@@ -1,0 +1,22 @@
+{
+  "name": "phaser",
+  "version": "1.0.0",
+  "description": "Sandbox para juegos en phaser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marianoluzza/phaser.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marianoluzza/phaser/issues"
+  },
+  "homepage": "https://github.com/marianoluzza/phaser#readme",
+  "dependencies": {
+    "phaser": "^3.60.0"
+  }
+}
