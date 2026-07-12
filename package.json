@@ -1,22 +1,18 @@
 {
-  "name": "phaser",
-  "version": "1.0.0",
-  "description": "Sandbox para juegos en phaser",
-  "main": "index.js",
+  "name": "phaser-tetris",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/marianoluzza/phaser.git"
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/marianoluzza/phaser/issues"
-  },
-  "homepage": "https://github.com/marianoluzza/phaser#readme",
   "dependencies": {
-    "phaser": "^3.60.0"
+    "phaser": "^4.1.0"
   }
 }
