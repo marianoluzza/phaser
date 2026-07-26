@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Song Browser</title>
+<link href="css/styles.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<div class="layout">
+  <header>
+    <h1><Span>Abstraction</span>Free<span>Loop</span>Browser</h1>
+		<span style="width:100%; text-align:right;"><a style="color: var(--text);" href="https://tallbeard.itch.io/music-loop-bundle"target="_blank">https://tallbeard.itch.io/music-loop-bundle</a><br/>Get exclusive songs and support me on <a style="color: var(--text);" href="https://patreon.com/ben_burnes"target="_blank">Patreon!</a></span>
+  </header>
+
+  <aside>
+    <span id="result-count">— songs</span>
+		
+    <!-- Name Search -->
+    <div class="search-row">
+      <div class="section-label">Search</div>
+      <input id="search-input" type="text" placeholder="song name…" autocomplete="off">
+    </div>
+
+    <!-- Alt Versions -->
+    <div>
+      <div class="section-label">Alternate Versions</div>
+      <label class="alt-toggle">
+        <input type="checkbox" id="filter-alt">
+        <span style="font-size:10px;color:var(--text-muted);">(alt track lengths may differ)</span>
+        <span class="pill-switch"></span><br/>
+      </label>
+    </div>
+
+    <!-- Numeric Sliders -->
+    <div>
+      <div class="section-label">Score Ranges</div>
+      <div class="slider-group" id="slider-container">
+        <!-- built by JS -->
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div>
+      <div class="section-label">Tags</div>
+      <div id="tag-cloud" class="tag-cloud">
+        <span id="no-tags">No tags in data yet</span>
+      </div>
+    </div>
+
+    <!-- How To -->
+    <div>
+      <div class="section-label">How To Use</div>
+      <div id="tag-cloud" class="tag-cloud">
+				<p>The song database is not connected directly to the audio. You will need to copy the audio folders into the root directory of this HTML file for it to be linked up.</p>
+				<p><a style="color: var(--text);" href="img/example_setup.png" target="_blank">Set it up like this</a></p>
+      </div>
+    </div>
+
+    <!-- Thanks -->
+    <div>
+      <div class="section-label">Thanks!</div>
+      <div id="tag-cloud" class="tag-cloud">
+				<p>Thank you for listening and supporting this pack. I hope you can find find lots of inspiration here.</p>
+				<p>If you have any feature requests or other feedback, let me know in the <a style="color: var(--text);" href="https://tallbeard.itch.io/music-loop-bundle"target="_blank">itch page</a> comments.</p>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="results-grid" id="results"></div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="text/javascript" src="js/csv_data.js"></script>
+<script type="text/javascript" src="js/browser.js"></script>
+</body>
+</html>

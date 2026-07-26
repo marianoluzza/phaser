@@ -6,13 +6,18 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "audio:catalog": "node scripts/generate-audio-catalog.mjs",
+    "audio:upload:r2": "node scripts/upload-audio-r2.mjs",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name phaser-arcade --branch main",
     "preview": "vite preview"
   },
   "devDependencies": {
     "typescript": "~6.0.2",
-    "vite": "^8.0.12"
+    "vite": "^8.1.4",
+    "wrangler": "^4.110.0"
   },
   "dependencies": {
+    "@sentry/browser": "^10.66.0",
     "phaser": "^4.1.0"
   }
 }

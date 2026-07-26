@@ -1,19 +1,31 @@
 import Phaser from 'phaser';
+import { audioManager } from '../../../core/audio/AudioManager';
+import { i18n } from '../../../core/i18n/i18n';
+import { loadTetrisAudio, TETRIS_AUDIO } from '../audio';
 import { Piece } from '../objects/Piece';
 import type { PieceType } from '../constants/tetrominoes';
+import { TETRIS_SCENES } from '../sceneKeys';
 
-export class GameScene extends Phaser.Scene {
+/**
+ * Escena completa del Tetris.
+ *
+ * La lógica mantiene dos representaciones del juego:
+ * - `board` es el estado real (una matriz de 20 x 10).
+ * - los Rectangle de Phaser son solamente su representación visual.
+ *
+ * Separarlas hace que colisiones, puntaje y reglas no dependan del dibujo.
+ */
+export class TetrisGameScene extends Phaser.Scene {
+	// Estado de la partida.
 	private score = 0;
 	private lines = 0;
-	private isGameOver = false;
 	private level = 1;
 	private levelText!: Phaser.GameObjects.Text;
 
 	private readonly linesPerLevel = 10;
 	private readonly minGravityInterval = 80;
 
-	private gameOverText!: Phaser.GameObjects.Text;
-	private nextText!: Phaser.GameObjects.Text;
+	// Textos y objetos visuales que luego actualizamos durante la partida.
 	private scoreText!: Phaser.GameObjects.Text;
 	private linesText!: Phaser.GameObjects.Text;
 
@@ -26,6 +38,7 @@ export class GameScene extends Phaser.Scene {
 	private board: number[][] = [];
 	private boardBlocks: Phaser.GameObjects.Rectangle[] = [];
 
+	// Medidas del tablero expresadas en celdas y en píxeles.
 	private readonly cols = 10;
 	private readonly rows = 20;
 	private readonly cell = 24;
@@ -34,7 +47,13 @@ export class GameScene extends Phaser.Scene {
 
 	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	private spaceKey!: Phaser.Input.Keyboard.Key;
+	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private pauseKey!: Phaser.Input.Keyboard.Key;
+	private paused = false;
+	private pauseOverlay!: Phaser.GameObjects.Container;
+	private pauseButtonLabel!: Phaser.GameObjects.Text;
 
+	// Acumuladores en milisegundos. `delta` indica lo que duró cada frame.
 	private gravityTimer = 0;
 	private gravityInterval = 500;
 	private lockTimer = 0;
@@ -49,45 +68,74 @@ export class GameScene extends Phaser.Scene {
 	private horizontalDirection: -1 | 0 | 1 = 0;
 
 	constructor() {
-		super('GameScene');
+		super(TETRIS_SCENES.GAME);
 	}
 
-	create() {
-		this.drawGrid();
+	preload() {
+		loadTetrisAudio(
+			this,
+			TETRIS_AUDIO.gameMusic,
+			TETRIS_AUDIO.confirm,
+			TETRIS_AUDIO.lineClear,
+			TETRIS_AUDIO.multiLineClear,
+			TETRIS_AUDIO.levelUp,
+			TETRIS_AUDIO.pauseToggle
+		);
+	}
 
-		this.scoreText = this.add.text(40, 40, 'Score: 0', {
+	/** Phaser llama a `create` al comenzar o reiniciar una partida. */
+	create() {
+		this.resetGameState();
+		this.cameras.main.setBackgroundColor('#080d1a');
+		this.drawGrid();
+		this.drawInterface();
+		audioManager.playMusic(this, TETRIS_AUDIO.gameMusic.cacheKey);
+
+		// La siguiente escena decide su propio ambiente sonoro.
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
+
+		this.scoreText = this.add.text(40, 78, `${i18n.t('tetris.game.score')}: 0`, {
 			fontSize: '24px',
 			color: '#ffffff',
 		});
-		this.linesText = this.add.text(40, 75, 'Lines: 0', {
+		this.linesText = this.add.text(40, 113, `${i18n.t('tetris.game.lines')}: 0`, {
 			fontSize: '24px',
 			color: '#ffffff',
 		});
-		this.levelText = this.add.text(40, 110, 'Level: 1', {
+		this.levelText = this.add.text(40, 148, `${i18n.t('tetris.game.level')}: 1`, {
 			fontSize: '24px',
 			color: '#ffffff',
 		});
-		this.nextText = this.add.text(580, 40, 'Next', {
+		this.add.text(580, 40, i18n.t('tetris.game.next'), {
 			fontSize: '24px',
-			color: '#ffffff',
+			color: '#8fa0c7',
 		});
 		this.cursors = this.input.keyboard!.createCursorKeys();
 		this.spaceKey = this.input.keyboard!.addKey(
 			Phaser.Input.Keyboard.KeyCodes.SPACE
 		);
-		for (let y = 0; y < this.rows; y++) {
-			this.board[y] = [];
+		this.escapeKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.pauseKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
-			for (let x = 0; x < this.cols; x++) {
-				this.board[y][x] = 0;
-			}
-		}
 		this.nextPiece = this.createRandomPiece();
 		this.spawnPiece();
 	}
 
+	/** Phaser llama a `update` en cada frame mientras esta escena está activa. */
 	update(_time: number, delta: number) {
-		if (this.isGameOver) {
+		if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+			this.togglePause();
+			return;
+		}
+
+		// La partida vuelve a la pantalla de inicio propia de Tetris.
+		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+			this.returnToTitle();
+			return;
+		}
+
+		// No llamamos scene.pause: así esta misma escena puede escuchar P para reanudar.
+		if (this.paused) {
 			return;
 		}
 
@@ -96,6 +144,95 @@ export class GameScene extends Phaser.Scene {
 		this.handleHardDropInput();
 		this.handleSoftDrop(delta);
 		this.handleGravity(delta);
+	}
+
+	/**
+	 * Las instancias de Scene se reutilizan. Por eso reiniciamos explícitamente
+	 * los datos antes de comenzar una nueva partida.
+	 */
+	private resetGameState() {
+		this.score = 0;
+		this.lines = 0;
+		this.level = 1;
+		this.gravityTimer = 0;
+		this.gravityInterval = 500;
+		this.lockTimer = 0;
+		this.softDropTimer = 0;
+		this.horizontalTimer = 0;
+		this.horizontalDirection = 0;
+		this.paused = false;
+		audioManager.setMusicDucked(false);
+		this.pieceBag = [];
+		this.ghostBlocks = [];
+		this.currentPieceBlocks = [];
+		this.nextPieceBlocks = [];
+		this.boardBlocks = [];
+
+		// Cada 0 representa una celda vacía; luego guardaremos el color de la pieza.
+		this.board = Array.from({ length: this.rows }, () => Array(this.cols).fill(0));
+	}
+
+	private drawInterface() {
+		this.add.text(40, 28, 'TETRIS', {
+			fontFamily: 'Arial Black, Arial, sans-serif',
+			fontSize: '28px',
+			color: '#46d9ff',
+			letterSpacing: 3,
+		});
+
+		this.add.text(40, 230, i18n.t('tetris.game.controlsTitle'), {
+			fontFamily: 'Arial, sans-serif',
+			fontSize: '13px',
+			color: '#7384aa',
+			letterSpacing: 2,
+		});
+		this.add.text(40, 260, i18n.t('tetris.game.controls'), {
+			fontFamily: 'Courier New, monospace',
+			fontSize: '15px',
+			color: '#c6d1ed',
+			lineSpacing: 8,
+		});
+
+		const menuButton = this.add.rectangle(40, 530, 185, 38, 0x182541)
+			.setOrigin(0)
+			.setStrokeStyle(1, 0x40577f)
+			.setInteractive({ useHandCursor: true });
+		this.add.text(55, 540, i18n.t('tetris.game.backToTitle'), {
+			fontFamily: 'Courier New, monospace',
+			fontSize: '12px',
+			color: '#d9e2ff',
+		});
+		menuButton.on('pointerdown', () => this.returnToTitle());
+
+		const pauseButton = this.add.rectangle(40, 480, 185, 38, 0x182541)
+			.setOrigin(0)
+			.setStrokeStyle(1, 0x40577f)
+			.setInteractive({ useHandCursor: true });
+		this.pauseButtonLabel = this.add.text(55, 490, i18n.t('tetris.game.pause'), {
+			fontFamily: 'Courier New, monospace',
+			fontSize: '12px',
+			color: '#d9e2ff',
+		});
+		pauseButton.on('pointerdown', () => this.togglePause());
+
+		this.createPauseOverlay();
+	}
+
+	private createPauseOverlay() {
+		// El Container permite mostrar u ocultar toda la capa sin tocar el tablero.
+		this.pauseOverlay = this.add.container(0, 0).setDepth(20).setVisible(false);
+		this.pauseOverlay.add(this.add.rectangle(400, 300, 800, 600, 0x050812, 0.72));
+		this.pauseOverlay.add(this.add.text(400, 265, i18n.t('tetris.game.paused'), {
+			fontFamily: 'Arial Black, Arial, sans-serif',
+			fontSize: '46px',
+			color: '#f5f7ff',
+			letterSpacing: 5,
+		}).setOrigin(0.5));
+		this.pauseOverlay.add(this.add.text(400, 330, i18n.t('tetris.game.pausedHint'), {
+			fontFamily: 'Courier New, monospace',
+			fontSize: '14px',
+			color: '#aebde1',
+		}).setOrigin(0.5));
 	}
 
 	private handleHorizontalInput(delta: number) {
@@ -117,6 +254,7 @@ export class GameScene extends Phaser.Scene {
 		}
 
 		if (direction !== this.horizontalDirection) {
+			// El primer movimiento ocurre al instante para que el control responda bien.
 			this.horizontalDirection = direction;
 			this.horizontalTimer = 0;
 			this.tryMove(direction, 0);
@@ -125,6 +263,7 @@ export class GameScene extends Phaser.Scene {
 
 		this.horizontalTimer += delta;
 
+		// Si se mantiene la tecla, esperamos y luego repetimos más rápidamente.
 		const requiredDelay =
 			this.horizontalTimer === delta // first frame
 				? this.horizontalInitialDelay
@@ -157,6 +296,7 @@ export class GameScene extends Phaser.Scene {
 			return;
 		}
 
+		// Avanzamos en una sola actualización hasta la última fila válida.
 		while (this.canMoveTo(this.currentPiece.x, this.currentPiece.y + 1)) {
 			this.currentPiece.moveDown();
 		}
@@ -189,6 +329,7 @@ export class GameScene extends Phaser.Scene {
 	}
 
 	private handleGravity(delta: number) {
+		// La gravedad no depende de los FPS: acumula tiempo real entre frames.
 		this.gravityTimer += delta;
 
 		if (this.gravityTimer < this.gravityInterval) {
@@ -221,19 +362,29 @@ export class GameScene extends Phaser.Scene {
 			4: 800,
 		};
 
+		const previousLevel = this.level;
 		this.score += pointsByLines[clearedLines] * this.level;
 		this.lines += clearedLines;
+		const clearSound = clearedLines >= 4
+			? TETRIS_AUDIO.multiLineClear
+			: TETRIS_AUDIO.lineClear;
+		// Un único efecto por limpieza evita que dos o cuatro líneas sean estridentes.
+		audioManager.playSfx(this, clearSound.cacheKey);
 
 		this.updateLevel();
+		if (this.level > previousLevel) {
+			audioManager.playSfx(this, TETRIS_AUDIO.levelUp.cacheKey);
+		}
 
-		this.scoreText.setText(`Score: ${this.score}`);
-		this.linesText.setText(`Lines: ${this.lines}`);
-		this.levelText.setText(`Level: ${this.level}`);
+		this.scoreText.setText(`${i18n.t('tetris.game.score')}: ${this.score}`);
+		this.linesText.setText(`${i18n.t('tetris.game.lines')}: ${this.lines}`);
+		this.levelText.setText(`${i18n.t('tetris.game.level')}: ${this.level}`);
 	}
 
 	private updateLevel() {
 		this.level = Math.floor(this.lines / this.linesPerLevel) + 1;
 
+		// Cada nivel reduce el intervalo, pero el mínimo mantiene el juego jugable.
 		this.gravityInterval = Math.max(
 			this.minGravityInterval,
 			500 - (this.level - 1) * 40
@@ -241,6 +392,7 @@ export class GameScene extends Phaser.Scene {
 	}
 
 	private refillPieceBag() {
+		// El sistema "7-bag" garantiza una de cada pieza antes de repetir la bolsa.
 		this.pieceBag = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
 
 		Phaser.Utils.Array.Shuffle(this.pieceBag);
@@ -254,6 +406,7 @@ export class GameScene extends Phaser.Scene {
 	}
 
 	private spawnPiece() {
+		// La pieza que se veía en NEXT pasa a ser la actual.
 		this.currentPiece = this.nextPiece;
 		this.currentPiece.x = 3;
 		this.currentPiece.y = 0;
@@ -263,20 +416,35 @@ export class GameScene extends Phaser.Scene {
 		this.renderNextPiece();
 
 		if (!this.canMoveTo(this.currentPiece.x, this.currentPiece.y)) {
-			this.isGameOver = true;
-
-			this.gameOverText = this.add.text(400, 300, 'GAME OVER', {
-				fontSize: '48px',
-				color: '#ff0000',
-			}).setOrigin(0.5);
-
 			this.clearGhostPieceRender();
+
+			// Las estadísticas viajan como datos hacia la escena final.
+			this.scene.start(TETRIS_SCENES.GAME_OVER, {
+				score: this.score,
+				lines: this.lines,
+				level: this.level,
+			});
 
 			return;
 		}
 
 		this.createPieceObjects();
 		this.renderPiece();
+	}
+
+	private returnToTitle() {
+		audioManager.playSfx(this, TETRIS_AUDIO.confirm.cacheKey);
+		this.scene.start(TETRIS_SCENES.TITLE);
+	}
+
+	private togglePause() {
+		this.paused = !this.paused;
+		audioManager.playSfx(this, TETRIS_AUDIO.pauseToggle.cacheKey);
+		audioManager.setMusicDucked(this.paused);
+		this.pauseOverlay.setVisible(this.paused);
+		this.pauseButtonLabel.setText(
+			i18n.t(this.paused ? 'tetris.game.resume' : 'tetris.game.pause')
+		);
 	}
 
 	private drawGrid() {
@@ -307,6 +475,7 @@ export class GameScene extends Phaser.Scene {
 		y: number,
 		shape = this.currentPiece.shape
 	): boolean {
+		// Probar primero y mutar después evita tener que deshacer movimientos.
 		const blocks = shape.map(([blockX, blockY]) => ({
 			x: x + blockX,
 			y: y + blockY,
@@ -354,6 +523,7 @@ export class GameScene extends Phaser.Scene {
 	}
 
 	private lockAndSpawnNextPiece() {
+		// Orden importante: fijar, limpiar, puntuar, redibujar y recién ahí crear.
 		this.lockPiece();
 
 		const clearedLines = this.clearCompletedLines();
@@ -367,6 +537,7 @@ export class GameScene extends Phaser.Scene {
 		const blocks = this.currentPiece.getBlocksAt();
 
 		for (const block of blocks) {
+			// Guardamos el color: 0 significa vacío y cualquier color, ocupado.
 			this.board[block.y][block.x] = this.currentPiece.color;
 		}
 	}
@@ -407,6 +578,7 @@ export class GameScene extends Phaser.Scene {
 
 		let ghostY = this.currentPiece.y;
 
+		// Simulamos la caída sin cambiar la posición real de la pieza.
 		while (this.canMoveTo(this.currentPiece.x, ghostY + 1)) {
 			ghostY++;
 		}
@@ -474,14 +646,16 @@ export class GameScene extends Phaser.Scene {
 	}
 
 	private clearCompletedLines() {
+		// Conservamos sólo las filas que tengan al menos una celda libre.
 		const newBoard = this.board.filter((row) => {
-			return row.some((cell) => cell === 0);//fila incompleta
+			return row.some((cell) => cell === 0);
 		});
 
 		const clearedLines = this.rows - newBoard.length;
 
 		for (let i = 0; i < clearedLines; i++) {
-			newBoard.unshift(Array(this.cols).fill(0));//rellenar con filas vacias
+			// Por cada fila eliminada agregamos una vacía arriba del tablero.
+			newBoard.unshift(Array(this.cols).fill(0));
 		}
 
 		this.board = newBoard;

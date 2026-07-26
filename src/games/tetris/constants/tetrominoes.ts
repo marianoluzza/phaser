@@ -3,11 +3,20 @@ import type { BlockPosition } from '../objects/Piece';
 export type PieceType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L';
 
 export type PieceDefinition = {
+	/** Cuatro bloques relativos al origen de la pieza. */
 	shape: BlockPosition[];
+	/** Punto alrededor del cual se aplica la fórmula de rotación. */
 	pivot: BlockPosition;
+	/** Los colores en Phaser se expresan habitualmente como hexadecimales. */
 	color: number;
 };
 
+/**
+ * Definiciones inmutables de los siete tetrominós.
+ *
+ * El eje X crece hacia la derecha y el eje Y hacia abajo, igual que las
+ * coordenadas del canvas. Las piezas reales copian estos datos al construirse.
+ */
 export const TETROMINOES: Record<PieceType, PieceDefinition> = {
 	I: {
 		shape: [

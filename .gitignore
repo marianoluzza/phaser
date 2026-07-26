@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Los packs ya extraídos viven en public; estos ZIP son copias de descarga.
+/kenney_interface-sounds.zip
+/kenney_ui-audio.zip
+/music-loop-bundle-2026-q1.zip
+/music-loop-bundle-2026-q2.zip
+/music-loop-bundle-song-browser.zip
+
+# Fuentes pesadas sincronizadas con Cloudflare R2.
+/local-assets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +32,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Estado y caché local de Wrangler
+.wrangler/
+.wrangler-runtime/
+
+# Variables locales; el ejemplo sí se versiona
+.env
+.env.*
+!.env.example

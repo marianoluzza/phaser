@@ -1,0 +1,1710 @@
+{
+  "music": [
+    {
+      "id": "jukebox:music:c95a6f4dd00e4a4b",
+      "name": "Dani Maccari Asset Pack - Jester's Distraction",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Dani Maccari Asset Pack - Jester's Distraction.ogg?v=80201d27e3ba5349",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:818e387cbf53c4bc",
+      "name": "Dani Maccari Asset Pack - Shadow Lurking",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Dani Maccari Asset Pack - Shadow Lurking.ogg?v=4799b8f1aff544b8",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:07bc700b94a6392e",
+      "name": "Week 1 - Retro Lounge BASE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 1 - Retro Lounge BASE.ogg?v=24bf93b867454b7b",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:1bc0989164b120dd",
+      "name": "Week 1 - Retro Lounge MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 1 - Retro Lounge MELODY.ogg?v=48c6f24609dac40f",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:403bda68d85f1665",
+      "name": "Week 1 - Retro Lounge UNUSED ALT",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 1 - Retro Lounge UNUSED ALT.ogg?v=f248f978cdee3221",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:20d25dc63f1b2b45",
+      "name": "Week 1.1 - Super Retro Lounge",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 1.1 - Super Retro Lounge.ogg?v=fc84b6b9b0dd8e53",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:a3aa4225b142e175",
+      "name": "Week 10 - Mischief GROOVE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 10 - Mischief GROOVE.ogg?v=a743204861dbc06d",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:a2bf70a6285d4515",
+      "name": "Week 10 - Mischief MELODY 2",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 10 - Mischief MELODY 2.ogg?v=3990ef17abdafa83",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:bb9efab8d49e2d0c",
+      "name": "Week 10 - Mischief MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 10 - Mischief MELODY.ogg?v=ba5a2554bf94b315",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:7032841e750e303d",
+      "name": "Week 10 - Mischief ZOOMIES",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 10 - Mischief ZOOMIES.ogg?v=9b37942aae591ab9",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:b19fa06f8c79c4d2",
+      "name": "Week 11 - Lost in Space",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 11 - Lost in Space.ogg?v=e0870db1d80c2134",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:21ae21d600728889",
+      "name": "Week 12 - Hypnotize Me BOOPS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 12 - Hypnotize Me BOOPS.ogg?v=6927b39c44aef8e8",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:bc26bab559ebade2",
+      "name": "Week 12 - Hypnotize Me BREAK",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 12 - Hypnotize Me BREAK.ogg?v=d227d9d517626cb6",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:c4bdf30ea799b6db",
+      "name": "Week 12 - Hypnotize Me CHORDS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 12 - Hypnotize Me CHORDS.ogg?v=74a6b7cda6002226",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:6a56ac10942e608e",
+      "name": "Week 2 - Ruined Lands HOPE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 2 - Ruined Lands HOPE.ogg?v=c9c9970d75fb6110",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:540ed35c35113416",
+      "name": "Week 2 - Ruined Lands WASTELAND",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 2 - Ruined Lands WASTELAND.ogg?v=d58642bb2c30d9c3",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:a6cf5deb8e54e150",
+      "name": "Week 3 - Waiting Room Ennui",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 3 - Waiting Room Ennui.ogg?v=7413703b6258fcbb",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:e1467e3a0c35c201",
+      "name": "Week 4 - Cloak of Darkness STAGE 1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 4 - Cloak of Darkness STAGE 1.ogg?v=3a619657fde610e8",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:df618b55963033d2",
+      "name": "Week 4 - Cloak of Darkness STAGE 2 TRANS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 4 - Cloak of Darkness STAGE 2 TRANS.ogg?v=05c0e4b3d6ad83db",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:4aa87b2002f6e800",
+      "name": "Week 4 - Cloak of Darkness STAGE 2",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 4 - Cloak of Darkness STAGE 2.ogg?v=c47346e0c0c06158",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:956d2c5281c44944",
+      "name": "Week 4 - Cloak of Darkness STAGE 3 TRANS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 4 - Cloak of Darkness STAGE 3 TRANS.ogg?v=ab638e7dc8c8aed1",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:7a6c1e8d0b071ecd",
+      "name": "Week 4 - Cloak of Darkness STAGE 3",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 4 - Cloak of Darkness STAGE 3.ogg?v=d807a6c88f396414",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:74a4f13afb8154a2",
+      "name": "Week 5 - Seven Reasons Why ARP",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 5 - Seven Reasons Why ARP.ogg?v=b7b9b0c36211cb04",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:1a4bda202ba3debc",
+      "name": "Week 5 - Seven Reasons Why MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 5 - Seven Reasons Why MELODY.ogg?v=b19efcb1a004f423",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:cc67cebe1329ff0d",
+      "name": "Week 6 - Never Miss FIRE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 6 - Never Miss FIRE.ogg?v=028797c6d4053c84",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:e6206356ebe8529d",
+      "name": "Week 6 - Never Miss STEADY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 6 - Never Miss STEADY.ogg?v=a50d98a1ec403172",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:bd31a9bc88dc10b1",
+      "name": "Week 6 - Never Miss TAKE AIM",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 6 - Never Miss TAKE AIM.ogg?v=525a6106c6dfd6d1",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:22283822c8760bab",
+      "name": "Week 7 - Life Is Hard BASE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 7 - Life Is Hard BASE.ogg?v=99599f1fb6999938",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:89a4604f5643ceac",
+      "name": "Week 7 - Life Is Hard MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 7 - Life Is Hard MELODY.ogg?v=16cf1318f45ed00f",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:c26bdbb62c95c96f",
+      "name": "Week 8 - Sugar Rush RISER",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 8 - Sugar Rush RISER.ogg?v=0de6e752ecab94ed",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:b5f2173035c955cb",
+      "name": "Week 8 - Sugar Rush ZOOMIES",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 8 - Sugar Rush ZOOMIES.ogg?v=926653300a2b4e43",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:15d1fb649f659cdf",
+      "name": "Week 9 - Graceful Descent FLOATING",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 9 - Graceful Descent FLOATING.ogg?v=06ab2f0e8dfa60a9",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:11036b9b463a0d5d",
+      "name": "Week 9 - Graceful Descent LANDING",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q1/Week 9 - Graceful Descent LANDING.ogg?v=7a802d624e972ad0",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q1",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:799e44bc8667caf1",
+      "name": "Week 13 - Primordial Soup BASE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 13 - Primordial Soup BASE.ogg?v=6f6c4c9b2744a921",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:9e81a7e1565dd620",
+      "name": "Week 13 - Primordial Soup JANGLES",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 13 - Primordial Soup JANGLES.ogg?v=779b57a673b96668",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:5d17de044f1cc6bd",
+      "name": "Week 13 - Primordial Soup MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 13 - Primordial Soup MELODY.ogg?v=d43a191e263a3b45",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:a897ddac849421da",
+      "name": "Week 14 - Lift You Up CHORUS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 14 - Lift You Up CHORUS.ogg?v=afdf5d82a752f678",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:41d941b4b5a3abf9",
+      "name": "Week 14 - Lift You Up MELODY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 14 - Lift You Up MELODY.ogg?v=a7bd29e432cc48cf",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:978ec81b8b501cb4",
+      "name": "Week 15 - Sunburn BEACH HOUSE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 15 - Sunburn BEACH HOUSE.ogg?v=f5c5cc0ecddeae67",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:f1c7d62673cfe7ff",
+      "name": "Week 15 - Sunburn SPF 3000",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 15 - Sunburn SPF 3000.ogg?v=9b4ed0ff61bec535",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:552e2e26457c7c52",
+      "name": "Week 16 - Vacation Day ADVENTURE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 16 - Vacation Day ADVENTURE.ogg?v=026bdbfcf0b956d6",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:8bc6857948c89280",
+      "name": "Week 16 - Vacation Day CHILLOUT",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 16 - Vacation Day CHILLOUT.ogg?v=cb7200fa26dd1b94",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:8d2394d48f5557de",
+      "name": "Week 17 - Alley Cat DUMPSTER DIVIN",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 17 - Alley Cat DUMPSTER DIVIN.ogg?v=6599099af016e745",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:c4d33fdf7f450607",
+      "name": "Week 17 - Alley Cat DUMPSTER PARTY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 17 - Alley Cat DUMPSTER PARTY.ogg?v=321fa28aca2ef6bb",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:644895c55fc06e92",
+      "name": "Week 18 - Distant Skyline CITY LIGHTS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 18 - Distant Skyline CITY LIGHTS.ogg?v=2bdcebdc8d127dcc",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:73cbff6e8f90ba70",
+      "name": "Week 18 - Distant Skyline NIGHT DRIVE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 18 - Distant Skyline NIGHT DRIVE.ogg?v=d1fd668930612823",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:22798cec952cedb1",
+      "name": "Week 18 - Distant Skyline SIDEWALK STRUT",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 18 - Distant Skyline SIDEWALK STRUT.ogg?v=2075e159cc37b140",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:df715d26136dd746",
+      "name": "Week 19 - Dark Portents MYSTERIOUS TRAVELER",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 19 - Dark Portents MYSTERIOUS TRAVELER.ogg?v=01c29eab3385ebe5",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:87504878afe1cd8f",
+      "name": "Week 19 - Dark Portents SHROUDED FUTURE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 19 - Dark Portents SHROUDED FUTURE.ogg?v=fa6b5a42c956b932",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:14c2c122e3d72a34",
+      "name": "Week 20 - Dust Bowl HOPE OF RAIN",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 20 - Dust Bowl HOPE OF RAIN.ogg?v=be7342b8731df432",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:7f9e25706f360067",
+      "name": "Week 20 - Dust Bowl PARCHED",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 20 - Dust Bowl PARCHED.ogg?v=e877b91032748e9f",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:73c5e241d6d9244f",
+      "name": "Week 20.1 - Magnetic Tape SCUFFED",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 20.1 - Magnetic Tape SCUFFED.ogg?v=469554fc0f7f889f",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:a648eb6bfae65cc6",
+      "name": "Week 21 - Freefall GLIDE",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 21 - Freefall GLIDE.ogg?v=d2ee7e1a0aa29958",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:e1e4e953d339c75d",
+      "name": "Week 21 - Freefall WHAT A VIEW",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 21 - Freefall WHAT A VIEW.ogg?v=4cd1c6c3a57b0cc4",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:e7e81776fdc0e95f",
+      "name": "Week 22 - The Walking Dunes EVENING OASIS",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 22 - The Walking Dunes EVENING OASIS.ogg?v=adb66d922cf29479",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:2944e9bdc47f3159",
+      "name": "Week 22 - The Walking Dunes UNBLINKING SUN",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 22 - The Walking Dunes UNBLINKING SUN.ogg?v=be693bce378ba0ac",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:608d15d7dad1a090",
+      "name": "Week 23 - Workshop BREADBOARD",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 23 - Workshop BREADBOARD.ogg?v=7ec21cd36dd4be37",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:df36e26564cb0bb5",
+      "name": "Week 24 - Pull Me Down DEEP WELL",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 24 - Pull Me Down DEEP WELL.ogg?v=5d2a9f815586d20e",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:32fb2689c1bc328a",
+      "name": "Week 24 - Pull Me Down GRAVITY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 24 - Pull Me Down GRAVITY.ogg?v=56db5312ccf82b87",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:98bbcb1d721069f9",
+      "name": "Week 25 - Have A Great Summer POOL PARTY",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 25 - Have A Great Summer POOL PARTY.ogg?v=6201bd85f4fa51fe",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:833b620662ec9444",
+      "name": "Week 26 - Seaside CORAL REEF",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 26 - Seaside CORAL REEF.ogg?v=d7088e040aa5ebe0",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:58c003f20d7c5b9d",
+      "name": "Week 26 - Seaside ENDLESS WAVES",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/abstraction/2026-q2/Week 26 - Seaside ENDLESS WAVES.ogg?v=39ba6c31b4f8c81c",
+      "source": "Abstraction / Tallbeard Studios",
+      "collection": "2026 Q2",
+      "license": "CC0"
+    }
+  ],
+  "sfx": [
+    {
+      "id": "jukebox:sfx:dd0fadfeed06ec01",
+      "name": "back_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/back_001.ogg?v=07db973f79f6ae0f",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b2292a49a32beb26",
+      "name": "back_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/back_002.ogg?v=61581c58194e3f19",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1a7d863c404da88a",
+      "name": "back_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/back_003.ogg?v=ff5e87de1230b1a5",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:bb9613e92712e78f",
+      "name": "back_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/back_004.ogg?v=c22e3c49f42c2a5b",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2fbde6b94e50dbc7",
+      "name": "bong_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/bong_001.ogg?v=d21d0f0b782445db",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:e35e80a8bc9951da",
+      "name": "click_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/click_001.ogg?v=ccfb7fa0cccdd9fa",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b6fc33199b36b5d4",
+      "name": "click_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/click_002.ogg?v=adcd1f4adc35f1b4",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2902d9bf759011be",
+      "name": "click_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/click_003.ogg?v=2fa929138bc3a0f4",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9c8c6cc7c5419743",
+      "name": "click_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/click_004.ogg?v=09e2c1b643b71b9a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:274fa179b3af76e2",
+      "name": "click_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/click_005.ogg?v=a3ee7ebb036bc3cd",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:f79137875933b92e",
+      "name": "close_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/close_001.ogg?v=44af8249b933e0fd",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:8bb129d678b5d4ff",
+      "name": "close_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/close_002.ogg?v=bc4279d2bb2bf865",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:f67718d4a17a647f",
+      "name": "close_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/close_003.ogg?v=39a1a7f3bc001766",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9f51d800f669420c",
+      "name": "close_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/close_004.ogg?v=41b41e01ac75f4bc",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:650bf973710f946b",
+      "name": "confirmation_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/confirmation_001.ogg?v=063564703b6094d7",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:652c5b2ba50e4b81",
+      "name": "confirmation_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/confirmation_002.ogg?v=33b17a9a9a2397c6",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:0dcff3213709dfc4",
+      "name": "confirmation_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/confirmation_003.ogg?v=3091bf0be0497f82",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:6d572544114c27da",
+      "name": "confirmation_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/confirmation_004.ogg?v=568967a3d9f8a8f6",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a698c6406c55b22c",
+      "name": "drop_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/drop_001.ogg?v=692ee3a6f1821402",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:be363ce1e7f65cd5",
+      "name": "drop_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/drop_002.ogg?v=4ac4d1cef7e93696",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:cae73d3397cc8b63",
+      "name": "drop_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/drop_003.ogg?v=43d086d50f90493a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:901b2d7571a8d392",
+      "name": "drop_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/drop_004.ogg?v=10738707f9300f9b",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9f25081767c79c94",
+      "name": "error_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_001.ogg?v=46e67425d1633977",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:45b6f2ef31bb1d63",
+      "name": "error_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_002.ogg?v=76810ec365f41078",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:d288d6ca0c1d6731",
+      "name": "error_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_003.ogg?v=885b28175c7b5111",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a8c1d53a2db1409c",
+      "name": "error_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_004.ogg?v=0b574cea597d9650",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:eb64ec85cafbae24",
+      "name": "error_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_005.ogg?v=3f75b11df5b06d68",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:62c40fbb6902fd6b",
+      "name": "error_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_006.ogg?v=a97513d7fd2b12b1",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:589d14df5ca7ce26",
+      "name": "error_007",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_007.ogg?v=f1ee4c1ac8bfe1a8",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:77269e3de59063c1",
+      "name": "error_008",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/error_008.ogg?v=eba17ecb2a426bfd",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:3d55db195e2eaf18",
+      "name": "glass_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_001.ogg?v=183eebee20eb0a53",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:c31c73c777c8c460",
+      "name": "glass_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_002.ogg?v=08e972c73e53c91d",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:57ebc511281b01b7",
+      "name": "glass_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_003.ogg?v=9a6f16e3c2eff6fe",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:adc0d51a3811bb1d",
+      "name": "glass_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_004.ogg?v=2379b58f953e3d86",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:021cc86343f6683f",
+      "name": "glass_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_005.ogg?v=1f6c88008d0d9fe4",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:949542246dcf3e41",
+      "name": "glass_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glass_006.ogg?v=840500be48078f12",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ad5ef40a0f6f22a9",
+      "name": "glitch_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glitch_001.ogg?v=da78c642bbd95da2",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9672b40af2a06e0c",
+      "name": "glitch_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glitch_002.ogg?v=1da06a2e63ce131f",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:94fd90a70be8d707",
+      "name": "glitch_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glitch_003.ogg?v=d55e0c64aee9f1ab",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:3a89f7a92bb0023f",
+      "name": "glitch_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/glitch_004.ogg?v=d0f4db4d12f88592",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:069366712858a499",
+      "name": "maximize_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_001.ogg?v=fd3e75e1de2f2fda",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9e52ace24e9b0725",
+      "name": "maximize_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_002.ogg?v=cc51162cb4506158",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:7b2523b8b45b9b87",
+      "name": "maximize_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_003.ogg?v=df16f25d45189f5d",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:989e069da1b156d6",
+      "name": "maximize_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_004.ogg?v=59c7a24b204be24d",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:d0923031fa61b1dd",
+      "name": "maximize_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_005.ogg?v=0ee06fc3ee494723",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:f10c0fe1571e7de5",
+      "name": "maximize_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_006.ogg?v=f050b3bb77cb0b90",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:c3a3a008fada7067",
+      "name": "maximize_007",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_007.ogg?v=3400931f3f3a1e9c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4400eb77a7e0acbb",
+      "name": "maximize_008",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_008.ogg?v=57c074e600e193a3",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ec245acbfe4e2385",
+      "name": "maximize_009",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/maximize_009.ogg?v=b4d56386258b3cc1",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:19882978c7d826a7",
+      "name": "minimize_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_001.ogg?v=8481912bc7fa5828",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:fe9f755ece363408",
+      "name": "minimize_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_002.ogg?v=670e47846dc003fe",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:779f3c603b41d8c2",
+      "name": "minimize_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_003.ogg?v=400e1041499de85e",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:f71e54da28b67bae",
+      "name": "minimize_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_004.ogg?v=fcfe6fbb03a728e9",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:df014a52b2776be1",
+      "name": "minimize_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_005.ogg?v=4e6792a98c75d3ff",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:8812e0727f66c5bd",
+      "name": "minimize_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_006.ogg?v=39d7c47855b9642f",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:00dc3a49d3f2019c",
+      "name": "minimize_007",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_007.ogg?v=e951505044de0d5d",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2e3ae5812e49a2b6",
+      "name": "minimize_008",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_008.ogg?v=bc14c17875436dca",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:88f0f7ae2b6890b2",
+      "name": "minimize_009",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/minimize_009.ogg?v=885c20fc8b5b5222",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:df0249a0928c9124",
+      "name": "open_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/open_001.ogg?v=a27c6bb0df7da1e6",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:fd8aae8798a66b86",
+      "name": "open_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/open_002.ogg?v=24ff224fe2c09c6a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:90737197798178a1",
+      "name": "open_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/open_003.ogg?v=bcdca6b5c9c33aa1",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:19595f77dc0f01af",
+      "name": "open_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/open_004.ogg?v=4e02b8287bc4d9e7",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:cb2d60f2def069dc",
+      "name": "pluck_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/pluck_001.ogg?v=be97ec4893a02d6e",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:00aa4e78bd329fe0",
+      "name": "pluck_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/pluck_002.ogg?v=c977fe249ff42d1c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b230a5cf4d69951b",
+      "name": "question_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/question_001.ogg?v=abb8f9e4eb207149",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:cd8e95623ea28a8b",
+      "name": "question_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/question_002.ogg?v=46056f10c70dda86",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:54278ecb8122b697",
+      "name": "question_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/question_003.ogg?v=00bafc564e29c12e",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a59a2e4a58aa372a",
+      "name": "question_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/question_004.ogg?v=585ecb58b529dc49",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ac671395cfe866c9",
+      "name": "scratch_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scratch_001.ogg?v=5c294d2e1a6b6d07",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ffcec5113bfe91b6",
+      "name": "scratch_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scratch_002.ogg?v=2b07edafc1f3f49c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b0d46fae09b35c31",
+      "name": "scratch_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scratch_003.ogg?v=2d80371b55ebe2e8",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:af9fedfbd1c54ad4",
+      "name": "scratch_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scratch_004.ogg?v=26009c67ef90ee7a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4d296633573fa9c8",
+      "name": "scratch_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scratch_005.ogg?v=65742c15dca98536",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:f020babf4559d927",
+      "name": "scroll_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scroll_001.ogg?v=320c6aafb2c7a503",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b553869ae457a4fa",
+      "name": "scroll_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scroll_002.ogg?v=6fbcda22bc45349c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ca8e24290a1dc304",
+      "name": "scroll_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scroll_003.ogg?v=c2fecaa6e37c73d7",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ed3e8130dc2535c3",
+      "name": "scroll_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scroll_004.ogg?v=431398a3c12ba3aa",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:0abf2fd82f2fa51e",
+      "name": "scroll_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/scroll_005.ogg?v=e39d059462225efa",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:6be31203c5fb1a6a",
+      "name": "select_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_001.ogg?v=aec0c31ea934a359",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:164ad99954259e44",
+      "name": "select_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_002.ogg?v=4cc6ac5341b9b2c8",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1f967afc3420dca2",
+      "name": "select_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_003.ogg?v=9a612fd2f513d52a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1ea3b8be69447a8c",
+      "name": "select_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_004.ogg?v=eb6cb435f3f2ab14",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:0a61b89a38f4d49e",
+      "name": "select_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_005.ogg?v=ad09146e4ea33b93",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:26c03a2dd9f1b27e",
+      "name": "select_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_006.ogg?v=b44550fa8d3276c0",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:d9860a9edf1ca5e6",
+      "name": "select_007",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_007.ogg?v=cd4390dd2b24f090",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b45087766121a654",
+      "name": "select_008",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/select_008.ogg?v=f703b6b1c62dae1c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a0712b382c249440",
+      "name": "switch_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_001.ogg?v=3b74efad87f1e69d",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:04a81c2fe828754d",
+      "name": "switch_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_002.ogg?v=6fc395be2ad1f99c",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2befb81af313beb1",
+      "name": "switch_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_003.ogg?v=ca12dd32103f4014",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ee1167c84c543069",
+      "name": "switch_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_004.ogg?v=541c19cc1ab712a9",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4310bf8126cfbf77",
+      "name": "switch_005",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_005.ogg?v=e94dfab6fd655806",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2a253a004547e642",
+      "name": "switch_006",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_006.ogg?v=2676ddc4e341ee55",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:011dd52139d3a5ca",
+      "name": "switch_007",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/switch_007.ogg?v=eeaf60c2abc7e1b7",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1faa0ff88c7ebe01",
+      "name": "tick_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/tick_001.ogg?v=9d057b918024c787",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:3b57a5f2319281a1",
+      "name": "tick_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/tick_002.ogg?v=869442f54214be90",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:7113e51bc311815e",
+      "name": "tick_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/tick_004.ogg?v=0253d5f7d8d2afbb",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:73cf4d3c40f48042",
+      "name": "toggle_001",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/toggle_001.ogg?v=ca1d2dde5f0b286a",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:0776b65c0475d9d7",
+      "name": "toggle_002",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/toggle_002.ogg?v=1f564f5520cfa076",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1aa3430b987f4cd1",
+      "name": "toggle_003",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/toggle_003.ogg?v=7e69aba356d59082",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:2c833253229a28ae",
+      "name": "toggle_004",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/interface-sounds/Audio/toggle_004.ogg?v=d7bf2236fc95a0fe",
+      "source": "Kenney",
+      "collection": "Interface Sounds",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:af1fd5439325bdd0",
+      "name": "click1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/click1.ogg?v=59175ac17cd49a68",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a8e07e6640ced540",
+      "name": "click2",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/click2.ogg?v=c394b46bc6737f7f",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:7d4f43d3a958d601",
+      "name": "click3",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/click3.ogg?v=e3e7fc7ccd9c5cfd",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1e6bc94817b4f41d",
+      "name": "click4",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/click4.ogg?v=9c02bbfc872b50eb",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:8b6e405e05fbb78a",
+      "name": "click5",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/click5.ogg?v=52d41e0bb012731b",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:c74758e5e44d55e7",
+      "name": "mouseclick1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/mouseclick1.ogg?v=ece1210c62ccae6c",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:970f76dbe10cd5a5",
+      "name": "mouserelease1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/mouserelease1.ogg?v=23cb78cea76d8f1b",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:694531b8d5663c08",
+      "name": "rollover1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover1.ogg?v=4eb47e2e1540c448",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:69d65d5561788027",
+      "name": "rollover2",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover2.ogg?v=d0bc0fcba496d73d",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:d301fa62dfa3c539",
+      "name": "rollover3",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover3.ogg?v=641df2c95468f1f0",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:19dae4a75db5f3c8",
+      "name": "rollover4",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover4.ogg?v=8b70e47aa1d51d22",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b5400da0a30f8f12",
+      "name": "rollover5",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover5.ogg?v=3e1805b914a66e63",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:e2ba3712ab66c5e9",
+      "name": "rollover6",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/rollover6.ogg?v=18f6f69f5fdbf55c",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4d8a772d8fc0939e",
+      "name": "switch1",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch1.ogg?v=efdd1d1e2904fb2d",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a411377467cea17e",
+      "name": "switch10",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch10.ogg?v=bf61b3f3af39b2c6",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:5a93178658a1d898",
+      "name": "switch11",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch11.ogg?v=a8d445bd96fe3842",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:e56d7da132e0609a",
+      "name": "switch12",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch12.ogg?v=dab0c21eacb65367",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:620eaec9a9438816",
+      "name": "switch13",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch13.ogg?v=54d1e63b907274bb",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ba2a31faba7b5b3a",
+      "name": "switch14",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch14.ogg?v=c640b370738c816e",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a7693fd24f141ed5",
+      "name": "switch15",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch15.ogg?v=5a20a9d5365dec8f",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9f8d2d3fa1c72a4b",
+      "name": "switch16",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch16.ogg?v=d2e9dd4fd2918132",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:027a4a948ed7c10a",
+      "name": "switch17",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch17.ogg?v=d09974d4cf5ccb2d",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:8607dbf12882ade4",
+      "name": "switch18",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch18.ogg?v=ba759707fc2e55f4",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:7958cebeea0f8331",
+      "name": "switch19",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch19.ogg?v=63753f884e4e0d44",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:de5e2abe771c31d6",
+      "name": "switch2",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch2.ogg?v=aa8ad6e4745e87c8",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4ef65dd6ea38cb0c",
+      "name": "switch20",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch20.ogg?v=276b402ee4840f88",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:06fba6f2c9c24aed",
+      "name": "switch21",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch21.ogg?v=8a3fdc5d35c74ae4",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:454583d315311acb",
+      "name": "switch22",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch22.ogg?v=913261ad55fa0692",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:41ce5d326acecd4d",
+      "name": "switch23",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch23.ogg?v=148d91722dd819b4",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:860ac34d8781646d",
+      "name": "switch24",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch24.ogg?v=aec5e91eef35c4a6",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:07f4f09f2b6f7971",
+      "name": "switch25",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch25.ogg?v=ba31fc9a780a6908",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:ff791fa60575f402",
+      "name": "switch26",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch26.ogg?v=1a628e2fbede99af",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:53781630ae960546",
+      "name": "switch27",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch27.ogg?v=a6a3a5fa54037e3b",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:dce0bbae8c2c6ee5",
+      "name": "switch28",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch28.ogg?v=2f7b627d85ce1530",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1edbebdd7c343d58",
+      "name": "switch29",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch29.ogg?v=b2923ed170e963b5",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:1d50c2fdb2ee1421",
+      "name": "switch3",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch3.ogg?v=75d87dc60b7d29df",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:772d197d7e1d48f3",
+      "name": "switch30",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch30.ogg?v=d220abb5218fccc6",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:4ff400eaf7cf6e3d",
+      "name": "switch31",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch31.ogg?v=bca5f3047e73d28f",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:17c6ff0bcb001851",
+      "name": "switch32",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch32.ogg?v=b740f507ad386a1d",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:e2b24dbc27da52e1",
+      "name": "switch33",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch33.ogg?v=977ecead4b27cf98",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:966c270fba380c86",
+      "name": "switch34",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch34.ogg?v=6e7943ed133c1b55",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:d7a7bae16ca2dbe1",
+      "name": "switch35",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch35.ogg?v=1ec7f5a76318f88c",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:9fc8f65c9c10fea4",
+      "name": "switch36",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch36.ogg?v=1dd3cf29291219ab",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:0f793c0756598d1e",
+      "name": "switch37",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch37.ogg?v=25faa57a3e819a3e",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b25bd44e59a27c26",
+      "name": "switch38",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch38.ogg?v=d5c164ba622e3c79",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:e94a9c43abf1bc8d",
+      "name": "switch4",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch4.ogg?v=687a42c24e5d25be",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:cb7d29665d91c050",
+      "name": "switch5",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch5.ogg?v=8a5c85c0009cfd98",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:a959123753dda06f",
+      "name": "switch6",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch6.ogg?v=34d37cbfe6785cab",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:b79bbc6888913ccd",
+      "name": "switch7",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch7.ogg?v=7a3032d1dae63d10",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:7767704c9f0da16c",
+      "name": "switch8",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch8.ogg?v=c7bf07f8d58ac62f",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    },
+    {
+      "id": "jukebox:sfx:69dfc4de1f9a799e",
+      "name": "switch9",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch9.ogg?v=069861740681c528",
+      "source": "Kenney",
+      "collection": "UI Audio",
+      "license": "CC0"
+    }
+  ]
+}
