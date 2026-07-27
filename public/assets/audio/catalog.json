@@ -495,6 +495,62 @@
       "source": "Abstraction / Tallbeard Studios",
       "collection": "2026 Q2",
       "license": "CC0"
+    },
+    {
+      "id": "jukebox:music:729cd35d3ea03139",
+      "name": "Retro-Action",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Action.ogg?v=2729b1018af2db2b",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:58f720c0436e7037",
+      "name": "Retro-Arcade",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Arcade.ogg?v=cc12d46598051b6c",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:c8df2383023c79c4",
+      "name": "Retro-Electronic",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Electronic.ogg?v=5c4763c916e8662b",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:b04516357ee0ed3c",
+      "name": "Retro-Instrumental",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Instrumental.ogg?v=83004861bc32b230",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:70e0047311dad67a",
+      "name": "Retro-Pop",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Pop.ogg?v=768aebfc3ec598c6",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:415007bde75781a8",
+      "name": "Retro-Synthwave",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/retro/Retro-Synthwave.ogg?v=af6f92c5c6f7adee",
+      "source": "Local",
+      "collection": "Retro",
+      "license": "No especificada"
+    },
+    {
+      "id": "jukebox:music:dc73692cdabde92f",
+      "name": "Tango-Manzana",
+      "url": "https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/tango/Tango-Manzana.ogg?v=dbcdadb4c8c801f5",
+      "source": "Local",
+      "collection": "Tango",
+      "license": "No especificada"
     }
   ],
   "sfx": [

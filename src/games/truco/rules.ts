@@ -1,4 +1,6 @@
-export const TRUCO_TARGET_SCORE = 15;
+/** Los primeros 15 tantos son las malas; desde ahí se juega en las buenas. */
+export const TRUCO_GOOD_SCORE = 15;
+export const TRUCO_TARGET_SCORE = TRUCO_GOOD_SCORE * 2;
 export const CARDS_PER_HAND = 3;
 
 export type Suit = 'espadas' | 'bastos' | 'oros' | 'copas';
@@ -9,6 +11,9 @@ export type Card = {
 	suit: Suit;
 	power: number;
 };
+
+export type TrickWinner = 'player' | 'ai' | null;
+export type EnvidoCall = 'envido' | 'realEnvido' | 'faltaEnvido';
 
 /**
  * Escala de poder simplificada del Truco argentino.
@@ -64,7 +69,50 @@ export function compareCards(first: Card, second: Card) {
 	return Math.sign(first.power - second.power) as -1 | 0 | 1;
 }
 
-/** La IA responde con la carta más fuerte disponible, aunque no pueda ganar. */
-export function chooseAiResponse(hand: Card[]) {
-	return [...hand].sort((first, second) => second.power - first.power)[0];
+/** Calcula el tanto: las figuras valen cero y la mejor pareja de palo suma 20. */
+export function calculateEnvido(hand: readonly Card[]) {
+	const valueOf = (card: Card) => card.value <= 7 ? card.value : 0;
+	const cardsBySuit = new Map<Suit, Card[]>();
+	for (const card of hand) {
+		const cards = cardsBySuit.get(card.suit) ?? [];
+		cards.push(card);
+		cardsBySuit.set(card.suit, cards);
+	}
+
+	let bestPair = 0;
+	for (const cards of cardsBySuit.values()) {
+		if (cards.length < 2) continue;
+		const pairValue = cards
+			.map(valueOf)
+			.sort((first, second) => second - first)
+			.slice(0, 2)
+			.reduce((total, value) => total + value, 20);
+		bestPair = Math.max(bestPair, pairValue);
+	}
+
+	return bestPair || Math.max(0, ...hand.map(valueOf));
+}
+
+/**
+ * Resuelve una mano de Truco a medida que se juegan sus bazas.
+ * Una parda no pertenece a nadie: si ocurre en la primera, la siguiente baza
+ * ganada decide; si ocurre en la segunda, prevalece quien ganó la primera.
+ * Tres pardas favorecen a quien es mano.
+ */
+export function resolveHandWinner(tricks: readonly TrickWinner[], mano: Exclude<TrickWinner, null>): Exclude<TrickWinner, null> | null {
+	const [first, second, third] = tricks;
+
+	if (first === undefined) return null;
+
+	if (first === null) {
+		if (second === undefined) return null;
+		if (second !== null) return second;
+		if (third === undefined) return null;
+		return third ?? mano;
+	}
+
+	if (second === undefined) return null;
+	if (second === first || second === null) return first;
+	if (third === undefined) return null;
+	return third ?? first;
 }

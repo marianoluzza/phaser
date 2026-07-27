@@ -2,6 +2,10 @@ import type Phaser from 'phaser';
 
 /** Efectos propios del Truco, con claves separadas de los demás juegos. */
 export const TRUCO_AUDIO = {
+	music: {
+		cacheKey: 'truco:music:tango-manzana',
+		url: 'https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/music/tango/Tango-Manzana.ogg?v=dbcdadb4c8c801f5',
+	},
 	cardPlay: {
 		cacheKey: 'truco:sfx:card-play',
 		url: 'https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio/sfx/kenney/ui-audio/Audio/switch1.ogg?v=efdd1d1e2904fb2d',

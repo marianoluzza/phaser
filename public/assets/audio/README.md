@@ -10,7 +10,7 @@ public/assets/audio/
 └── licenses/
 ```
 
-Los 213 audios catalogados viven en el bucket Cloudflare R2
+Los 220 audios catalogados viven en el bucket Cloudflare R2
 `phaser-arcade-assets`. Las fuentes locales se conservan bajo
 `local-assets/audio`, carpeta ignorada por Git y por Vite.
 

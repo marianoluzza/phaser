@@ -281,7 +281,7 @@ R2 declaradas en el catálogo y usan `AudioManager` para la política común.
 ```mermaid
 flowchart LR
     Packs["local-assets/audio<br/>OGG locales"]
-    R2["Cloudflare R2<br/>213 audios"]
+    R2["Cloudflare R2<br/>220 audios"]
     Upload["scripts/upload-audio-r2.mjs"]
     Script["scripts/generate-audio-catalog.mjs"]
     Json["public/assets/audio/catalog.json"]

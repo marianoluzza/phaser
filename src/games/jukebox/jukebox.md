@@ -27,7 +27,7 @@ flowchart LR
     Loader --> Manager
 ```
 
-Al entrar se descarga únicamente `catalog.json`, no los 213 audios alojados en
+Al entrar se descarga únicamente `catalog.json`, no los 220 audios alojados en
 R2. Cuando el
 jugador elige **Oír**, la escena agrega el archivo seleccionado al loader de
 Phaser y espera su evento de finalización. Esto reduce la carga inicial y deja

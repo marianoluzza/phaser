@@ -5,7 +5,7 @@ import { TRUCO_SCENES } from '../sceneKeys';
 
 type TrucoResult = { playerScore?: number; aiScore?: number };
 
-/** Resultado de la partida al llegar a 15 puntos. */
+/** Resultado de la partida al llegar a 30 puntos. */
 export class TrucoGameOverScene extends Phaser.Scene {
 	private result: TrucoResult = {};
 	private enterKey!: Phaser.Input.Keyboard.Key;

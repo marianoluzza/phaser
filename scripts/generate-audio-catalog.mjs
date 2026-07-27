@@ -36,6 +36,20 @@ const collections = [
 		license: 'CC0',
 	},
 	{
+		kind: 'music',
+		directory: path.join(audioSourceDirectory, 'music', 'retro'),
+		source: 'Local',
+		collection: 'Retro',
+		license: 'No especificada',
+	},
+	{
+		kind: 'music',
+		directory: path.join(audioSourceDirectory, 'music', 'tango'),
+		source: 'Local',
+		collection: 'Tango',
+		license: 'No especificada',
+	},
+	{
 		kind: 'sfx',
 		directory: path.join(
 			audioSourceDirectory,
