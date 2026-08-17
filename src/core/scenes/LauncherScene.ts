@@ -141,11 +141,48 @@ export class LauncherScene extends Phaser.Scene {
 		});
 	}
 
+	/**
+	 * Ubicación de las fichas según cuántos juegos haya instalados.
+	 *
+	 * Con pocos juegos entran en una fila; a partir del cuarto se arma una
+	 * grilla y las fichas se achican. Cada fila se centra por separado para que
+	 * la última, aunque esté incompleta, no quede pegada al margen izquierdo.
+	 */
+	private getCardLayout() {
+		const count = GAME_CATALOG.length;
+		const columns = Math.min(count, 3);
+		const rows = Math.ceil(count / columns);
+		const scale = count <= 2 ? 1 : rows > 1 ? 0.6 : 0.68;
+
+		return {
+			columns,
+			rows,
+			scale,
+			cardWidth: 330 * scale,
+			cardHeight: 285 * scale,
+			columnGap: 22,
+			rowGap: 16,
+			startY: rows > 1 ? 150 : 185,
+		};
+	}
+
+	private getCardPosition(index: number) {
+		const layout = this.getCardLayout();
+		const row = Math.floor(index / layout.columns);
+		const cardsInRow = Math.min(layout.columns, GAME_CATALOG.length - row * layout.columns);
+		const rowWidth = cardsInRow * layout.cardWidth + (cardsInRow - 1) * layout.columnGap;
+		const columnInRow = index % layout.columns;
+
+		return {
+			x: (800 - rowWidth) / 2 + columnInRow * (layout.cardWidth + layout.columnGap),
+			y: layout.startY + row * (layout.cardHeight + layout.rowGap),
+			scale: layout.scale,
+		};
+	}
+
 	private createGameCard(game: GameDefinition, index: number) {
-		const compactLayout = GAME_CATALOG.length > 2;
-		const x = compactLayout ? 40 + index * 250 : 70 + index * 380;
-		const y = 185;
-		const card = this.add.container(x, y).setScale(compactLayout ? 0.68 : 1);
+		const { x, y, scale } = this.getCardPosition(index);
+		const card = this.add.container(x, y).setScale(scale);
 
 		const shadow = this.add.rectangle(8, 10, 330, 285, 0x000000, 0.35)
 			.setOrigin(0);
@@ -198,6 +235,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawTrucoCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'pipes') {
+			this.drawPipesCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -235,6 +276,21 @@ export class LauncherScene extends Phaser.Scene {
 		});
 	}
 
+	private drawPipesCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// Un recorrido corto de cañería anticipa la mecánica sin usar imágenes.
+		const segments: Array<[number, number, number, number]> = [
+			[38, 48, 108, 16],
+			[130, 48, 16, 60],
+			[130, 92, 120, 16],
+			[234, 34, 16, 74],
+		];
+
+		for (const [x, y, width, height] of segments) {
+			card.add(this.add.rectangle(x - 4, y - 4, width + 8, height + 8, 0x2a3f63).setOrigin(0));
+			card.add(this.add.rectangle(x, y, width, height, accentColor).setOrigin(0));
+		}
+	}
+
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {
 		// La v1 usa cartas tipográficas: la portada anticipa la regla sin imágenes.
 		for (const [x, y, label] of [[82, 48, '1'], [132, 68, '7'], [182, 48, '3']] as const) {
@@ -244,13 +300,14 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	private drawFooter() {
-		this.add.text(70, 510, i18n.t('launcher.chooseGame'), {
+		// El pie va debajo de la última fila de fichas, incluso con grilla.
+		this.add.text(70, 522, i18n.t('launcher.chooseGame'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '13px',
 			color: '#6d7da8',
 			letterSpacing: 2,
 		});
-		this.add.text(70, 540, i18n.t('launcher.navigation'), {
+		this.add.text(70, 550, i18n.t('launcher.navigation'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '16px',
 			color: '#d9e2ff',
@@ -272,7 +329,7 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	private refreshSelection() {
-		const baseScale = GAME_CATALOG.length > 2 ? 0.68 : 1;
+		const baseScale = this.getCardLayout().scale;
 		this.gameCards.forEach((card, index) => {
 			const surface = card.list[1] as Phaser.GameObjects.Rectangle;
 			const selected = index === this.selectedGameIndex;

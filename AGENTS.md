@@ -5,8 +5,8 @@ La aplicación funciona como un pequeño arcade: comienza en un launcher común 
 cada juego se instala como un módulo independiente con sus propias escenas,
 objetos, reglas y documentación.
 
-Actualmente incluye Tetris, Truco y Jukebox, una herramienta interna para probar la
-biblioteca de música y efectos.
+Actualmente incluye Tetris, Truco, Pipes y Jukebox, una herramienta interna para
+probar la biblioteca de música y efectos.
 
 ## Puesta en marcha
 
@@ -100,6 +100,26 @@ src/
     │       ├── TetrisTitleScene.ts
     │       ├── TetrisGameScene.ts
     │       └── TetrisGameOverScene.ts
+    ├── pipes/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── tuningStore.ts
+    │   ├── pipes.md
+    │   ├── constants/
+    │   │   ├── pipeTypes.ts
+    │   │   ├── levels.ts
+    │   │   └── tuning.ts
+    │   ├── objects/
+    │   │   ├── PipeBoard.ts
+    │   │   ├── PipeQueue.ts
+    │   │   ├── WaterFlow.ts
+    │   │   └── pipeRenderer.ts
+    │   └── scenes/
+    │       ├── PipesTitleScene.ts
+    │       ├── PipesGameScene.ts
+    │       ├── PipesRoundEndScene.ts
+    │       └── PipesConfigScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -149,7 +169,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -384,6 +404,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 
 - [Reglas para asistentes y mantenimiento](AGENTS.md)
 - [Diseño técnico y funcionalidades de Tetris](src/games/tetris/tetris.md)
+- [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)
 - [Biblioteca, licencias y procedimiento de audio](public/assets/audio/README.md)
 - [Infraestructura y operación de Cloudflare R2](cloudflare/README.md)
