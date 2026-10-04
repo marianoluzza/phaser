@@ -5,7 +5,8 @@ La aplicación funciona como un pequeño arcade: comienza en un launcher común 
 cada juego se instala como un módulo independiente con sus propias escenas,
 objetos, reglas y documentación.
 
-Actualmente incluye Tetris, Truco, Pipes y Jukebox, una herramienta interna para
+Actualmente incluye Tetris, Truco, Pipes, Astro Chess —en construcción, con su
+diseño ya documentado— y Jukebox, una herramienta interna para
 probar la biblioteca de música y efectos.
 
 ## Puesta en marcha
@@ -120,6 +121,31 @@ src/
     │       ├── PipesGameScene.ts
     │       ├── PipesRoundEndScene.ts
     │       └── PipesConfigScene.ts
+    ├── astro-chess/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── astro-chess.md
+    │   ├── constants/
+    │   │   ├── pieces.ts
+    │   │   ├── rooms.ts
+    │   │   ├── enemies.ts
+    │   │   └── tuning.ts
+    │   ├── state/
+    │   │   ├── rng.ts
+    │   │   ├── Crew.ts
+    │   │   ├── Ship.ts
+    │   │   └── Combat.ts
+    │   ├── objects/
+    │   │   ├── pieceRenderer.ts
+    │   │   ├── shipRenderer.ts
+    │   │   ├── CrewBoard.ts
+    │   │   ├── text.ts
+    │   │   └── ui.ts
+    │   └── scenes/
+    │       ├── AstroChessTitleScene.ts
+    │       ├── AstroChessShipScene.ts
+    │       └── AstroChessCombatScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -169,7 +195,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -405,6 +431,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 - [Reglas para asistentes y mantenimiento](AGENTS.md)
 - [Diseño técnico y funcionalidades de Tetris](src/games/tetris/tetris.md)
 - [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
+- [Diseño y plan de implementación de Astro Chess](src/games/astro-chess/astro-chess.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)
 - [Biblioteca, licencias y procedimiento de audio](public/assets/audio/README.md)
 - [Infraestructura y operación de Cloudflare R2](cloudflare/README.md)

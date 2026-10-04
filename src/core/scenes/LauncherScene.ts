@@ -239,6 +239,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawPipesCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'astro-chess') {
+			this.drawAstroChessCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -289,6 +293,35 @@ export class LauncherScene extends Phaser.Scene {
 			card.add(this.add.rectangle(x - 4, y - 4, width + 8, height + 8, 0x2a3f63).setOrigin(0));
 			card.add(this.add.rectangle(x, y, width, height, accentColor).setOrigin(0));
 		}
+	}
+
+	private drawAstroChessCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// El plano de la nave con sus salas en damero: la portada tiene que decir
+		// "nave" y "ajedrez" al mismo tiempo, sin mostrar un tablero.
+		const graphics = this.add.graphics();
+		card.add(graphics);
+
+		const hull = [
+			[36, 40], [246, 40], [288, 85], [246, 130], [36, 130], [60, 85],
+		].map(([x, y]) => new Phaser.Math.Vector2(x, y));
+
+		graphics.fillStyle(0x121a3c, 1);
+		graphics.fillPoints(hull, true);
+		graphics.lineStyle(2, accentColor, 0.75);
+		graphics.strokePoints(hull, true);
+
+		[78, 130, 182].forEach((x, index) => {
+			graphics.fillStyle(index % 2 === 0 ? 0x232a5e : 0x0d1330, 1);
+			graphics.fillRect(x, 63, 44, 44);
+			graphics.lineStyle(1, accentColor, 0.3);
+			graphics.strokeRect(x, 63, 44, 44);
+		});
+
+		// Dos tripulantes alcanzan para insinuar la asignación por puestos.
+		graphics.fillStyle(accentColor, 1);
+		graphics.fillTriangle(100, 71, 114, 97, 86, 97);
+		graphics.fillStyle(0xffca4b, 1);
+		graphics.fillCircle(204, 85, 11);
 	}
 
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {
