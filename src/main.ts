@@ -11,7 +11,7 @@ import { LauncherScene } from './core/scenes/LauncherScene';
  * La primera escena arranca automáticamente. Cada juego aporta después sus
  * propias escenas mediante el manifiesto registrado en el catálogo.
  */
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   width: 800,
   height: 600,
@@ -24,3 +24,12 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
 		},
 });
+
+/**
+ * En desarrollo el juego queda accesible desde la consola y desde el driver de
+ * `npm run shots`, que necesita preguntarle a Phaser qué escena está activa.
+ * El build de producción no expone nada.
+ */
+if (import.meta.env.DEV) {
+  (window as unknown as { arcade: Phaser.Game }).arcade = game;
+}

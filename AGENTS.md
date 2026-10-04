@@ -22,6 +22,7 @@ Comandos disponibles:
 npm install
 npm run dev
 npm run build
+npm run shots
 npm run audio:catalog
 npm run audio:upload:r2
 npm run deploy:pages
@@ -30,10 +31,47 @@ npm run preview
 
 - `npm run dev` inicia el entorno de desarrollo con recarga automática.
 - `npm run build` valida TypeScript y genera la versión de producción.
+- `npm run shots` recorre el arcade en un Chrome headless y deja capturas.
 - `npm run audio:catalog` reconstruye el catálogo después de agregar audio.
 - `npm run audio:upload:r2` sincroniza los OGG locales con Cloudflare R2.
 - `npm run deploy:pages` compila y publica el arcade en Cloudflare Pages.
 - `npm run preview` permite revisar localmente el build de producción.
+
+## Verificación en el navegador
+
+`npm run build` valida los tipos, no lo que se ve. Un color invisible, dos
+siluetas iguales o un botón tapado compilan perfecto. `npm run shots` levanta el
+servidor de desarrollo, recorre el arcade en un Chrome headless y deja las
+capturas en `screenshots/`, que no se versiona.
+
+```bash
+npm run shots                 # launcher y Astro Chess
+npm run shots -- astro-chess  # sólo un recorrido
+npm run shots -- --show       # con ventana visible
+ARCADE_PORT=5180 npm run shots  # si el 5173 lo usa otro proyecto
+```
+
+Los recorridos viven en `scripts/screenshots.mjs` y el driver en
+`scripts/arcade-driver.mjs`. Agregar un recorrido es agregar una función a
+`FLOWS`.
+
+Tres decisiones y dos trampas que conviene conocer antes de tocarlo:
+
+- Se usa `playwright-core`, no `playwright`: el primero pesa unos megas y maneja
+  el Chrome ya instalado (`channel: 'chrome'`); el segundo descargaría sus
+  propios navegadores.
+- Dentro de un canvas no hay selectores. Todo se maneja con teclado,
+  coordenadas y capturas.
+- Una captura prueba que algo se dibujó, no que sea la pantalla correcta. Por
+  eso `main.ts` publica el juego en `window.arcade` **sólo en desarrollo** y
+  cada paso espera la clave de la escena activa en vez de dormir a ciegas.
+- Las teclas se mantienen apretadas 80 ms. `Key.onUp` de Phaser borra el
+  `justDown`, así que una tecla apretada y soltada en el mismo frame no llega
+  nunca a `update()` y se pierde sin dar error.
+- El driver reutiliza el servidor que encuentre en el puerto, pero antes
+  comprueba que sea el arcade (`<title>Mi Arcade</title>`). Si en el 5173 corre
+  otro proyecto de Vite, se detiene con un error en vez de manejar la
+  aplicación equivocada. En ese caso hay que usar `ARCADE_PORT`.
 
 ## Arquitectura general
 

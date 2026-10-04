@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "shots": "node scripts/screenshots.mjs",
     "audio:catalog": "node scripts/generate-audio-catalog.mjs",
     "audio:upload:r2": "node scripts/upload-audio-r2.mjs",
     "deploy:pages": "npm run build && wrangler pages deploy dist --project-name phaser-arcade --branch main",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "playwright-core": "^1.62.1",
     "typescript": "~6.0.2",
     "vite": "^8.1.4",
     "wrangler": "^4.110.0"

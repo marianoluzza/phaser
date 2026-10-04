@@ -22,6 +22,9 @@ dist-ssr
 # Fuentes pesadas sincronizadas con Cloudflare R2.
 /local-assets/
 
+# Capturas generadas por `npm run shots`.
+/screenshots/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
