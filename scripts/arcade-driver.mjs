@@ -76,6 +76,14 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {})
 			await page.waitForTimeout(220);
 		},
 
+		/** Gira la rueda del mouse sobre un punto del canvas. */
+		async wheel(x, y, deltaY) {
+			const box = await page.locator('canvas').boundingBox();
+			await page.mouse.move(box.x + x, box.y + y);
+			await page.mouse.wheel(0, deltaY);
+			await page.waitForTimeout(220);
+		},
+
 		/** Arrastra de un punto a otro del canvas, con pasos intermedios como una mano. */
 		async drag(from, to) {
 			const box = await page.locator('canvas').boundingBox();

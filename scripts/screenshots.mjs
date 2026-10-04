@@ -90,6 +90,11 @@ const FLOWS = {
 		await arcade.press('Enter');
 		await arcade.shot('astro-combate-ronda-3');
 
+		// La bitácora guarda todas las rondas: la rueda baja hasta las viejas.
+		await arcade.press('Enter', 2);
+		await arcade.wheel(640, 420, 600);
+		await arcade.shot('astro-bitacora-scroll');
+
 		// Se pelea hasta el final: la escena expone el resultado, así que no hay
 		// que adivinar cuántas rondas faltan. Cada ronda lleva dos Enter: uno la
 		// resuelve y el otro saltea la cuenta.

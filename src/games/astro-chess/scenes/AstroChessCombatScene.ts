@@ -34,6 +34,8 @@ const PIP = { width: 18, height: 10, gap: 4 };
 const COLUMN = { x: 518, width: 256 };
 const FORECAST = { top: 168, bottom: 312 };
 const LOG = { top: 320, bottom: 506 };
+/** Ventana visible de la bitácora; lo que no entra se recorre con scroll. */
+const LOG_VIEW = { top: LOG.top + 24, height: LOG.bottom - LOG.top - 26, textWidth: 246, barX: 776 };
 
 /** Cuánto dura cada línea de la bitácora cuando se cuenta la ronda. */
 const STEP_MS = 480;
@@ -99,6 +101,11 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	private intentDetail!: Phaser.GameObjects.Text;
 	private forecastLayer!: Phaser.GameObjects.Container;
 	private logLayer!: Phaser.GameObjects.Container;
+	private logScrollbar!: Phaser.GameObjects.Graphics;
+	/** Cuánto se bajó en la bitácora, en píxeles desde la ronda más nueva. */
+	private logScroll = 0;
+	private logContentHeight = 0;
+	private logDrag: { y: number; scroll: number } | null = null;
 	private toast!: Phaser.GameObjects.Text;
 	private resolveButton!: Button;
 	private overlay: Phaser.GameObjects.Container | null = null;
@@ -129,6 +136,8 @@ export class AstroChessCombatScene extends Phaser.Scene {
 		this.overlay = null;
 		this.playing = false;
 		this.timers = [];
+		this.logScroll = 0;
+		this.logDrag = null;
 	}
 
 	preload() {
@@ -300,12 +309,85 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	private createLogPanel() {
 		this.label(COLUMN.x, LOG.top + 8, i18n.t('astro.combat.log'));
 		this.logLayer = this.add.container(0, 0);
+		this.logScrollbar = this.add.graphics();
 
-		// Las rondas viejas siguen ahí abajo; lo que no entra se corta.
-		const maskShape = this.add.graphics().setVisible(false);
-		maskShape.fillStyle(0xffffff, 1);
-		maskShape.fillRect(506, LOG.top + 24, 278, LOG.bottom - LOG.top - 26);
-		this.logLayer.setMask(maskShape.createGeometryMask());
+		this.bindLogScroll();
+	}
+
+	/**
+	 * Rueda, arrastre o RePág/AvPág.
+	 *
+	 * El arrastre es para pantallas táctiles, donde no hay rueda. La bitácora no
+	 * toca el plano de la nave, así que no compite con el reparto de piezas.
+	 */
+	private bindLogScroll() {
+		const inLog = (pointer: Phaser.Input.Pointer) =>
+			pointer.x >= 506 && pointer.x <= 784 && pointer.y >= LOG_VIEW.top && pointer.y <= LOG.bottom;
+
+		this.input.on(
+			'wheel',
+			(pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+				if (inLog(pointer) && !this.overlay) this.scrollLog(this.logScroll + dy * 0.5);
+			}
+		);
+		this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+			if (inLog(pointer) && !this.overlay) this.logDrag = { y: pointer.y, scroll: this.logScroll };
+		});
+		this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+			if (this.logDrag && pointer.isDown) this.scrollLog(this.logDrag.scroll - (pointer.y - this.logDrag.y));
+		});
+		this.input.on('pointerup', () => {
+			this.logDrag = null;
+		});
+
+		const page = LOG_VIEW.height * 0.8;
+		this.input.keyboard?.on('keydown-PAGE_DOWN', () => this.scrollLog(this.logScroll + page));
+		this.input.keyboard?.on('keydown-PAGE_UP', () => this.scrollLog(this.logScroll - page));
+	}
+
+	private scrollLog(to: number) {
+		const max = Math.max(0, this.logContentHeight - LOG_VIEW.height);
+		this.logScroll = Phaser.Math.Clamp(to, 0, max);
+		this.logLayer.y = -this.logScroll;
+		this.clipLog();
+		this.drawLogScrollbar();
+	}
+
+	/**
+	 * Recorta cada línea a la ventana de la bitácora.
+	 *
+	 * Con una máscara de Phaser sobre el contenedor las líneas se seguían
+	 * viendo fuera del panel. El recorte por línea es exacto al píxel y no
+	 * depende del renderer: una línea a medio salir se ve a medias.
+	 */
+	private clipLog() {
+		const bottom = LOG_VIEW.top + LOG_VIEW.height;
+
+		for (const child of this.logLayer.list) {
+			const text = child as Phaser.GameObjects.Text;
+			const top = text.y + this.logLayer.y;
+			const from = Math.max(0, LOG_VIEW.top - top);
+			const to = Math.min(text.height, bottom - top);
+
+			text.setVisible(to > from);
+			if (to > from) text.setCrop(0, from, text.width, to - from);
+		}
+	}
+
+	/** Sólo aparece cuando hay más bitácora de la que entra. */
+	private drawLogScrollbar() {
+		const g = this.logScrollbar;
+		g.clear();
+		if (this.logContentHeight <= LOG_VIEW.height) return;
+
+		const thumb = Math.max(18, (LOG_VIEW.height * LOG_VIEW.height) / this.logContentHeight);
+		const max = this.logContentHeight - LOG_VIEW.height;
+		const y = LOG_VIEW.top + (this.logScroll / max) * (LOG_VIEW.height - thumb);
+
+		g.fillStyle(0x1a1f45, 1);
+		g.fillRect(LOG_VIEW.barX, LOG_VIEW.top, 4, LOG_VIEW.height);
+		g.fillStyle(0x8f86c8, 1);
+		g.fillRect(LOG_VIEW.barX, y, 4, thumb);
 	}
 
 	private createControls() {
@@ -579,32 +661,35 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	 * La bitácora entera, la ronda más nueva arriba.
 	 *
 	 * Antes cada ronda borraba la anterior y no había forma de mirar qué venía
-	 * pasando. Las rondas viejas quedan en gris y se cortan por abajo.
+	 * pasando. Las rondas viejas quedan en gris, más abajo, a un scroll de
+	 * distancia.
 	 */
 	private renderLog() {
 		this.logLayer.removeAll(true);
 
 		const rounds = [...this.combat.history].reverse();
-		let y = LOG.top + 26;
+		const top = LOG_VIEW.top + 2;
+		let y = top;
 
 		rounds.forEach((entries, age) => {
 			const visible = age === 0 && this.playing ? entries.slice(0, this.revealed) : entries;
 			const color = age === 0 ? '#d9e2ff' : '#59628a';
 
 			visible.forEach((entry, index) => {
-				if (y > LOG.bottom) return;
-
 				const text = this.add.text(COLUMN.x, y, formatEntry(entry), {
 					fontFamily: FONTS.mono,
 					fontSize: '11px',
 					color: index === 0 ? (age === 0 ? '#8f86c8' : '#454c70') : color,
-					wordWrap: { width: COLUMN.width },
+					wordWrap: { width: LOG_VIEW.textWidth },
 				});
 				this.logLayer.add(text);
 				y += text.height + 4;
 			});
 			y += 6;
 		});
+
+		this.logContentHeight = y - top;
+		this.scrollLog(this.logScroll);
 	}
 
 	/** Explica por qué no se pudo mover a alguien, con lo que habría que cambiar. */
@@ -647,6 +732,7 @@ export class AstroChessCombatScene extends Phaser.Scene {
 
 		this.playing = true;
 		this.revealed = 1;
+		this.logScroll = 0;
 		this.shown = before;
 		this.board.setEnabled(false);
 		this.board.setAlert(null);
