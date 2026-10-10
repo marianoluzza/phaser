@@ -3,6 +3,12 @@ import Phaser from 'phaser';
 import './style.css';
 import { GAME_SCENES } from './core/gameCatalog';
 import { LauncherScene } from './core/scenes/LauncherScene';
+import {
+  DESIGN_HEIGHT,
+  DESIGN_WIDTH,
+  RENDER_SCALE,
+  RenderScalePlugin,
+} from './core/renderScale';
 
 /**
  * Punto de entrada de la aplicación.
@@ -13,8 +19,11 @@ import { LauncherScene } from './core/scenes/LauncherScene';
  */
 const game = new Phaser.Game({
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  // El canvas tiene la resolución real de pantalla; ver core/renderScale.ts.
+  width: DESIGN_WIDTH * RENDER_SCALE,
+  height: DESIGN_HEIGHT * RENDER_SCALE,
+  // Evita posiciones en medio píxel, que reparten cada trazo en dos columnas.
+  roundPixels: true,
   backgroundColor: '#080d1a',
   parent: 'app',
   scene: [LauncherScene, ...GAME_SCENES],
@@ -22,7 +31,10 @@ const game = new Phaser.Game({
     // FIT conserva la proporción del juego en pantallas chicas.
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-		},
+  },
+  plugins: {
+    scene: [{ key: 'RenderScalePlugin', plugin: RenderScalePlugin, mapping: 'renderScale' }],
+  },
 });
 
 /**

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { RENDER_SCALE } from '../../../core/renderScale';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { PIPE_TYPES, type PipeType } from '../constants/pipeTypes';
 import {
@@ -158,8 +159,15 @@ export class PipesConfigScene extends Phaser.Scene {
 
 		// El scroll de la cámara arranca en la esquina del visor, así que las
 		// coordenadas de la lista se escriben igual que las del resto de la escena.
-		this.listCamera = this.cameras.add(VIEWPORT.x, VIEWPORT.y, VIEWPORT.width, VIEWPORT.height);
-		this.listCamera.setScroll(VIEWPORT.x, VIEWPORT.y);
+		// El viewport se mide en píxeles reales del canvas y el zoom acompaña a la
+		// cámara principal (ver core/renderScale.ts).
+		this.listCamera = this.cameras.add(
+			VIEWPORT.x * RENDER_SCALE,
+			VIEWPORT.y * RENDER_SCALE,
+			VIEWPORT.width * RENDER_SCALE,
+			VIEWPORT.height * RENDER_SCALE
+		);
+		this.listCamera.setOrigin(0).setZoom(RENDER_SCALE).setScroll(VIEWPORT.x, VIEWPORT.y);
 
 		const trackX = VIEWPORT.x + VIEWPORT.width - 10;
 		this.scrollTrack = this.add.rectangle(trackX, VIEWPORT.y + 4, 6, VIEWPORT.height - 8, 0x172343)
@@ -242,7 +250,9 @@ export class PipesConfigScene extends Phaser.Scene {
 			const usable = VIEWPORT.height - 8 - this.scrollThumb.height;
 			if (usable <= 0) return;
 
-			const offset = pointer.y - VIEWPORT.y - 4 - this.scrollThumb.height / 2;
+			// `pointer.y` está en píxeles del canvas y `worldY` dependería de la
+			// cámara bajo el puntero, que puede ser la de la lista desplazada.
+			const offset = pointer.y / RENDER_SCALE - VIEWPORT.y - 4 - this.scrollThumb.height / 2;
 			this.scrollTo((offset / usable) * this.maxScroll);
 		});
 

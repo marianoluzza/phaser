@@ -32,7 +32,9 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {})
 		args: ['--autoplay-policy=no-user-gesture-required'],
 	});
 
-	const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+	// Densidad 2, como un monitor HiDPI: ejercita el zoom de core/renderScale.ts.
+	// Las coordenadas de click siguen siendo las de 800×600.
+	const page = await browser.newPage({ viewport: { width: 800, height: 600 }, deviceScaleFactor: 2 });
 	const errors = [];
 	page.on('console', (message) => {
 		if (message.type() === 'error') errors.push(message.text());
