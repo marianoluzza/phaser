@@ -198,7 +198,8 @@ siete extracciones contenga todos los tetrominós.
 ### Movimiento horizontal
 
 - El primer movimiento ocurre inmediatamente al presionar la tecla.
-- Demora inicial antes de repetir: 140 ms.
+- Demora inicial antes de repetir: 170 ms. Tiene que superar lo que dura un
+  toque normal de tecla (~100 ms); si no, un toque mueve dos celdas.
 - Intervalo de repetición: 70 ms.
 - Presionar izquierda y derecha al mismo tiempo no mueve la pieza.
 

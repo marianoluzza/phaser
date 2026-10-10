@@ -63,9 +63,10 @@ export class TetrisGameScene extends Phaser.Scene {
 	private softDropInterval = 50;
 
 	private horizontalTimer = 0;
-	private horizontalInitialDelay = 140;
+	private horizontalInitialDelay = 170;
 	private horizontalRepeatInterval = 70;
 	private horizontalDirection: -1 | 0 | 1 = 0;
+	private horizontalRepeating = false;
 
 	constructor() {
 		super(TETRIS_SCENES.GAME);
@@ -160,6 +161,7 @@ export class TetrisGameScene extends Phaser.Scene {
 		this.softDropTimer = 0;
 		this.horizontalTimer = 0;
 		this.horizontalDirection = 0;
+		this.horizontalRepeating = false;
 		this.paused = false;
 		audioManager.setMusicDucked(false);
 		this.pieceBag = [];
@@ -250,6 +252,7 @@ export class TetrisGameScene extends Phaser.Scene {
 		if (direction === 0) {
 			this.horizontalDirection = 0;
 			this.horizontalTimer = 0;
+			this.horizontalRepeating = false;
 			return;
 		}
 
@@ -257,6 +260,7 @@ export class TetrisGameScene extends Phaser.Scene {
 			// El primer movimiento ocurre al instante para que el control responda bien.
 			this.horizontalDirection = direction;
 			this.horizontalTimer = 0;
+			this.horizontalRepeating = false;
 			this.tryMove(direction, 0);
 			return;
 		}
@@ -264,14 +268,16 @@ export class TetrisGameScene extends Phaser.Scene {
 		this.horizontalTimer += delta;
 
 		// Si se mantiene la tecla, esperamos y luego repetimos más rápidamente.
-		const requiredDelay =
-			this.horizontalTimer === delta // first frame
-				? this.horizontalInitialDelay
-				: this.horizontalRepeatInterval;
+		// La demora inicial debe superar lo que dura un toque normal (~100 ms);
+		// si no, un solo toque mueve la pieza dos celdas.
+		const requiredDelay = this.horizontalRepeating
+			? this.horizontalRepeatInterval
+			: this.horizontalInitialDelay;
 
 		if (this.horizontalTimer >= requiredDelay) {
 			this.tryMove(direction, 0);
 			this.horizontalTimer = 0;
+			this.horizontalRepeating = true;
 		}
 	}
 
