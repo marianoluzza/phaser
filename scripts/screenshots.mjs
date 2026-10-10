@@ -116,6 +116,42 @@ const FLOWS = {
 		await arcade.press('Escape');
 		await arcade.waitForScene('core:launcher');
 	},
+
+	truco: async (arcade) => {
+		await arcade.waitForScene('core:launcher');
+		// El rival elegido se recuerda: se parte siempre del predeterminado.
+		await arcade.page.evaluate(() => localStorage.removeItem('truco.aiProfile'));
+		// El Truco es la segunda ficha del catálogo.
+		await arcade.press('ArrowRight');
+		await arcade.press('Enter');
+		await arcade.waitForScene('truco:title');
+		await arcade.shot('truco-titulo-noob');
+
+		// El selector recorre Noob, Pibe, Viejo y Aleatorio.
+		await arcade.press('ArrowRight');
+		await arcade.shot('truco-titulo-pibe');
+		await arcade.press('ArrowRight', 2);
+		await arcade.shot('truco-titulo-aleatorio');
+
+		// Con el sorteo, la mesa no delata qué perfil tocó.
+		await arcade.press('Enter');
+		await arcade.waitForScene('truco:game');
+		await arcade.shot('truco-mesa-aleatorio');
+
+		// El Viejo tiene el nombre más largo: el marcador no debe salirse.
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('ArrowRight');
+		await arcade.press('Enter');
+		await arcade.waitForScene('truco:title');
+		await arcade.press('ArrowLeft');
+		await arcade.press('Enter');
+		await arcade.waitForScene('truco:game');
+		await arcade.shot('truco-mesa-viejo');
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
 };
 
 const args = process.argv.slice(2);
