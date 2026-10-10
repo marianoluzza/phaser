@@ -322,7 +322,7 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	 */
 	private bindLogScroll() {
 		const inLog = (pointer: Phaser.Input.Pointer) =>
-			pointer.x >= 506 && pointer.x <= 784 && pointer.y >= LOG_VIEW.top && pointer.y <= LOG.bottom;
+			pointer.worldX >= 506 && pointer.worldX <= 784 && pointer.worldY >= LOG_VIEW.top && pointer.worldY <= LOG.bottom;
 
 		this.input.on(
 			'wheel',
@@ -331,10 +331,10 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			}
 		);
 		this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-			if (inLog(pointer) && !this.overlay) this.logDrag = { y: pointer.y, scroll: this.logScroll };
+			if (inLog(pointer) && !this.overlay) this.logDrag = { y: pointer.worldY, scroll: this.logScroll };
 		});
 		this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-			if (this.logDrag && pointer.isDown) this.scrollLog(this.logDrag.scroll - (pointer.y - this.logDrag.y));
+			if (this.logDrag && pointer.isDown) this.scrollLog(this.logDrag.scroll - (pointer.worldY - this.logDrag.y));
 		});
 		this.input.on('pointerup', () => {
 			this.logDrag = null;
@@ -369,8 +369,11 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			const from = Math.max(0, LOG_VIEW.top - top);
 			const to = Math.min(text.height, bottom - top);
 
+			// El recorte se mide en píxeles de la textura, que tiene `resolution`
+			// veces el tamaño del texto en pantalla (ver core/renderScale.ts).
+			const r = text.style.resolution;
 			text.setVisible(to > from);
-			if (to > from) text.setCrop(0, from, text.width, to - from);
+			if (to > from) text.setCrop(0, from * r, text.width * r, (to - from) * r);
 		}
 	}
 

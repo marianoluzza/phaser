@@ -94,6 +94,31 @@ export function calculateEnvido(hand: readonly Card[]) {
 }
 
 /**
+ * Cantos con los que se puede subir el envido, que sólo crece:
+ * Envido (hasta dos veces) → Real Envido → Falta Envido. La Falta cierra.
+ */
+export function getEnvidoRaises(chain: readonly EnvidoCall[]): EnvidoCall[] {
+	if (chain.includes('faltaEnvido')) return [];
+	if (chain.includes('realEnvido')) return ['faltaEnvido'];
+	const envidos = chain.filter((call) => call === 'envido').length;
+	return envidos < 2 ? ['envido', 'realEnvido', 'faltaEnvido'] : ['realEnvido', 'faltaEnvido'];
+}
+
+function sumEnvidoCalls(chain: readonly EnvidoCall[]) {
+	return chain.reduce((total, call) => total + (call === 'realEnvido' ? 3 : 2), 0);
+}
+
+/** Querida, la cadena suma sus cantos; con Falta vale lo que le falta al ganador. */
+export function getEnvidoAcceptedPoints(chain: readonly EnvidoCall[], winnerScore: number) {
+	return chain.includes('faltaEnvido') ? TRUCO_TARGET_SCORE - winnerScore : sumEnvidoCalls(chain);
+}
+
+/** No querida, se cobra lo ya aceptado: todo menos el último canto, y al menos 1. */
+export function getEnvidoRejectedPoints(chain: readonly EnvidoCall[]) {
+	return Math.max(1, sumEnvidoCalls(chain.slice(0, -1)));
+}
+
+/**
  * Resuelve una mano de Truco a medida que se juegan sus bazas.
  * Una parda no pertenece a nadie: si ocurre en la primera, la siguiente baza
  * ganada decide; si ocurre en la segunda, prevalece quien ganó la primera.

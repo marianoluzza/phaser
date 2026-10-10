@@ -55,7 +55,7 @@ Los recorridos viven en `scripts/screenshots.mjs` y el driver en
 `scripts/arcade-driver.mjs`. Agregar un recorrido es agregar una función a
 `FLOWS`.
 
-Tres decisiones y dos trampas que conviene conocer antes de tocarlo:
+Cuatro decisiones y dos trampas que conviene conocer antes de tocarlo:
 
 - Se usa `playwright-core`, no `playwright`: el primero pesa unos megas y maneja
   el Chrome ya instalado (`channel: 'chrome'`); el segundo descargaría sus
@@ -65,6 +65,9 @@ Tres decisiones y dos trampas que conviene conocer antes de tocarlo:
 - Una captura prueba que algo se dibujó, no que sea la pantalla correcta. Por
   eso `main.ts` publica el juego en `window.arcade` **sólo en desarrollo** y
   cada paso espera la clave de la escena activa en vez de dormir a ciegas.
+- La página se abre con densidad 2 (`deviceScaleFactor`), como un monitor
+  HiDPI, para ejercitar el zoom de `core/renderScale.ts`. Las capturas salen de
+  1600×1200, pero los clicks se siguen dando en coordenadas de 800×600.
 - Las teclas se mantienen apretadas 80 ms. `Key.onUp` de Phaser borra el
   `justDown`, así que una tecla apretada y soltada en el mismo frame no llega
   nunca a `update()` y se pierde sin dar error.
@@ -117,6 +120,7 @@ src/
 │
 ├── core/
 │   ├── gameCatalog.ts
+│   ├── renderScale.ts
 │   ├── sceneKeys.ts
 │   ├── audio/
 │   │   └── AudioManager.ts
@@ -434,6 +438,25 @@ Cloudflare Pages y R2 se despliegan por separado:
 Vite tienen hash en el nombre y los OGG llevan `?v=<hash>`, por lo que pueden
 usar caché inmutable durante un año. En un despliegue normal no se purga caché:
 todo contenido modificado obtiene una URL diferente.
+
+## Nitidez del canvas
+
+Las escenas se diseñan en 800×600, pero el canvas se crea con los píxeles que
+realmente ocupará en pantalla (ventana × densidad del monitor). Si se dibujara
+a 800×600 y el navegador lo estirara, los textos chicos y los trazos finos se
+verían borrosos. `core/renderScale.ts` calcula esa escala al arrancar y un
+plugin de escena hace zoom en la cámara principal y rasteriza cada `Text` a la
+misma resolución. `roundPixels` evita además posiciones en medio píxel.
+
+Para las escenas esto es transparente, salvo en tres casos:
+
+- `pointer.x` y `pointer.y` están en píxeles del canvas. Para coordenadas de la
+  escena se usan `pointer.worldX` y `pointer.worldY`.
+- Una cámara adicional (`cameras.add`) recibe su viewport en píxeles del canvas
+  y necesita `setOrigin(0).setZoom(RENDER_SCALE)`, como el visor de la
+  configuración de Pipes.
+- `setCrop` sobre un `Text` se mide en píxeles de su textura: hay que
+  multiplicar por `text.style.resolution`, como en la bitácora de Astro Chess.
 
 ## Estado y representación visual
 

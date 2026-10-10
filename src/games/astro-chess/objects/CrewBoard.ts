@@ -246,26 +246,26 @@ export class CrewBoard {
 		const input = this.scene.input;
 
 		input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-			this.pointer = { x: pointer.x, y: pointer.y };
+			this.pointer = { x: pointer.worldX, y: pointer.worldY };
 			this.keyboardMode = false;
 			this.drawFocus();
 			this.drawGhost();
-			this.setHoveredRoom(this.roomAt(pointer.x, pointer.y));
+			this.setHoveredRoom(this.roomAt(pointer.worldX, pointer.worldY));
 		});
 
 		input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
 			if (!this.enabled) return;
 
-			this.pointer = { x: pointer.x, y: pointer.y };
+			this.pointer = { x: pointer.worldX, y: pointer.worldY };
 			this.keyboardMode = false;
-			const target = this.targetAt(pointer.x, pointer.y);
+			const target = this.targetAt(pointer.worldX, pointer.worldY);
 			if (!target) return;
 
 			// Sólo puede empezar un arrastre quien llegó con la mano vacía: si ya
 			// tenía una pieza, este click la está dejando.
 			const emptyHanded = !this.selectedMemberId;
 			this.activate(target);
-			if (emptyHanded && this.selectedMemberId) this.dragStart = { x: pointer.x, y: pointer.y };
+			if (emptyHanded && this.selectedMemberId) this.dragStart = { x: pointer.worldX, y: pointer.worldY };
 		});
 
 		input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
@@ -274,9 +274,9 @@ export class CrewBoard {
 			if (!start || !this.enabled || !this.selectedMemberId) return;
 
 			// Soltar casi donde se apretó es un click: la pieza queda en la mano.
-			if (Phaser.Math.Distance.Between(start.x, start.y, pointer.x, pointer.y) < DRAG_THRESHOLD) return;
+			if (Phaser.Math.Distance.Between(start.x, start.y, pointer.worldX, pointer.worldY) < DRAG_THRESHOLD) return;
 
-			const target = this.targetAt(pointer.x, pointer.y);
+			const target = this.targetAt(pointer.worldX, pointer.worldY);
 			if (target) this.activate(target);
 		});
 	}
