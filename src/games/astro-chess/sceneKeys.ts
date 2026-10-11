@@ -4,6 +4,7 @@
  */
 export const ASTRO_SCENES = {
 	TITLE: 'astro:title',
+	HELP: 'astro:help',
 	SHIP: 'astro:ship',
 	COMBAT: 'astro:combat',
 } as const;

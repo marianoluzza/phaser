@@ -2,13 +2,13 @@ import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
-import { RAIDER, type EnemyIntent } from '../constants/enemies';
+import { RAIDER } from '../constants/enemies';
 import { PIECES } from '../constants/pieces';
 import { ROOMS } from '../constants/rooms';
 import { CrewBoard, type RoomAlert } from '../objects/CrewBoard';
 import { type PlanTransform } from '../objects/shipRenderer';
 import { fill, formatEntry } from '../objects/text';
-import { addButton, floatText, FONTS, type Button } from '../objects/ui';
+import { addButton, floatText, FONTS, INTENT_COLORS, type Button } from '../objects/ui';
 import { ASTRO_SCENES } from '../sceneKeys';
 import { Combat, type Hit, type LogEntry, type RoundForecast } from '../state/Combat';
 import { Crew } from '../state/Crew';
@@ -39,16 +39,6 @@ const LOG_VIEW = { top: LOG.top + 24, height: LOG.bottom - LOG.top - 26, textWid
 
 /** Cuánto dura cada línea de la bitácora cuando se cuenta la ronda. */
 const STEP_MS = 480;
-
-/** Colores de la intención enemiga: el jugador la lee antes que el texto. */
-const INTENT_COLORS: Record<EnemyIntent, string> = {
-	fire: '#ff647c',
-	charge: '#ffca4b',
-	shield: '#46d9ff',
-	board: '#ff8a3d',
-	torpedo: '#ff6ad5',
-	radiation: '#d4f542',
-};
 
 const COLORS = {
 	shield: 0x46d9ff,

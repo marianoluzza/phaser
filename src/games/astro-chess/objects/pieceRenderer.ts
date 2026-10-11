@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PIECES, type PieceType } from '../constants/pieces';
+import { COMBAT_TUNING } from '../constants/tuning';
 
 /**
  * Dibujo compartido de las piezas de la tripulación.
@@ -94,6 +95,35 @@ export function drawPiece(
 	}
 
 	graphics.fillCircle(x, y - size * 0.04, size * 0.23);
+}
+
+/**
+ * Una marca por herida en la esquina del puesto, sobre las que sacan de
+ * combate: se ve cuánto le queda a la pieza.
+ */
+export function drawWoundMarks(
+	graphics: Phaser.GameObjects.Graphics,
+	x: number,
+	y: number,
+	size: number,
+	wounds: number,
+	radius: number
+) {
+	if (wounds === 0) return;
+
+	const left = x - size / 2 + radius + 3;
+	const top = y - size / 2 + radius + 3;
+
+	for (let index = 0; index < COMBAT_TUNING.woundsToDrop; index += 1) {
+		const cx = left + index * (radius * 2 + 2);
+		if (index < wounds) {
+			graphics.fillStyle(0xff647c, 1);
+			graphics.fillCircle(cx, top, radius);
+		} else {
+			graphics.lineStyle(1, 0xff647c, 0.7);
+			graphics.strokeCircle(cx, top, radius);
+		}
+	}
 }
 
 function fillPolygon(graphics: Phaser.GameObjects.Graphics, points: Array<[number, number]>) {

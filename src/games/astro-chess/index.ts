@@ -1,5 +1,6 @@
 import type { GameDefinition } from '../../core/gameCatalog';
 import { AstroChessCombatScene } from './scenes/AstroChessCombatScene';
+import { AstroChessHelpScene } from './scenes/AstroChessHelpScene';
 import { AstroChessShipScene } from './scenes/AstroChessShipScene';
 import { AstroChessTitleScene } from './scenes/AstroChessTitleScene';
 import { ASTRO_SCENES } from './sceneKeys';
@@ -16,5 +17,5 @@ export const astroChessGame: GameDefinition = {
 	accentColor: 0xc66cff,
 	coverType: 'astro-chess',
 	entrySceneKey: ASTRO_SCENES.TITLE,
-	scenes: [AstroChessTitleScene, AstroChessShipScene, AstroChessCombatScene],
+	scenes: [AstroChessTitleScene, AstroChessHelpScene, AstroChessShipScene, AstroChessCombatScene],
 };
