@@ -71,7 +71,10 @@ export class Crew {
 		return isDown(member);
 	}
 
-	/** Atiende la herida más vieja de quien esté peor. Devuelve a quién curó. */
+	/**
+	 * Le saca una herida a quien tenga más, esté donde esté: la enfermería
+	 * atiende a toda la nave, no sólo a quien está adentro. Devuelve a quién curó.
+	 */
 	healOne(): CrewMember | null {
 		const wounded = this.members
 			.filter((member) => member.wounds > 0)

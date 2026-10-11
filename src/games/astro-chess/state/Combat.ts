@@ -1,9 +1,9 @@
 import type { TranslationKey } from '../../../core/i18n/i18n';
 import { choosePlan, type EnemyIntent, type EnemyPlan, type EnemyProfile } from '../constants/enemies';
 import { PIECES, type PieceType } from '../constants/pieces';
-import type { RoomId } from '../constants/rooms';
+import { ROOMS, type RoomId } from '../constants/rooms';
 import { COMBAT_TUNING } from '../constants/tuning';
-import type { Crew } from './Crew';
+import { effectiveAptitude, type Crew } from './Crew';
 import type { Ship } from './Ship';
 import { Rng } from './rng';
 
@@ -47,7 +47,7 @@ export type RoundForecast = {
 };
 
 /** Un golpe al casco, para explicar cómo terminó el combate. */
-export type Hit = { round: number; damage: number; hull: number; charged: boolean };
+export type Hit = { round: number; damage: number; hull: number; kind: 'fire' | 'charged' | 'torpedo' };
 
 export type CombatStats = {
 	dealt: number;
@@ -257,7 +257,7 @@ export class Combat {
 			round: this.round,
 			damage,
 			hull: damage - absorbed,
-			charged: false,
+			kind: 'fire',
 		});
 
 		this.log.push({
@@ -297,7 +297,88 @@ export class Combat {
 			return;
 		}
 
+		if (this.intent === 'torpedo') {
+			this.resolveTorpedo();
+			return;
+		}
+
+		if (this.intent === 'radiation') {
+			this.resolveRadiation();
+			return;
+		}
+
 		this.resolveEnemyFire();
+	}
+
+	/**
+	 * Torpedo: rodea el escudo y lo único que lo achica son los motores.
+	 *
+	 * No tira evasión: cada punto de motores le saca una cantidad fija. Así el
+	 * pronóstico dice exactamente cuánto entra y la respuesta queda a la vista,
+	 * igual que el escudo contra el disparo.
+	 */
+	private resolveTorpedo() {
+		const damage = COMBAT_TUNING.torpedoDamage;
+		const dodged = Math.min(
+			damage,
+			this.ship.output('engines', this.crew) * COMBAT_TUNING.torpedoDodgePerPoint
+		);
+		const hull = damage - dodged;
+
+		this.stats.taken += Math.min(this.ship.hull, hull);
+		this.ship.hull = Math.max(0, this.ship.hull - hull);
+		this.stats.worstHit = harder(this.stats.worstHit, {
+			round: this.round,
+			damage,
+			hull,
+			kind: 'torpedo',
+		});
+
+		this.log.push({ key: 'astro.log.torpedo', values: { damage, dodged, hull }, room: 'engines' });
+
+		if (this.ship.hull === 0) {
+			this.outcome = 'lost';
+			this.log.push({ key: 'astro.log.defeat' });
+		}
+	}
+
+	/**
+	 * Radiación: hiere a las piezas que más rinden, salvo las que atienda la
+	 * enfermería.
+	 *
+	 * Elige por aporte y no al azar, para que el pronóstico nombre a quién va a
+	 * herir. Cada punto de enfermería evita una herida: el alfil la cubre
+	 * entera, el peón la mitad.
+	 */
+	private resolveRadiation() {
+		const blocked = this.ship.output('medbay', this.crew);
+		const count = Math.max(0, COMBAT_TUNING.radiationWounds - blocked);
+
+		if (count === 0) {
+			this.log.push({ key: 'astro.log.radiationBlocked', room: 'medbay' });
+			return;
+		}
+
+		// El orden de la tripulación desempata, así que el resultado no depende
+		// del orden en que se recorran las salas.
+		const order = this.crew.all();
+		const targets = (Object.keys(ROOMS) as RoomId[])
+			.flatMap((room) =>
+				this.ship.occupants(room, this.crew).map((member) => ({
+					member,
+					room,
+					output: effectiveAptitude(member, room) * ROOMS[room].perSlot,
+				}))
+			)
+			.sort((a, b) => b.output - a.output || order.indexOf(a.member) - order.indexOf(b.member))
+			.slice(0, count);
+
+		this.log.push({
+			key: 'astro.log.radiation',
+			values: { blocked: Math.min(blocked, COMBAT_TUNING.radiationWounds) },
+			room: 'medbay',
+		});
+		for (const { member, room } of targets) this.wound(member, room);
 	}
 
 	/**
@@ -327,7 +408,7 @@ export class Combat {
 			round: this.round,
 			damage,
 			hull: throughShield,
-			charged,
+			kind: charged ? 'charged' : 'fire',
 		});
 
 		this.log.push({
@@ -437,6 +518,8 @@ export class Combat {
 				shield: this.enemyShield,
 				charged: this.enemyCharged,
 				playerDamage: this.damage,
+				playerShield: this.shieldCapacity,
+				enemyDamage: this.enemy.damage,
 				occupiedRooms: this.ship.occupiedRooms(this.crew),
 			},
 			(probability) => this.rng.chance(probability),

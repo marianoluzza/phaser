@@ -17,7 +17,7 @@ import {
 } from './shipRenderer';
 import { fill } from './text';
 import { FONTS } from './ui';
-import { effectiveAptitude, type Crew, type CrewMember } from '../state/Crew';
+import { effectiveAptitude, isDown, type Crew, type CrewMember } from '../state/Crew';
 import type { Ship, SlotRef } from '../state/Ship';
 
 /** Colores con los que se lee una aptitud de un vistazo. */
@@ -637,8 +637,9 @@ export class CrewBoard {
 
 	private drawReserve() {
 		const { ship, crew, reserve } = this.options;
+		const unassigned = ship.unassigned(crew);
 
-		ship.unassigned(crew).forEach((member, index) => {
+		unassigned.forEach((member, index) => {
 			const x = this.reserveX(index);
 			const selected = member.id === this.selectedMemberId;
 			const locked = this.locked(member.id);
@@ -663,6 +664,26 @@ export class CrewBoard {
 				color: selected ? '#ffffff' : '#8290b3',
 			}).setOrigin(0.5);
 		});
+
+		// Quien quedó fuera de combate se sigue viendo, apagado, al final de la
+		// fila: si desapareciera, la enfermería lo devolvería a la reserva sin que
+		// se supiera de dónde salió. No se lo puede levantar: esos índices quedan
+		// fuera de `unassigned`, así que tocarlos no selecciona a nadie, y el foco
+		// del teclado no llega hasta acá.
+		crew
+			.all()
+			.filter(isDown)
+			.forEach((member, offset) => {
+				const x = this.reserveX(unassigned.length + offset);
+				drawPiece(this.stateGraphics, x, reserve.y - 6, reserve.size, member.type, 0.2);
+				this.drawWounds(x, reserve.y - 6, reserve.size, member.wounds);
+
+				this.addText(x, reserve.y + reserve.size / 2 + 10, i18n.t(PIECES[member.type].nameKey), {
+					fontFamily: FONTS.mono,
+					fontSize: '10px',
+					color: '#4a5578',
+				}).setOrigin(0.5);
+			});
 	}
 
 	/** Corchetes en las esquinas: marcan sin tapar lo que hay adentro. */

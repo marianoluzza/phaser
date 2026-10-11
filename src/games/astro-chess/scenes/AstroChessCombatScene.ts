@@ -10,7 +10,7 @@ import { type PlanTransform } from '../objects/shipRenderer';
 import { fill, formatEntry } from '../objects/text';
 import { addButton, floatText, FONTS, type Button } from '../objects/ui';
 import { ASTRO_SCENES } from '../sceneKeys';
-import { Combat, type LogEntry, type RoundForecast } from '../state/Combat';
+import { Combat, type Hit, type LogEntry, type RoundForecast } from '../state/Combat';
 import { Crew } from '../state/Crew';
 import { Ship, type ShipLayout } from '../state/Ship';
 import { Rng } from '../state/rng';
@@ -46,6 +46,8 @@ const INTENT_COLORS: Record<EnemyIntent, string> = {
 	charge: '#ffca4b',
 	shield: '#46d9ff',
 	board: '#ff8a3d',
+	torpedo: '#ff6ad5',
+	radiation: '#d4f542',
 };
 
 const COLORS = {
@@ -538,7 +540,8 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	 *
 	 * Un abordaje marca la sala a la que van. Un disparo que el escudo no
 	 * alcanza a parar, o una carga que el escudo no va a aguantar, marcan los
-	 * escudos: la respuesta está ahí, no en el texto del enemigo.
+	 * escudos; un torpedo que entra marca los motores y una radiación que hiere
+	 * marca la enfermería: la respuesta está ahí, no en el texto del enemigo.
 	 */
 	private alert(): RoomAlert | null {
 		const { combat, forecast } = this;
@@ -546,6 +549,17 @@ export class AstroChessCombatScene extends Phaser.Scene {
 
 		if (combat.intent === 'board' && combat.target) {
 			return { room: combat.target, color: 0xff8a3d, label: i18n.t('astro.intent.board') };
+		}
+
+		const torpedo = forecast.entries.find((entry) => entry.key === 'astro.log.torpedo');
+		const torpedoHull = torpedo?.values?.hull ?? 0;
+		if (torpedoHull > 0) {
+			return { room: 'engines', color: 0xff6ad5, label: fill('astro.alert.torpedo', { hull: torpedoHull }) };
+		}
+
+		if (forecast.entries.some((entry) => entry.key === 'astro.log.radiation')) {
+			const count = forecast.entries.filter((entry) => entry.key === 'astro.log.wounded').length;
+			return { room: 'medbay', color: 0xd4f542, label: fill('astro.alert.radiation', { count }) };
 		}
 
 		const shot = forecast.entries.find((entry) => entry.key === 'astro.log.enemyFires');
@@ -594,6 +608,13 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			},
 		];
 		const entries = forecast.entries;
+		// Abordaje y radiación escriben a quiénes hieren en las líneas siguientes.
+		const woundedAfter = (index: number) =>
+			entries
+				.slice(index + 1)
+				.filter((next) => next.key === 'astro.log.wounded' && next.piece)
+				.map((next) => i18n.t(next.piece!))
+				.join(', ');
 
 		entries.forEach((entry, index) => {
 			const values = entry.values ?? {};
@@ -620,20 +641,30 @@ export class AstroChessCombatScene extends Phaser.Scene {
 				case 'astro.log.enemyShields':
 					lines.push({ text: formatEntry(entry, 'astro.forecast.enemyShield'), color: '#9eacd0' });
 					break;
-				case 'astro.log.boarding': {
-					const wounded = entries
-						.slice(index + 1)
-						.filter((next) => next.key === 'astro.log.wounded' && next.piece)
-						.map((next) => i18n.t(next.piece!));
+				case 'astro.log.boarding':
 					lines.push({
 						text: fill('astro.forecast.boarding', {
 							room: entry.room ? i18n.t(ROOMS[entry.room].nameKey) : '',
-							pieces: wounded.join(', '),
+							pieces: woundedAfter(index),
 						}),
 						color: '#ff8a3d',
 					});
 					break;
-				}
+				case 'astro.log.torpedo':
+					lines.push({
+						text: formatEntry(entry, 'astro.forecast.torpedo'),
+						color: values.hull > 0 ? '#ff6ad5' : '#9eacd0',
+					});
+					break;
+				case 'astro.log.radiation':
+					lines.push({
+						text: fill('astro.forecast.radiation', { pieces: woundedAfter(index) }),
+						color: '#d4f542',
+					});
+					break;
+				case 'astro.log.radiationBlocked':
+					lines.push({ text: i18n.t('astro.forecast.radiationBlocked'), color: '#5ee48a' });
+					break;
 				case 'astro.log.boardingMissed':
 					lines.push({ text: formatEntry(entry, 'astro.forecast.boardingMissed'), color: '#5ee48a' });
 					break;
@@ -807,6 +838,29 @@ export class AstroChessCombatScene extends Phaser.Scene {
 				shown.enemyShield = values.shield;
 				floatText(this, enemyShield.x, enemyShield.y, `${values.shield}`, '#46d9ff');
 				break;
+			case 'astro.log.torpedo': {
+				const engines = this.board.roomCenter('engines');
+				this.tracer({ x: 520, y: ENEMY_CENTER.y }, engines, 0xff6ad5);
+				audioManager.playSfx(this, ASTRO_AUDIO.fire.cacheKey);
+				shown.playerHull = Math.max(0, shown.playerHull - values.hull);
+				if (values.dodged > 0) {
+					this.board.flashRoom('engines', 0x5ee48a);
+					floatText(this, engines.x, engines.y, `−${values.dodged}`, '#5ee48a');
+				}
+				if (values.hull > 0) {
+					this.cameras.main.shake(180, 0.008);
+					audioManager.playSfx(this, ASTRO_AUDIO.hit.cacheKey);
+					floatText(this, playerHull.x, playerHull.y, `−${values.hull}`, '#ff647c');
+				}
+				break;
+			}
+			case 'astro.log.radiation':
+				this.board.flashRoom('medbay', 0xd4f542);
+				break;
+			case 'astro.log.radiationBlocked':
+				this.board.flashRoom('medbay', 0x5ee48a);
+				floatText(this, roomCenter.x, roomCenter.y, i18n.t('astro.float.treated'), '#5ee48a');
+				break;
 			case 'astro.log.boarding':
 				if (entry.room) this.board.flashRoom(entry.room, 0xff8a3d);
 				audioManager.playSfx(this, ASTRO_AUDIO.hit.cacheKey);
@@ -944,7 +998,12 @@ export class AstroChessCombatScene extends Phaser.Scene {
 		}
 		if (!worstHit) return i18n.t('astro.combat.cause.none');
 
-		const key: TranslationKey = worstHit.charged ? 'astro.combat.cause.charged' : 'astro.combat.cause.fire';
+		const causes: Record<Hit['kind'], TranslationKey> = {
+			fire: 'astro.combat.cause.fire',
+			charged: 'astro.combat.cause.charged',
+			torpedo: 'astro.combat.cause.torpedo',
+		};
+		const key = causes[worstHit.kind];
 		return fill(key, { round: worstHit.round, damage: worstHit.damage, hull: worstHit.hull });
 	}
 

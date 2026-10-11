@@ -7,9 +7,9 @@ import type { RoomId } from './rooms';
  * La intención es siempre visible. Ocultarla haría el juego más difícil, no más
  * interesante: sin saber qué viene, repartir la tripulación sería adivinar.
  */
-export type EnemyIntent = 'fire' | 'charge' | 'shield' | 'board';
+export type EnemyIntent = 'fire' | 'charge' | 'shield' | 'board' | 'torpedo' | 'radiation';
 
-export const ENEMY_INTENTS: EnemyIntent[] = ['fire', 'charge', 'shield', 'board'];
+export const ENEMY_INTENTS: EnemyIntent[] = ['fire', 'charge', 'shield', 'board', 'torpedo', 'radiation'];
 
 export type EnemyProfile = {
 	id: string;
@@ -54,7 +54,7 @@ export const RAIDER: EnemyProfile = {
 export type EnemyPlan = { intent: EnemyIntent; target: RoomId | null };
 
 /**
- * Sólo el abordaje anuncia sala, y sólo el abordaje hiere.
+ * Sólo el abordaje anuncia sala, y los disparos nunca hieren.
  *
  * La primera versión hacía que cada disparo que pasara el escudo hiriera
  * también a la sala apuntada. Sonaba bien y arruinaba el juego: cada herida
@@ -65,6 +65,13 @@ export type EnemyPlan = { intent: EnemyIntent; target: RoomId | null };
  * Ahora cada intención tiene su propia respuesta: al disparo se le opone
  * escudo, a la carga se le opone más escudo por una ronda, y al abordaje se le
  * opone vaciar la sala.
+ *
+ * Con sólo esas cuatro, motores y enfermería no respondían a nada y el
+ * comodín de la tripulación tenía dos destinos: escudos o armería. El torpedo
+ * se responde con motores y la radiación con enfermería, así que el puente
+ * reparte movimientos entre cuatro salas en vez de accionar un interruptor.
+ * La radiación hiere, pero no encadena: no depende del escudo, y la sala que
+ * la frena es la misma que cura.
  */
 
 /**
@@ -80,6 +87,9 @@ export function choosePlan(
 		shield: number;
 		charged: boolean;
 		playerDamage: number;
+		/** Capacidad del escudo del jugador, para saber si su disparo pasa. */
+		playerShield: number;
+		enemyDamage: number;
 		occupiedRooms: Array<{ room: RoomId; output: number }>;
 	},
 	roll: (probability: number) => boolean,
@@ -92,7 +102,13 @@ export function choosePlan(
 }
 
 function chooseIntent(
-	state: { shield: number; charged: boolean; playerDamage: number },
+	state: {
+		shield: number;
+		charged: boolean;
+		playerDamage: number;
+		playerShield: number;
+		enemyDamage: number;
+	},
 	roll: (probability: number) => boolean
 ): EnemyIntent {
 	if (state.charged) return 'fire';
@@ -102,7 +118,12 @@ function chooseIntent(
 	// Sin armería enfrente puede tomarse el lujo de cargar el próximo disparo.
 	if (state.playerDamage === 0 && roll(0.7)) return 'charge';
 
-	if (roll(0.3)) return 'board';
+	if (roll(0.25)) return 'board';
+
+	// Contra un escudo que se come casi todo su disparo, busca el camino que lo rodea.
+	if (state.playerShield >= state.enemyDamage - 1 && roll(0.3)) return 'torpedo';
+
+	if (roll(0.2)) return 'radiation';
 
 	return roll(0.3) ? 'charge' : 'fire';
 }
