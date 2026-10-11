@@ -37,4 +37,21 @@ export const COMBAT_TUNING = {
 
 	/** Cuánto multiplica el disparo del enemigo después de cargar. */
 	chargeMultiplier: 2,
+
+	/**
+	 * Torpedo: ignora el escudo y sólo lo achican los motores.
+	 *
+	 * Es exacto, sin tirada de evasión, para que el pronóstico diga cuánto
+	 * entra y mover a alguien a motores tenga un efecto que se ve.
+	 */
+	torpedoDamage: 6,
+
+	/** Daño de torpedo que esquiva cada punto de rendimiento de motores. */
+	torpedoDodgePerPoint: 2,
+
+	/**
+	 * Radiación: hiere a las piezas que más rinden. Cada punto de enfermería
+	 * evita una de estas heridas.
+	 */
+	radiationWounds: 2,
 } as const;

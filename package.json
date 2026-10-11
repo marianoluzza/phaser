@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "shots": "node scripts/screenshots.mjs",
+    "sim:astro": "node scripts/astro-sim.mjs",
     "audio:catalog": "node scripts/generate-audio-catalog.mjs",
     "audio:upload:r2": "node scripts/upload-audio-r2.mjs",
     "deploy:pages": "npm run build && wrangler pages deploy dist --project-name phaser-arcade --branch main",

@@ -23,6 +23,7 @@ npm install
 npm run dev
 npm run build
 npm run shots
+npm run sim:astro
 npm run audio:catalog
 npm run audio:upload:r2
 npm run deploy:pages
@@ -32,6 +33,8 @@ npm run preview
 - `npm run dev` inicia el entorno de desarrollo con recarga automática.
 - `npm run build` valida TypeScript y genera la versión de producción.
 - `npm run shots` recorre el arcade en un Chrome headless y deja capturas.
+- `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
+  para medir el balance.
 - `npm run audio:catalog` reconstruye el catálogo después de agregar audio.
 - `npm run audio:upload:r2` sincroniza los OGG locales con Cloudflare R2.
 - `npm run deploy:pages` compila y publica el arcade en Cloudflare Pages.

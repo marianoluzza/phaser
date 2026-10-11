@@ -113,6 +113,12 @@ Ahora cada intención tiene su propia respuesta:
 | Cargar | Tener más escudo justo esa ronda. |
 | Abordar *(sala)* | Vaciar esa sala, y perder lo que produce por una ronda. |
 | Escudarse | Empujar el daño mientras no ataca. |
+| Torpedo | Motores: rodea el escudo y cada punto de motores le saca 2. |
+| Radiación | Enfermería: hiere a las dos piezas que más rinden y cada punto de enfermería evita una herida. |
+
+Las dos últimas llegaron después (ver más abajo). La radiación hiere, pero no
+reabre la espiral: no depende del escudo, y la sala que la frena es la misma
+que cura.
 
 El abordaje además **barre la sala entera**: hiere a todos los que encuentre.
 Con una sola herida por abordaje, esquivarlo no compensaba perder la producción
@@ -133,15 +139,39 @@ Es el cambio que le da sentido al bucle entero: reaccionar a lo que el enemigo
 anuncia vale entre **14 y 39 puntos de victoria**, y esa ventaja pasa toda por
 el puente.
 
+### El comodín sólo tenía dos destinos
+
+Con cuatro intenciones, la ronda era un interruptor: si el enemigo dispara, el
+peón va a escudos; si no, a la armería. El peón es el comodín natural porque
+rinde ×1 en todo, y las otras piezas tienen una sala obvia. Motores y enfermería
+no respondían a ningún anuncio: servían para estacionar a quien huía de un
+abordaje.
+
+El torpedo y la radiación les dan una respuesta a cada una. Las dos son
+exactas, sin tiradas, así que el pronóstico dice cuánto entra y a quién hiere.
+Con dos movimientos por ronda, ahora importa también *quién* se mueve: el alfil
+frena la radiación entera desde la enfermería, pero deja la armería a medias;
+el peón frena la mitad sin desarmar nada.
+
+El torpedo sale cuando el escudo se come casi todo el disparo enemigo: es el
+camino que lo rodea, y castiga apilar todo en escudos.
+
 ### Dónde quedó el balance
 
-El corsario tiene casco 18 y daño 7. Con la tripulación inicial:
+El corsario tiene casco 18 y daño 7. `npm run sim:astro` juega 1000 combates
+por jugador con la tripulación inicial. El jugador reactivo prueba cada
+combinación de movimientos contra el pronóstico, así que juega casi perfecto:
+un humano queda entre los dos.
 
-| Jugador | Victorias |
-| --- | --- |
-| Reparte bien y no vuelve a tocar nada | ~50 % |
-| Reparte bien y reacciona a cada anuncio | ~89 % |
-| Deja la armería vacía | 0 % |
+| Jugador | Sin torpedo ni radiación | Con torpedo y radiación |
+| --- | --- | --- |
+| Reparte bien y no vuelve a tocar nada | 75 % | 64 % |
+| Reparte bien y reacciona a cada anuncio | 98 % | 97,5 % |
+| Deja la armería vacía | 0 % | 0 % |
+
+Reaccionar pasó a valer 34 puntos en vez de 23. El jugador reactivo tiene
+alguien en motores ante el 81 % de los torpedos y en la enfermería ante el
+92 % de las radiaciones.
 
 Un primer enemigo tiene que ser así: se lo gana prestando atención y se lo puede
 perder por no prestarla.
