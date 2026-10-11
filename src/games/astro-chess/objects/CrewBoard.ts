@@ -3,7 +3,7 @@ import { i18n } from '../../../core/i18n/i18n';
 import { PIECES } from '../constants/pieces';
 import { ROOM_IDS, ROOMS, type RoomId } from '../constants/rooms';
 import { COMBAT_TUNING } from '../constants/tuning';
-import { drawPiece } from './pieceRenderer';
+import { drawPiece, drawWoundMarks } from './pieceRenderer';
 import {
 	drawHull,
 	drawRoomShell,
@@ -604,24 +604,8 @@ export class CrewBoard {
 		}).setOrigin(1, 0);
 	}
 
-	/** Una marca por herida, sobre las que lo sacan de combate: se ve cuánto le queda. */
 	private drawWounds(x: number, y: number, size: number, wounds: number) {
-		if (wounds === 0) return;
-
-		const radius = Math.max(2.5, 3.5 * this.scale);
-		const left = x - size / 2 + radius + 3;
-		const top = y - size / 2 + radius + 3;
-
-		for (let index = 0; index < COMBAT_TUNING.woundsToDrop; index += 1) {
-			const cx = left + index * (radius * 2 + 2);
-			if (index < wounds) {
-				this.stateGraphics.fillStyle(0xff647c, 1);
-				this.stateGraphics.fillCircle(cx, top, radius);
-			} else {
-				this.stateGraphics.lineStyle(1, 0xff647c, 0.7);
-				this.stateGraphics.strokeCircle(cx, top, radius);
-			}
-		}
+		drawWoundMarks(this.stateGraphics, x, y, size, wounds, Math.max(2.5, 3.5 * this.scale));
 	}
 
 	/** Candado chico: esta pieza ya no puede dejar su lugar en esta ronda. */

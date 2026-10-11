@@ -1,10 +1,21 @@
 import type Phaser from 'phaser';
+import type { EnemyIntent } from '../constants/enemies';
 
 export const FONTS = {
 	display: 'Arial Black, Arial, sans-serif',
 	sans: 'Arial, sans-serif',
 	mono: 'Courier New, monospace',
 } as const;
+
+/** Colores de la intención enemiga: el jugador la lee antes que el texto. */
+export const INTENT_COLORS: Record<EnemyIntent, string> = {
+	fire: '#ff647c',
+	charge: '#ffca4b',
+	shield: '#46d9ff',
+	board: '#ff8a3d',
+	torpedo: '#ff6ad5',
+	radiation: '#d4f542',
+};
 
 const BUTTON_STYLES = {
 	primary: { fill: 0x231a4d, hover: 0x33266e, stroke: 0xc66cff, strokeWidth: 2, text: '#ffffff' },

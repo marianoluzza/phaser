@@ -189,6 +189,7 @@ src/
     │   │   └── ui.ts
     │   └── scenes/
     │       ├── AstroChessTitleScene.ts
+    │       ├── AstroChessHelpScene.ts
     │       ├── AstroChessShipScene.ts
     │       └── AstroChessCombatScene.ts
     └── jukebox/

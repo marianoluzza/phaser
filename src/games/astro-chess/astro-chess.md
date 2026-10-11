@@ -12,7 +12,9 @@ combate entero contra el corsario.
 
 - Módulo, claves con prefijo `astro:` y manifiesto en el catálogo, con portada
   propia en el launcher.
-- Pantalla de título que presenta a las seis piezas con su rasgo.
+- Pantalla de título que sólo presenta: jugar, ayuda o volver al arcade.
+- Ayuda en cuatro páginas —la nave, la tripulación, el combate y el enemigo—
+  con ejemplos sobre el plano real (ver [Ayuda](#ayuda)).
 - Plano de la nave con sus cinco salas, sus siete puestos y el damero de
   colores de casilla.
 - Asignación de tripulantes por click, con la aptitud de la pieza elegida
@@ -76,6 +78,30 @@ Algunas decisiones de implementación:
 - **Avisos antes del combate.** Sin nadie en la armería la derrota es segura, así
   que el primer Enter avisa y el segundo confirma. La falta de puente o de
   escudos se avisa sin bloquear.
+
+## Ayuda
+
+El título presentaba las piezas una por una, pero no tenía lugar para el resto:
+qué hace cada sala, cómo es una ronda o qué responder a cada anuncio. La ayuda
+(`astro:help`, tecla H desde el título) lo reparte en cuatro páginas.
+
+| Página | Qué muestra |
+| --- | --- |
+| La nave | El plano con una tripulación de muestra y qué produce cada sala. Pasar el mouse muestra la misma ayuda que en el juego. |
+| Tripulación | Rasgo de cada pieza y su aptitud dibujada sobre un plano chico: ×2 en la armería se lee mejor en la armería. |
+| El combate | La ronda en tres pasos (anuncio, movimientos, pronóstico), las heridas y la condición de victoria. |
+| El enemigo | Cada intención sobre el plano, alternando el anuncio y la respuesta. |
+
+Dos decisiones:
+
+- **Los ejemplos son el juego.** Las páginas de la nave y del enemigo usan el
+  `CrewBoard` real, deshabilitado, y los números de los ejemplos salen de
+  `Ship.output` y de `COMBAT_TUNING`. Los textos de muestra del combate son las
+  mismas traducciones que usa el pronóstico. Si cambia una regla, la ayuda
+  cambia con ella.
+- **Cambiar de página reinicia la escena.** Es la forma más simple de que el
+  plano, sus zonas y sus teclas desaparezcan enteros. La música sigue sonando:
+  sólo se corta al salir de la ayuda.
 
 **El resto de este documento es el plan, no el estado actual.**
 
@@ -407,6 +433,7 @@ src/games/astro-chess/
 │   └── ui.ts                 # Botones y textos flotantes
 └── scenes/
     ├── AstroChessTitleScene.ts
+    ├── AstroChessHelpScene.ts
     ├── AstroChessMapScene.ts
     ├── AstroChessShipScene.ts
     ├── AstroChessCombatScene.ts
@@ -423,6 +450,7 @@ que ya usan `PipeBoard` y `WaterFlow`.
 ```mermaid
 flowchart LR
     Launcher["LauncherScene"] --> Title["astro:title"]
+    Title <--> Help["astro:help"]
     Title --> Map["astro:map"]
     Map --> Combat["astro:combat"]
     Map --> Event["astro:event"]

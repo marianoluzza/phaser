@@ -25,11 +25,25 @@ const FLOWS = {
 
 		await arcade.press('Enter');
 		await arcade.waitForScene('astro:title');
-		await arcade.shot('astro-titulo-rey');
+		await arcade.shot('astro-titulo');
 
-		// La fila de tripulación se recorre con las flechas.
-		await arcade.press('ArrowRight', 3);
-		await arcade.shot('astro-titulo-alfil');
+		// La ayuda: ← → cambia de página, ↑ ↓ elige dentro de la página.
+		await arcade.press('h');
+		await arcade.waitForScene('astro:help');
+		await arcade.shot('astro-ayuda-nave');
+		await arcade.press('ArrowRight');
+		await arcade.press('ArrowDown', 3);
+		await arcade.shot('astro-ayuda-alfil');
+		await arcade.press('ArrowRight');
+		await arcade.shot('astro-ayuda-combate');
+		await arcade.press('ArrowRight');
+		await arcade.press('ArrowDown', 3);
+		await arcade.shot('astro-ayuda-abordaje-anuncio');
+		// El ejemplo alterna solo entre el anuncio y la respuesta.
+		await arcade.page.waitForTimeout(1900);
+		await arcade.shot('astro-ayuda-abordaje-respuesta');
+		await arcade.press('Escape');
+		await arcade.waitForScene('astro:title');
 
 		await arcade.press('Enter');
 		await arcade.waitForScene('astro:ship');
