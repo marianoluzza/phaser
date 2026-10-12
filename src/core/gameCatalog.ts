@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { astroChessGame } from '../games/astro-chess';
 import { jukeboxGame } from '../games/jukebox';
 import { pipesGame } from '../games/pipes';
+import { tanksGame } from '../games/tanks';
 import { tetrisGame } from '../games/tetris';
 import { trucoGame } from '../games/truco';
 import type { TranslationKey } from './i18n/i18n';
@@ -18,7 +19,7 @@ export type GameDefinition = {
 	descriptionKey: TranslationKey;
 	controlsKey: TranslationKey;
 	accentColor: number;
-	coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess';
+	coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks';
 	/** Primera pantalla que se abre al elegir el juego desde el launcher. */
 	entrySceneKey: string;
 	/** Clases de Scene que Phaser debe registrar para ejecutar el juego. */
@@ -36,6 +37,7 @@ export const GAME_CATALOG: GameDefinition[] = [
 	trucoGame,
 	pipesGame,
 	astroChessGame,
+	tanksGame,
 	jukeboxGame,
 ];
 

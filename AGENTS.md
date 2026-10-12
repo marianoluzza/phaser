@@ -6,8 +6,8 @@ cada juego se instala como un módulo independiente con sus propias escenas,
 objetos, reglas y documentación.
 
 Actualmente incluye Tetris, Truco, Pipes, Astro Chess —en construcción, con su
-diseño ya documentado— y Jukebox, una herramienta interna para
-probar la biblioteca de música y efectos.
+diseño ya documentado—, Tanques —al estilo de Battle City— y Jukebox, una
+herramienta interna para probar la biblioteca de música y efectos.
 
 ## Puesta en marcha
 
@@ -192,6 +192,26 @@ src/
     │       ├── AstroChessHelpScene.ts
     │       ├── AstroChessShipScene.ts
     │       └── AstroChessCombatScene.ts
+    ├── tanks/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── tanks.md
+    │   ├── constants/
+    │   │   ├── levels.ts
+    │   │   └── tuning.ts
+    │   ├── state/
+    │   │   ├── Battle.ts
+    │   │   ├── mapGenerator.ts
+    │   │   ├── rng.ts
+    │   │   └── highScore.ts
+    │   ├── objects/
+    │   │   ├── battleRenderer.ts
+    │   │   └── labels.ts
+    │   └── scenes/
+    │       ├── TanksTitleScene.ts
+    │       ├── TanksGameScene.ts
+    │       └── TanksResultScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -241,7 +261,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -497,6 +517,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 - [Diseño técnico y funcionalidades de Tetris](src/games/tetris/tetris.md)
 - [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
 - [Diseño y plan de implementación de Astro Chess](src/games/astro-chess/astro-chess.md)
+- [Diseño técnico y funcionalidades de Tanques](src/games/tanks/tanks.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)
 - [Biblioteca, licencias y procedimiento de audio](public/assets/audio/README.md)
 - [Infraestructura y operación de Cloudflare R2](cloudflare/README.md)

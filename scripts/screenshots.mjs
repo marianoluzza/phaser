@@ -131,6 +131,92 @@ const FLOWS = {
 		await arcade.waitForScene('core:launcher');
 	},
 
+	tanks: async (arcade) => {
+		await arcade.waitForScene('core:launcher');
+		// Tanques es la quinta ficha del catálogo.
+		await arcade.press('ArrowRight', 4);
+		await arcade.shot('launcher-tanques-seleccionado');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:title');
+		// La etapa elegida se recuerda mientras el arcade siga abierto.
+		await arcade.press('ArrowRight', 2);
+		await arcade.shot('tanques-titulo-etapa-3');
+		await arcade.press('ArrowLeft', 2);
+		await arcade.shot('tanques-titulo');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:game');
+		await arcade.shot('tanques-cortina');
+		await arcade.page.waitForTimeout(1600);
+
+		// Se mantiene la flecha para avanzar y se dispara contra los ladrillos.
+		const battle = (expression) =>
+			arcade.page.evaluate(`(() => { const battle = window.arcade.scene.getScene('tanks:game').battle; return ${expression}; })()`);
+		await arcade.page.keyboard.down('ArrowUp');
+		await arcade.page.waitForTimeout(600);
+		await arcade.page.keyboard.up('ArrowUp');
+		await arcade.press('Space');
+		await arcade.page.waitForTimeout(150);
+		await arcade.shot('tanques-disparo');
+		await arcade.page.waitForTimeout(4000);
+		await arcade.shot('tanques-enemigos');
+
+		await arcade.press('p');
+		await arcade.shot('tanques-pausa');
+		await arcade.press('p');
+
+		// Se fuerza el final de la etapa en vez de jugarla entera: lo que importa
+		// acá es la planilla, no la puntería.
+		await battle('(battle.enemyQueue.splice(0), battle.enemies.forEach((tank) => battle.tanks.splice(battle.tanks.indexOf(tank), 1)), battle.kills.basic = 12, battle.kills.fast = 3, battle.score += 1800)');
+		await arcade.waitForScene('tanks:result');
+		await arcade.page.waitForTimeout(1800);
+		await arcade.shot('tanques-etapa-superada');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:game');
+		await arcade.page.waitForTimeout(1800);
+		await arcade.shot('tanques-etapa-2');
+
+		await battle('battle.destroyBase()');
+		await arcade.page.waitForTimeout(1200);
+		await arcade.shot('tanques-game-over');
+		await arcade.waitForScene('tanks:result');
+		await arcade.page.waitForTimeout(1800);
+		await arcade.shot('tanques-cayo-el-aguila');
+
+		await arcade.press('m');
+		await arcade.waitForScene('tanks:title');
+
+		// ALEATORIO va después de la última etapa: desde la 1 se llega yendo a la izquierda.
+		await arcade.press('ArrowLeft');
+		await arcade.shot('tanques-titulo-aleatorio');
+		await arcade.press('n');
+		await arcade.shot('tanques-titulo-otro-mapa');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:game');
+		await arcade.page.waitForTimeout(1800);
+		await arcade.shot('tanques-mapa-aleatorio');
+
+		// Superar la última etapa diseñada pasa a mapas generados, con su semilla en el marcador.
+		await arcade.press('Escape');
+		await arcade.waitForScene('tanks:title');
+		await arcade.press('ArrowLeft');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:game');
+		await battle('(battle.enemyQueue.splice(0), battle.enemies.forEach((tank) => battle.tanks.splice(battle.tanks.indexOf(tank), 1)), true)');
+		await arcade.waitForScene('tanks:result');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tanks:game');
+		await arcade.page.waitForTimeout(1800);
+		await arcade.shot('tanques-etapa-7-generada');
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('tanks:title');
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
+
 	truco: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		// El rival elegido se recuerda: se parte siempre del predeterminado.

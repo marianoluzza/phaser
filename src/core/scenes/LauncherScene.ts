@@ -243,6 +243,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawAstroChessCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'tanks') {
+			this.drawTanksCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -322,6 +326,34 @@ export class LauncherScene extends Phaser.Scene {
 		graphics.fillTriangle(100, 71, 114, 97, 86, 97);
 		graphics.fillStyle(0xffca4b, 1);
 		graphics.fillCircle(204, 85, 11);
+	}
+
+	private drawTanksCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// Un tanque frente a un muro de ladrillos y una bala en camino.
+		const graphics = this.add.graphics();
+		card.add(graphics);
+
+		for (let row = 0; row < 3; row += 1) {
+			for (let column = 0; column < 4; column += 1) {
+				const x = 196 + column * 22 + (row % 2) * 11;
+				graphics.fillStyle(0xb4582a, 1);
+				graphics.fillRect(x, 50 + row * 22, 20, 20);
+				graphics.fillStyle(0xd8794a, 1);
+				graphics.fillRect(x, 50 + row * 22, 20, 3);
+			}
+		}
+
+		graphics.fillStyle(0x8a6514, 1);
+		graphics.fillRect(40, 54, 52, 16);
+		graphics.fillRect(40, 100, 52, 16);
+		graphics.fillStyle(accentColor, 1);
+		graphics.fillRect(46, 66, 42, 38);
+		graphics.fillStyle(0xffe49a, 1);
+		graphics.fillCircle(67, 85, 12);
+		graphics.fillRect(67, 81, 54, 8);
+
+		graphics.fillStyle(0xfff1c2, 1);
+		graphics.fillCircle(152, 85, 5);
 	}
 
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {
