@@ -12,14 +12,44 @@ import { CORE_SCENES } from '../sceneKeys';
  * una pantalla. Al iniciar otra escena con `scene.start`, Phaser apaga ésta y
  * crea/activa la elegida.
  */
+const CARD_WIDTH = 330;
+const CARD_HEIGHT = 285;
+const CAROUSEL_X = 400;
+const CAROUSEL_Y = 315;
+const DOTS_Y = 492;
+const DOT_SPACING = 18;
+const SLIDE_DURATION = 180;
+
+/**
+ * Ranuras del carrusel según la distancia a la ficha elegida. La última está
+ * fuera de la pantalla: ahí esperan las fichas que no se ven y por ahí entran
+ * las que dan la vuelta al otro extremo de la lista.
+ *
+ * Las laterales se apagan con un velo opaco y no con transparencia: una ficha
+ * translúcida dejaría ver a la que tiene detrás.
+ */
+const CAROUSEL_SLOTS = [
+	{ x: 0, scale: 1, dim: 0 },
+	{ x: 255, scale: 0.62, dim: 0.5 },
+	{ x: 395, scale: 0.45, dim: 0.75 },
+	{ x: 560, scale: 0.35, dim: 0.75 },
+];
+const HIDDEN_SLOT = CAROUSEL_SLOTS.length - 1;
+
 export class LauncherScene extends Phaser.Scene {
-	/** La selección permitirá navegar con teclado cuando haya más juegos. */
+	/** Índice en `GAME_CATALOG` de la ficha que ocupa el centro del carrusel. */
 	private selectedGameIndex = 0;
 
 	private leftKey!: Phaser.Input.Keyboard.Key;
 	private rightKey!: Phaser.Input.Keyboard.Key;
 	private enterKey!: Phaser.Input.Keyboard.Key;
 	private gameCards: Phaser.GameObjects.Container[] = [];
+	private cardSurfaces: Phaser.GameObjects.Rectangle[] = [];
+	private cardVeils: Phaser.GameObjects.Rectangle[] = [];
+	/** Distancia de cada ficha al centro en el último dibujo; detecta las que dan la vuelta. */
+	private cardOffsets: number[] = [];
+	private pageDots: Phaser.GameObjects.Arc[] = [];
+	private lastWheelAt = 0;
 
 	constructor() {
 		super(CORE_SCENES.LAUNCHER);
@@ -33,12 +63,19 @@ export class LauncherScene extends Phaser.Scene {
 	create() {
 		this.selectedGameIndex = 0;
 		this.gameCards = [];
+		this.cardSurfaces = [];
+		this.cardVeils = [];
+		this.cardOffsets = [];
+		this.pageDots = [];
+		this.lastWheelAt = 0;
 
 		this.drawBackground();
 		this.drawHeader();
 		this.createGameCards();
+		this.createPageDots();
 		this.drawFooter();
 		this.configureKeyboard();
+		this.configureWheel();
 		this.refreshSelection();
 		audioManager.playMusic(this, CORE_AUDIO.launcherMusic.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
@@ -142,61 +179,55 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	/**
-	 * Ubicación de las fichas según cuántos juegos haya instalados.
-	 *
-	 * Con pocos juegos entran en una fila; a partir del cuarto se arma una
-	 * grilla y las fichas se achican. Cada fila se centra por separado para que
-	 * la última, aunque esté incompleta, no quede pegada al margen izquierdo.
+	 * Distancia circular de una ficha a la elegida: negativa a la izquierda,
+	 * positiva a la derecha. La lista no tiene extremos, así que siempre se
+	 * toma el camino más corto alrededor del círculo.
 	 */
-	private getCardLayout() {
+	private getCircularOffset(index: number, from = this.selectedGameIndex) {
 		const count = GAME_CATALOG.length;
-		const columns = Math.min(count, 3);
-		const rows = Math.ceil(count / columns);
-		const scale = count <= 2 ? 1 : rows > 1 ? 0.6 : 0.68;
-
-		return {
-			columns,
-			rows,
-			scale,
-			cardWidth: 330 * scale,
-			cardHeight: 285 * scale,
-			columnGap: 22,
-			rowGap: 16,
-			startY: rows > 1 ? 150 : 185,
-		};
+		const offset = (index - from + count) % count;
+		return offset > count / 2 ? offset - count : offset;
 	}
 
-	private getCardPosition(index: number) {
-		const layout = this.getCardLayout();
-		const row = Math.floor(index / layout.columns);
-		const cardsInRow = Math.min(layout.columns, GAME_CATALOG.length - row * layout.columns);
-		const rowWidth = cardsInRow * layout.cardWidth + (cardsInRow - 1) * layout.columnGap;
-		const columnInRow = index % layout.columns;
+	private getSlotTransform(offset: number) {
+		const distance = Math.min(Math.abs(offset), HIDDEN_SLOT);
+		const slot = CAROUSEL_SLOTS[distance];
 
 		return {
-			x: (800 - rowWidth) / 2 + columnInRow * (layout.cardWidth + layout.columnGap),
-			y: layout.startY + row * (layout.cardHeight + layout.rowGap),
-			scale: layout.scale,
+			x: CAROUSEL_X + Math.sign(offset) * slot.x,
+			y: CAROUSEL_Y,
+			scale: slot.scale,
+			dim: slot.dim,
+			alpha: distance < HIDDEN_SLOT ? 1 : 0,
+			depth: 10 - distance,
+			visible: distance < HIDDEN_SLOT,
 		};
 	}
 
 	private createGameCard(game: GameDefinition, index: number) {
-		const { x, y, scale } = this.getCardPosition(index);
-		const card = this.add.container(x, y).setScale(scale);
+		// El contenido se corre medio ancho y medio alto para que la ficha se
+		// mueva y escale desde su centro, como pide el carrusel.
+		const card = this.add.container(CAROUSEL_X, CAROUSEL_Y);
+		const content = this.add.container(-CARD_WIDTH / 2, -CARD_HEIGHT / 2);
+		card.add(content);
 
-		const shadow = this.add.rectangle(8, 10, 330, 285, 0x000000, 0.35)
+		const shadow = this.add.rectangle(8, 10, CARD_WIDTH, CARD_HEIGHT, 0x000000, 0.35)
 			.setOrigin(0);
-		const surface = this.add.rectangle(0, 0, 330, 285, 0x111a31, 1)
+		const surface = this.add.rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT, 0x111a31, 1)
 			.setOrigin(0)
 			.setStrokeStyle(2, 0x34486f);
+		this.cardSurfaces.push(surface);
 
 		// La zona interactiva recibe eventos del mouse aunque sus hijos sean texto.
+		// Una ficha lateral primero viene al centro; recién la del centro se juega.
 		surface.setInteractive({ useHandCursor: true });
-		surface.on('pointerover', () => {
-			this.selectedGameIndex = index;
-			this.refreshSelection();
+		surface.on('pointerdown', () => {
+			if (index === this.selectedGameIndex) {
+				this.launchGame(game);
+			} else {
+				this.selectGame(index);
+			}
 		});
-		surface.on('pointerdown', () => this.launchGame(game));
 
 		const cover = this.add.rectangle(18, 18, 294, 132, 0x09101f).setOrigin(0);
 		const title = this.add.text(24, 170, i18n.t(game.titleKey), {
@@ -216,10 +247,41 @@ export class LauncherScene extends Phaser.Scene {
 			color: '#64759f',
 		});
 
-		card.add([shadow, surface, cover, title, description, controls]);
-		this.drawGameCover(card, game.coverType, game.accentColor);
+		content.add([shadow, surface, cover, title, description, controls]);
+		this.drawGameCover(content, game.coverType, game.accentColor);
+
+		const veil = this.add.rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT, 0x080d1a, 0).setOrigin(0);
+		content.add(veil);
+		this.cardVeils.push(veil);
 
 		return card;
+	}
+
+	/** Un punto por juego bajo el carrusel, con flechas a los costados. */
+	private createPageDots() {
+		const count = GAME_CATALOG.length;
+		const rowWidth = (count - 1) * DOT_SPACING;
+		const startX = CAROUSEL_X - rowWidth / 2;
+
+		GAME_CATALOG.forEach((_game, index) => {
+			const x = startX + index * DOT_SPACING;
+			this.pageDots.push(this.add.circle(x, DOTS_Y, 4, 0x34486f));
+			this.add.zone(x, DOTS_Y, DOT_SPACING, DOT_SPACING)
+				.setInteractive({ useHandCursor: true })
+				.on('pointerdown', () => this.selectGame(index));
+		});
+
+		this.createArrow(startX - 30, -1);
+		this.createArrow(startX + rowWidth + 30, 1);
+	}
+
+	private createArrow(x: number, direction: -1 | 1) {
+		const tip = 7 * direction;
+		this.add.triangle(x, DOTS_Y, -tip / 2, -7, tip / 2, 0, -tip / 2, 7, 0x7f91bd)
+			.setOrigin(0);
+		this.add.zone(x, DOTS_Y, 28, 28)
+			.setInteractive({ useHandCursor: true })
+			.on('pointerdown', () => this.moveSelection(direction));
 	}
 
 	private drawGameCover(
@@ -365,7 +427,7 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	private drawFooter() {
-		// El pie va debajo de la última fila de fichas, incluso con grilla.
+		// El pie va debajo del carrusel y de sus puntos.
 		this.add.text(70, 522, i18n.t('launcher.chooseGame'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '13px',
@@ -386,20 +448,84 @@ export class LauncherScene extends Phaser.Scene {
 		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 	}
 
+	private configureWheel() {
+		// Un trackpad dispara decenas de eventos por gesto: se toma uno por vez.
+		this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _over: unknown, deltaX: number, deltaY: number) => {
+			const delta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+			if (delta === 0 || this.time.now - this.lastWheelAt < SLIDE_DURATION) {
+				return;
+			}
+			this.lastWheelAt = this.time.now;
+			this.moveSelection(delta > 0 ? 1 : -1);
+		});
+	}
+
 	private moveSelection(direction: -1 | 1) {
 		// El módulo permite que al pasar el último juego volvamos al primero.
 		const gameCount = GAME_CATALOG.length;
-		this.selectedGameIndex = (this.selectedGameIndex + direction + gameCount) % gameCount;
-		this.refreshSelection();
+		this.selectGame((this.selectedGameIndex + direction + gameCount) % gameCount);
 	}
 
-	private refreshSelection() {
-		const baseScale = this.getCardLayout().scale;
+	private selectGame(index: number) {
+		if (index === this.selectedGameIndex) {
+			return;
+		}
+		// Cuánto gira el carrusel, por el camino más corto.
+		const shift = this.getCircularOffset(index);
+		this.selectedGameIndex = index;
+		this.refreshSelection(shift);
+	}
+
+	/**
+	 * Lleva cada ficha a su ranura. Sin `shift` (el primer dibujo) se ubican de
+	 * golpe; con `shift` se deslizan. Una ficha que da la vuelta al círculo
+	 * cruzaría la pantalla de punta a punta, así que se la pone fuera de vista
+	 * del lado donde termina y entra desde ahí.
+	 */
+	private refreshSelection(shift?: number) {
 		this.gameCards.forEach((card, index) => {
-			const surface = card.list[1] as Phaser.GameObjects.Rectangle;
+			const veil = this.cardVeils[index];
+			const offset = this.getCircularOffset(index);
+			const previous = this.cardOffsets[index];
+			const slot = this.getSlotTransform(offset);
+			this.cardOffsets[index] = offset;
+
+			card.setDepth(slot.depth);
+			this.cardSurfaces[index].setStrokeStyle(2, offset === 0 ? 0x46d9ff : 0x34486f);
+			this.tweens.killTweensOf([card, veil]);
+
+			if (shift === undefined) {
+				card.setPosition(slot.x, slot.y).setScale(slot.scale).setAlpha(slot.alpha).setVisible(slot.visible);
+				veil.setFillStyle(0x080d1a, slot.dim);
+				return;
+			}
+
+			if (previous - shift !== offset) {
+				const entry = this.getSlotTransform(Math.sign(offset) * HIDDEN_SLOT);
+				card.setPosition(entry.x, entry.y).setScale(entry.scale).setAlpha(0);
+			}
+
+			card.setVisible(true);
+			this.tweens.add({
+				targets: card,
+				x: slot.x,
+				scale: slot.scale,
+				alpha: slot.alpha,
+				duration: SLIDE_DURATION,
+				ease: 'Cubic.Out',
+				onComplete: () => card.setVisible(slot.visible),
+			});
+			this.tweens.add({
+				targets: veil,
+				fillAlpha: slot.dim,
+				duration: SLIDE_DURATION,
+				ease: 'Cubic.Out',
+			});
+		});
+
+		this.pageDots.forEach((dot, index) => {
 			const selected = index === this.selectedGameIndex;
-			surface.setStrokeStyle(2, selected ? 0x46d9ff : 0x34486f);
-			card.setScale(selected ? baseScale * 1.02 : baseScale);
+			dot.setRadius(selected ? 5 : 4).setFillStyle(selected ? 0x46d9ff : 0x34486f);
 		});
 	}
 
