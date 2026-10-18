@@ -1,11 +1,12 @@
 import { getEnvidoAcceptedPoints } from '../rules';
-import { estimateTrucoOdds, sortByPower, strongest, weakest, weakestThatBeats } from './handStrength';
+import { estimateTrucoOdds, sortByPower, strongest, weakest, weakestThatBeats, winsEnvido } from './handStrength';
 import type { TrucoAiProfile } from './types';
 
 /**
  * Perfil intermedio: conoce el valor de las cartas y juega derecho.
  * Gana cada baza con la carta más barata posible, canta y acepta sólo con
- * buenas manos y nunca miente.
+ * buenas manos y nunca miente. Tampoco sospecha: se cree el tanto que declara
+ * el jugador y lo usa para adivinar sus cartas.
  */
 export const pibeAi: TrucoAiProfile = {
 	id: 'pibe',
@@ -18,8 +19,9 @@ export const pibeAi: TrucoAiProfile = {
 		if (playedTricks.length === 0 && hand.length === 3) return sortByPower(hand)[1];
 		return strongest(hand);
 	},
-	decideCallTruco: (context) => estimateTrucoOdds(context) >= 0.7,
-	decideTruco: (context) => estimateTrucoOdds(context) >= 0.4 ? 'accept' : 'reject',
+	// Se cree todo lo que el jugador dijo del envido.
+	decideCallTruco: (context) => estimateTrucoOdds(context, 1) >= 0.7,
+	decideTruco: (context) => estimateTrucoOdds(context, 1) >= 0.4 ? 'accept' : 'reject',
 	decideEnvido: ({ chain, raises, envidoPoints }) => {
 		if (envidoPoints >= 31 && raises.includes('realEnvido')) return 'realEnvido';
 		if (envidoPoints >= 30 && raises.includes('envido')) return 'envido';
@@ -34,4 +36,6 @@ export const pibeAi: TrucoAiProfile = {
 		if (envidoPoints >= 28) return 'envido';
 		return null;
 	},
+	// Dice la verdad o "son buenas": nunca muestra un tanto que pierde.
+	decideDeclareEnvido: (context) => winsEnvido(context, context.rivalPoints) ? context.envidoPoints : 'concede',
 };

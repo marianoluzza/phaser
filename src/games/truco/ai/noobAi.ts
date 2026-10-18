@@ -27,4 +27,6 @@ export const noobAi: TrucoAiProfile = {
 		if (random() >= 0.1) return null;
 		return ENVIDO_CALLS[Math.min(ENVIDO_CALLS.length - 1, Math.floor(random() * ENVIDO_CALLS.length))];
 	},
+	// Canta siempre su tanto, aunque pierda: no sabe que eso muestra sus cartas.
+	decideDeclareEnvido: ({ envidoPoints }) => envidoPoints,
 };

@@ -335,6 +335,83 @@ const FLOWS = {
 		await arcade.waitForScene('truco:game');
 		await arcade.shot('truco-mesa-viejo');
 
+		// Un solo foco para cartas y cantos: dos `←` desde la carta del medio
+		// pasan por la primera y entran a la grilla.
+		await arcade.press('ArrowLeft', 2);
+		await arcade.shot('truco-foco-cantos');
+
+		// `A` vuelve a la primera carta y Enter la juega. La tecla se suelta a mano
+		// para capturar la carta en pleno vuelo; después, al llegar.
+		await arcade.press('a');
+		await arcade.page.keyboard.press('Enter', { delay: 40 });
+		await arcade.page.waitForTimeout(60);
+		await arcade.shot('truco-carta-en-vuelo');
+		await arcade.page.waitForTimeout(1200);
+		await arcade.shot('truco-baza-jugada');
+
+		// Con un truco por responder no hay foco: `←` entra a la grilla por la
+		// derecha y `→`, sin cartas jugables, da la vuelta y entra por la izquierda.
+		const setTrucoPending = (pending) => arcade.page.evaluate((pending) => {
+			const scene = window.arcade.scene.getScene('truco:game');
+			scene.pendingTruco = pending ? { caller: 'ai', value: 2 } : undefined;
+			scene.focus.focus(null);
+			scene.renderState();
+		}, pending);
+		await setTrucoPending(true);
+		await arcade.shot('truco-responder');
+		await arcade.press('ArrowLeft');
+		await arcade.shot('truco-responder-izquierda');
+		await setTrucoPending(true);
+		await arcade.press('ArrowRight');
+		await arcade.shot('truco-responder-derecha');
+		await setTrucoPending(false);
+
+		// Los tantos se dicen en orden: con la IA de mano, ella declara primero y
+		// el jugador puede contestar "son buenas" (`B`) sin mostrar el suyo.
+		const startDeclarations = (playerIsMano) => arcade.page.evaluate((playerIsMano) => {
+			const scene = window.arcade.scene.getScene('truco:game');
+			scene.playerIsMano = playerIsMano;
+			scene.envidoResolved = false;
+			scene.aiDeclaredEnvido = null;
+			scene.envidoChain = ['envido'];
+			scene.envidoAwaiting = 'player';
+			scene.acceptEnvido();
+			return window.arcade.scene.getScene('truco:game').declaringEnvido;
+		}, playerIsMano);
+		if (!await startDeclarations(false)) throw new Error('El cuadro de tantos no se abrió.');
+		await arcade.shot('truco-tantos-ia-mano');
+		await arcade.press('b');
+		await arcade.shot('truco-son-buenas');
+		// Siendo mano, el jugador declara primero y la IA contesta.
+		if (!await startDeclarations(true)) throw new Error('El cuadro de tantos no se abrió.');
+		await arcade.press('3', 2);
+		await arcade.press('Enter');
+		await arcade.shot('truco-tantos-jugador-mano');
+
+		// El anotador y el registro sólo se llenan jugando: se fuerza un tanteador
+		// que cruce a las buenas y algunos cantos, incluido uno que no entra en un renglón.
+		await arcade.page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('truco:game');
+			scene.playerScore = 17;
+			scene.aiScore = 8;
+			scene.addDialogue('player', 'ENVIDO');
+			scene.addDialogue('ai', 'REAL ENVIDO');
+			scene.addDialogue('player', 'QUIERO');
+			scene.addDialogue('player', '27');
+			scene.addDialogue('ai', '31');
+			scene.addDialogue(null, 'IA VIEJO ganó el envido · +5');
+			scene.addDialogue(null, 'Ingresá un tanto válido entre 0 y 33.');
+			// Dos bazas sobre la mesa: una ganada por la IA y una parda, con los cuatro palos.
+			const card = (value, suit) => ({ id: `${value}-${suit}`, value, suit, power: 0 });
+			scene.playedTricks = [
+				[{ card: card(1, 'espadas'), owner: 'ai', outcome: 'won' }, { card: card(7, 'oros'), owner: 'player', outcome: 'lost' }],
+				[{ card: card(3, 'copas'), owner: 'ai', outcome: 'tie' }, { card: card(3, 'bastos'), owner: 'player', outcome: 'tie' }],
+			];
+			scene.renderState();
+		});
+		await arcade.page.waitForTimeout(2500);
+		await arcade.shot('truco-anotador');
+
 		await arcade.press('Escape');
 		await arcade.waitForScene('core:launcher');
 	},

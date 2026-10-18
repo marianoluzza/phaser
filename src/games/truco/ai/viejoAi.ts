@@ -1,19 +1,37 @@
 import { getEnvidoAcceptedPoints, TRUCO_TARGET_SCORE } from '../rules';
-import { estimateTrucoOdds, sortByPower, strongest, tieWith, weakest, weakestThatBeats } from './handStrength';
+import { estimateTrucoOdds, sortByPower, strongest, tieWith, weakest, weakestThatBeats, winsEnvido } from './handStrength';
 import type { AiTableView, TrucoAiProfile } from './types';
 
 const TRUCO_BLUFF_CHANCE = 0.08;
 const ENVIDO_BLUFF_CHANCE = 0.08;
+/** Con el envido perdido, a veces canta otro tanto en vez de "son buenas". */
+const ENVIDO_MISLEAD_CHANCE = 0.3;
+/** Cuánto le cree a un tanto que perdió: el que lo dijo pudo querer despistar, como él. */
+const LOSING_CLUE_TRUST = 0.5;
+/** Tantos que alguien puede tener: sin pareja, de 0 a 7; con pareja, de 20 a 33. */
+const POSSIBLE_ENVIDO = [...Array.from({ length: 8 }, (_, points) => points), ...Array.from({ length: 14 }, (_, index) => 20 + index)];
 
 /** Los empates de envido favorecen a la mano: vale como un tanto más. */
 function effectiveEnvido({ envidoPoints, isMano }: AiTableView) {
 	return envidoPoints + (isMano ? 1 : 0);
 }
 
+function trucoOdds(view: AiTableView) {
+	const clue = view.opponentEnvido;
+	return estimateTrucoOdds(view, clue?.kind === 'declared' && !clue.won ? LOSING_CLUE_TRUST : 1);
+}
+
+/** Un tanto creíble, distinto del suyo y que igual pierde: despista sin regalar el envido. */
+function misleadingEnvido({ envidoPoints, random }: AiTableView, rivalPoints: number) {
+	const options = POSSIBLE_ENVIDO.filter((points) => points < rivalPoints && points !== envidoPoints);
+	return options.length > 0 ? options[Math.min(options.length - 1, Math.floor(random() * options.length))] : null;
+}
+
 /**
  * Perfil difícil: el que se sienta en el bar desde antes de que abrieras.
  * Juega las bazas según cómo viene la mano, mira el puntaje antes de cantar o
- * aceptar, sube el truco cuando la tiene y de vez en cuando miente.
+ * aceptar, sube el truco cuando la tiene y de vez en cuando miente. No
+ * muestra un tanto que pierde y desconfía del que le muestran perdido.
  */
 export const viejoAi: TrucoAiProfile = {
 	id: 'viejo',
@@ -40,12 +58,12 @@ export const viejoAi: TrucoAiProfile = {
 		return strongest(hand);
 	},
 	decideCallTruco: (context) => {
-		const odds = estimateTrucoOdds(context);
+		const odds = trucoOdds(context);
 		if (odds >= 0.65) return true;
 		return odds < 0.35 && context.random() < TRUCO_BLUFF_CHANCE;
 	},
 	decideTruco: (context) => {
-		const odds = estimateTrucoOdds(context);
+		const odds = trucoOdds(context);
 		const { value, score } = context;
 		if (value < 4 && odds >= 0.75) return 'raise';
 		// Si el "no quiero" le da la partida al rival, no hay nada que perder.
@@ -77,5 +95,12 @@ export const viejoAi: TrucoAiProfile = {
 		if (points >= 30) return 'realEnvido';
 		if (points >= 27) return 'envido';
 		return random() < ENVIDO_BLUFF_CHANCE ? 'envido' : null;
+	},
+	// Muestra el tanto sólo si gana; perdido, "son buenas" o un número falso.
+	decideDeclareEnvido: (context) => {
+		const { envidoPoints, rivalPoints, random } = context;
+		if (rivalPoints === null || winsEnvido(context, rivalPoints)) return envidoPoints;
+		if (random() < ENVIDO_MISLEAD_CHANCE) return misleadingEnvido(context, rivalPoints) ?? 'concede';
+		return 'concede';
 	},
 };
