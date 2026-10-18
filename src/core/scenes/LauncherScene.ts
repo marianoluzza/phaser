@@ -309,6 +309,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawTanksCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'traffic') {
+			this.drawTrafficCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -416,6 +420,48 @@ export class LauncherScene extends Phaser.Scene {
 
 		graphics.fillStyle(0xfff1c2, 1);
 		graphics.fillCircle(152, 85, 5);
+	}
+
+	private drawTrafficCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// Un cruce visto desde arriba, un semáforo en verde y dos coches por cruzarse.
+		const graphics = this.add.graphics();
+		card.add(graphics);
+
+		graphics.fillStyle(0x343944, 1);
+		graphics.fillRect(18, 62, 294, 46);
+		graphics.fillRect(118, 18, 46, 132);
+		graphics.fillStyle(0xe8ebf2, 0.8);
+		for (let x = 24; x < 306; x += 22) {
+			if (x + 12 < 116 || x > 166) graphics.fillRect(x, 84, 12, 2);
+		}
+		for (let y = 22; y < 148; y += 22) {
+			if (y + 12 < 60 || y > 110) graphics.fillRect(140, y, 2, 12);
+		}
+
+		// Coches del color de su destino, con la letra en el techo.
+		graphics.fillStyle(0x3d8bff, 1);
+		graphics.fillRoundedRect(58, 88, 36, 18, 5);
+		graphics.fillStyle(0xffc93c, 1);
+		graphics.fillRoundedRect(144, 30, 18, 36, 5);
+		graphics.fillStyle(0x1c2533, 1);
+		graphics.fillRect(84, 91, 5, 12);
+		graphics.fillRect(147, 56, 12, 5);
+		graphics.fillStyle(0xffa21f, 1);
+		graphics.fillCircle(92, 104, 3);
+		graphics.fillCircle(60, 104, 3);
+
+		graphics.fillStyle(0x14171f, 1);
+		graphics.fillRoundedRect(214, 26, 30, 64, 7);
+		graphics.lineStyle(2, 0x2c313d, 1);
+		graphics.strokeRoundedRect(214, 26, 30, 64, 7);
+		graphics.fillStyle(0x3a1717, 1);
+		graphics.fillCircle(229, 43, 10);
+		graphics.fillStyle(accentColor, 0.25);
+		graphics.fillCircle(229, 73, 17);
+		graphics.fillStyle(accentColor, 1);
+		graphics.fillCircle(229, 73, 10);
+		graphics.fillStyle(accentColor, 1);
+		graphics.fillRect(118, 58, 22, 4);
 	}
 
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {

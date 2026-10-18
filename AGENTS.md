@@ -6,8 +6,9 @@ cada juego se instala como un módulo independiente con sus propias escenas,
 objetos, reglas y documentación.
 
 Actualmente incluye Tetris, Truco, Pipes, Astro Chess —en construcción, con su
-diseño ya documentado—, Tanques —al estilo de Battle City— y Jukebox, una
-herramienta interna para probar la biblioteca de música y efectos.
+diseño ya documentado—, Tanques —al estilo de Battle City—, Semáforos —un cruce
+céntrico con los semáforos a mano— y Jukebox, una herramienta interna para
+probar la biblioteca de música y efectos.
 
 ## Puesta en marcha
 
@@ -24,6 +25,7 @@ npm run dev
 npm run build
 npm run shots
 npm run sim:astro
+npm run sim:traffic
 npm run audio:catalog
 npm run audio:upload:r2
 npm run deploy:pages
@@ -35,6 +37,8 @@ npm run preview
 - `npm run shots` recorre el arcade en un Chrome headless y deja capturas.
 - `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
   para medir el balance.
+- `npm run sim:traffic` juega cientos de partidas de Semáforos con jugadores
+  automáticos y mide duración, choques e impaciencias.
 - `npm run audio:catalog` reconstruye el catálogo después de agregar audio.
 - `npm run audio:upload:r2` sincroniza los OGG locales con Cloudflare R2.
 - `npm run deploy:pages` compila y publica el arcade en Cloudflare Pages.
@@ -212,6 +216,28 @@ src/
     │       ├── TanksTitleScene.ts
     │       ├── TanksGameScene.ts
     │       └── TanksResultScene.ts
+    ├── traffic/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── traffic.md
+    │   ├── constants/
+    │   │   ├── layouts.ts
+    │   │   └── tuning.ts
+    │   ├── state/
+    │   │   ├── routes.ts
+    │   │   ├── Traffic.ts
+    │   │   └── highScore.ts
+    │   ├── objects/
+    │   │   ├── cityRenderer.ts
+    │   │   ├── lightRenderer.ts
+    │   │   ├── carRenderer.ts
+    │   │   ├── effects.ts
+    │   │   └── labels.ts
+    │   └── scenes/
+    │       ├── TrafficTitleScene.ts
+    │       ├── TrafficGameScene.ts
+    │       └── TrafficGameOverScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -261,7 +287,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -518,6 +544,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 - [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
 - [Diseño y plan de implementación de Astro Chess](src/games/astro-chess/astro-chess.md)
 - [Diseño técnico y funcionalidades de Tanques](src/games/tanks/tanks.md)
+- [Diseño técnico y funcionalidades de Semáforos](src/games/traffic/traffic.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)
 - [Biblioteca, licencias y procedimiento de audio](public/assets/audio/README.md)
 - [Infraestructura y operación de Cloudflare R2](cloudflare/README.md)

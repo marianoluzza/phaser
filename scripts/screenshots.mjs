@@ -217,6 +217,92 @@ const FLOWS = {
 		await arcade.waitForScene('core:launcher');
 	},
 
+	traffic: async (arcade) => {
+		await arcade.waitForScene('core:launcher');
+		// Semáforos es la sexta ficha del catálogo.
+		await arcade.press('ArrowRight', 5);
+		await arcade.shot('launcher-semaforos-seleccionado');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('traffic:title');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('semaforos-titulo');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('traffic:game');
+		const traffic = (expression) =>
+			arcade.page.evaluate(`(() => { const traffic = window.arcade.scene.getScene('traffic:game').traffic; return ${expression}; })()`);
+		/** Espera a que la simulación cumpla la condición; los coches salen al azar. */
+		const until = async (expression, timeout = 30000) => {
+			const start = Date.now();
+			while (!(await traffic(expression))) {
+				if (Date.now() - start > timeout) throw new Error(`No se cumplió: ${expression}`);
+				await arcade.page.waitForTimeout(40);
+			}
+		};
+
+		// Todo arranca en rojo: se forman colas y aparecen las barras de paciencia.
+		await arcade.page.waitForTimeout(4500);
+		await arcade.shot('semaforos-colas-en-rojo');
+
+		// Norte y sur en verde con el teclado; el puntero sobre el del este resalta su carril.
+		await arcade.press('ArrowUp');
+		await arcade.press('ArrowDown');
+		await arcade.move(489, 214);
+		await arcade.page.waitForTimeout(500);
+		await arcade.shot('semaforos-norte-sur-verde');
+
+		// Con todo en verde el choque llega solo.
+		await arcade.click(489, 214);
+		await arcade.press('ArrowLeft');
+		await until('traffic.stats.crashes > 0');
+		await arcade.page.waitForTimeout(120);
+		await arcade.shot('semaforos-choque');
+
+		// Todo en rojo hasta que alguien se canse de esperar.
+		await traffic('(traffic.lightIds.forEach((id) => traffic.setLight(id, "red")), traffic.lives = 3, true)');
+		await until('traffic.stats.impatient > 0', 40000);
+		await arcade.page.waitForTimeout(150);
+		await arcade.shot('semaforos-impaciencia');
+
+		// Se fuerza la última vida para no esperar el final entero.
+		await traffic('(traffic.lives = 1, traffic.lightIds.forEach((id) => traffic.setLight(id, "green")), true)');
+		await until('traffic.outcome === "over"', 60000);
+		await arcade.shot('semaforos-ultimo-golpe');
+		await arcade.waitForScene('traffic:over');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('semaforos-game-over');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('traffic:game');
+		await arcade.page.waitForTimeout(600);
+		await arcade.shot('semaforos-reinicio');
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('traffic:title');
+
+		// Las pantallas en inglés: el idioma se lee al arrancar.
+		await arcade.page.evaluate(() => localStorage.setItem('arcade.locale', 'en'));
+		await arcade.page.reload();
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('ArrowRight', 5);
+		await arcade.press('Enter');
+		await arcade.waitForScene('traffic:title');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('semaforos-titulo-en');
+		await arcade.press('Enter');
+		await arcade.waitForScene('traffic:game');
+		// Esta vez la última vida se va por impaciencia, que no depende del azar.
+		await until('traffic.cars.some((car) => car.speed < 1)');
+		await traffic('(traffic.lives = 1, traffic.cars.forEach((car) => { car.patience = 0.2; }), true)');
+		await arcade.waitForScene('traffic:over');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('semaforos-game-over-en');
+		await arcade.page.evaluate(() => localStorage.setItem('arcade.locale', 'es'));
+		await arcade.page.reload();
+		await arcade.waitForScene('core:launcher');
+	},
+
 	truco: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		// El rival elegido se recuerda: se parte siempre del predeterminado.
