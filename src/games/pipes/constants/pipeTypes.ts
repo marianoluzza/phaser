@@ -91,19 +91,22 @@ export function turnsFlow(type: PipeType): boolean {
 export type PipeWeights = Record<PipeType, number>;
 
 /**
- * Reparto por defecto de la bolsa.
+ * Reparto por defecto de la bolsa: una de cada pieza.
  *
- * Rectas y curvas aparecen seguido porque son las que arman el recorrido. El
- * cruce es una pieza de excepción, así que entra una sola vez. Es sólo el punto
- * de partida: la pantalla de configuración puede cambiar estos números.
+ * Es el reparto de la *Pipe Mania* original de DOS. Su ejecutable no sortea
+ * pieza por pieza: entrega bolsas de 8 con las siete piezas una vez y una
+ * repetida, que acá es la pieza extra de cada vuelta (`bagExtra` en la
+ * configuración). Así sale un cruce cada siete piezas, y el bonus por cruces
+ * pasa a ser una estrategia en vez de una casualidad. Es sólo el punto de
+ * partida: la pantalla de configuración puede cambiar estos números.
  */
 export const DEFAULT_PIPE_WEIGHTS: PipeWeights = {
-	horizontal: 5,
-	vertical: 5,
-	curveNorthEast: 4,
-	curveEastSouth: 4,
-	curveSouthWest: 4,
-	curveWestNorth: 4,
+	horizontal: 1,
+	vertical: 1,
+	curveNorthEast: 1,
+	curveEastSouth: 1,
+	curveSouthWest: 1,
+	curveWestNorth: 1,
 	cross: 1,
 };
 

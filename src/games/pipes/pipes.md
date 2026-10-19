@@ -11,7 +11,7 @@ recorrido por delante del caudal hasta llegar a la meta del nivel.
 - Cuenta regresiva antes de que arranque el agua.
 - Agua que llena cada tramo de forma progresiva.
 - Meta de tramos por nivel, con progresión de dificultad.
-- Puntaje por tramo, bonus por cruces dobles y multas por reemplazar piezas o
+- Puntaje por tramo, bonus por cada tanda de cruces dobles y multas por reemplazar piezas o
   dejarlas sin usar, acumulado entre niveles.
 - Cierre de nivel con los dos finales: superado o derramado, con el desglose del
   puntaje.
@@ -69,10 +69,25 @@ mover sin tocar código.
 | Concepto | Por defecto | Cuándo se aplica |
 | --- | --- | --- |
 | Puntos por tramo | +10 | Cada tramo que el agua termina de recorrer. |
-| Doble uso de cruz | +25 | Cada cruce que el agua atraviesa por segunda vez. |
-| Bonus por cruces | +100 | Al juntar 3 cruces dobles en el mismo nivel. |
+| Doble uso de cruz | +50 | Cada cruce que el agua atraviesa por segunda vez. |
+| Bonus por cruces | +400 | Por cada 5 cruces dobles en el mismo nivel: 10 cruces son +800. |
 | Multa por reemplazo | −5 | Cada vez que se pisa una pieza seca ya colocada. |
-| Multa por pieza suelta | −5 | Cada pieza del tablero que el agua nunca usó. |
+| Multa por pieza suelta | −10 | Cada pieza del tablero que el agua nunca usó. |
+
+Los valores por defecto copian las proporciones de la *Pipe Mania* original de
+DOS, leídas de su ejecutable, a un décimo de su escala:
+
+| Concepto | Original | Acá |
+| --- | --- | --- |
+| Tramo | 100 | 10 |
+| Segunda pasada por un cruce | 500 | 50 |
+| Bonus de cruces | 4000 cada 5 | 400 cada 5 |
+| Reemplazo | −50 | −5 |
+| Pieza sin usar | −100 | −10 |
+
+En el original un cruce doble vale cinco tramos y cada tanda de cinco vale
+cuarenta: hacer cruces es la forma de sumar, no un adorno. El original también
+da 50.000 por llenar el tablero, que acá todavía no existe.
 
 Las dos multas empujan en direcciones distintas: la de reemplazo castiga
 improvisar sobre lo ya construido, y la de piezas sueltas castiga tirar piezas
@@ -140,30 +155,42 @@ efecto es el mismo que antes: una vez mojadas, quedan terminadas.
 Las piezas no se sortean de cero cada vez. Igual que el "7-bag" de Tetris, hay
 una bolsa con todas las piezas adentro: se mezcla, se reparte hasta vaciarla y
 recién entonces se arma una nueva. El reparto vive en la configuración y
-`buildBag()` lo convierte en la bolsa expandida que reparte `PipeQueue`.
+`buildBag()` lo convierte en la bolsa expandida que reparte `PipeQueue`. A cada
+vuelta se le suman además `bagExtra` piezas sorteadas entre esas mismas piezas,
+así la vuelta no es siempre idéntica y cada pieza conserva su peso promedio.
 
 | Pieza | Por defecto |
 | --- | --- |
-| `horizontal` | 5 |
-| `vertical` | 5 |
-| Cada una de las 4 curvas | 4 |
-| `cross` | 1 |
-| **Total por vuelta** | **27** |
+| Cada una de las 7 piezas | 1 |
+| Extra sorteada | 1 |
+| **Total por vuelta** | **8** |
 
-Sortear cada pieza por separado dejaba pasar rachas absurdas: seis rectas
-seguidas justo cuando hacía falta doblar, con el agua encima. Con la bolsa, en
-cada vuelta de 27 piezas salen exactamente 16 curvas.
+Es el reparto de la *Pipe Mania* original de DOS. Su ejecutable tiene, para
+cada uno de sus 36 niveles, 8 bolsas fijas de 8 piezas ordenadas a mano: las
+siete piezas una vez y una repetida. Al empezar el nivel sortea una bolsa y la
+entrega en orden; al vaciarse sortea otra. Eso da un cruce cada siete piezas.
 
-Ese mismo reparto es el que hace que el cruce sea casi anecdótico: una cruz cada
-27 piezas obliga a construir un circuito larguísimo antes de poder plantear el
-segundo cruce, y eso suponiendo que la siguiente cruz llegue enseguida. Por eso
-la bolsa es lo primero que se puede tocar desde la configuración.
+La primera versión de este clon usaba una bolsa de 27 (5 y 5 rectas, 4 de cada
+curva y una sola cruz), y por eso no se sentía como el original:
 
-Encima de la bolsa hay un tope: nunca se reparten más de tres piezas seguidas
+| | Original | Bolsa de 27 | Bolsa 7 + 1 |
+| --- | --- | --- | --- |
+| Cruces | 14 % | 3,7 % | 14 % |
+| Mayor distancia entre dos cruces | 15 piezas | 53 piezas | 15 piezas |
+| Cola de 5 con algún cruce | 62 % | 19 % | 62 % |
+| Rectas / curvas | 29 % / 57 % | 37 % / 59 % | 29 % / 57 % |
+
+Con un cruce cada 27 piezas había que construir un circuito larguísimo antes de
+poder plantear el segundo cruce, así que el bonus por cruces era casi
+anecdótico.
+
+Encima de la bolsa hay un tope: nunca se reparten más de cuatro piezas seguidas
 que no hagan doblar el agua (`MAX_STRAIGHT_RUN` en `PipeQueue`). Al alcanzarlo,
 se adelanta la próxima curva de la bolsa. Eso sólo cambia el orden, no el
 contenido; si a la bolsa ya no le quedan curvas, se mezcla la siguiente y se
-toma de ahí, así que el tope se respeta siempre.
+toma de ahí, así que el tope se respeta siempre. El cruce cuenta como recta,
+igual que en el original, cuyas bolsas nunca pasan de cuatro piezas sin curva.
+Una bolsa de 8 mezclada al azar, sin el tope, llega a dar rachas de ocho.
 
 El panel lateral muestra cuántas piezas quedan en la bolsa. No es sólo
 información: hace visible que las piezas salen de un conjunto conocido y no de
@@ -203,10 +230,10 @@ Qué se puede ajustar:
 - **Meta de tramos**: inicial, delta por nivel y máximo.
 - **Puntos y multas**: puntos por segmento, multa por reemplazo y multa por
   pieza suelta.
-- **Cruces**: puntos por doble uso, cuántos cruces dobles activan el bonus y
-  cuántos puntos da.
+- **Cruces**: puntos por doble uso, cada cuántos cruces dobles se cobra el
+  bonus y cuántos puntos da.
 - **Bolsa**: un submenú con las siete piezas, su cantidad, el porcentaje que
-  representan y el total por vuelta.
+  representan, las piezas extra sorteadas por vuelta y el total por vuelta.
 
 Detalles de la pantalla:
 

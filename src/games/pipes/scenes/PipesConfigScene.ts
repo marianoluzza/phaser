@@ -5,9 +5,11 @@ import { RENDER_SCALE } from '../../../core/renderScale';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { PIPE_TYPES, type PipeType } from '../constants/pipeTypes';
 import {
+	BAG_FIELDS,
 	bagTotal,
 	formatTuningValue,
 	PIECE_LABEL_KEYS,
+	roundTotal,
 	TUNING_GROUPS,
 	type TuningField,
 } from '../constants/tuning';
@@ -328,6 +330,11 @@ export class PipesConfigScene extends Phaser.Scene {
 			y += ROW_HEIGHT + 8;
 		}
 
+		for (const field of BAG_FIELDS) {
+			this.addFieldRow(y, field);
+			y += ROW_HEIGHT;
+		}
+
 		y += 4;
 		this.addTotalRow(y);
 		y += ROW_HEIGHT;
@@ -423,7 +430,7 @@ export class PipesConfigScene extends Phaser.Scene {
 		}).setOrigin(1, 0.5);
 
 		this.content.add([label, value]);
-		this.valueUpdaters.push(() => value.setText(String(bagTotal(pipesTuning.current.bag))));
+		this.valueUpdaters.push(() => value.setText(String(roundTotal(pipesTuning.current))));
 	}
 
 	private addSubmenuRow(y: number, text: string, onClick: () => void) {

@@ -154,7 +154,7 @@ export class PipesGameScene extends Phaser.Scene {
 	/** Las escenas se reutilizan: cada partida arranca desde un estado limpio. */
 	private resetGameState() {
 		this.board = new PipeBoard();
-		this.queue = new PipeQueue(this.tuning.bag);
+		this.queue = new PipeQueue(this.tuning.bag, this.tuning.bagExtra);
 		this.flow = new WaterFlow(this.board, this.setup.msPerSegment);
 		this.replacements = 0;
 		this.fastForward = false;
@@ -278,12 +278,16 @@ export class PipesGameScene extends Phaser.Scene {
 		);
 	}
 
-	/** Premio por juntar varios cruces dobles en el mismo nivel. */
+	/**
+	 * Premio por juntar cruces dobles en el mismo nivel: se cobra una vez por
+	 * cada tanda completa, como el "Bonus For Crosses" del original, que paga
+	 * cada cinco cruces y no sólo los primeros cinco.
+	 */
 	private get crossBonus(): number {
 		const threshold = this.tuning.crossBonusThreshold;
-		if (threshold <= 0 || this.flow.doubleCrossings < threshold) return 0;
+		if (threshold <= 0) return 0;
 
-		return this.tuning.crossBonusPoints;
+		return Math.floor(this.flow.doubleCrossings / threshold) * this.tuning.crossBonusPoints;
 	}
 
 	/** Puntaje visible: lo acumulado en los niveles anteriores más este nivel. */
@@ -382,11 +386,11 @@ export class PipesGameScene extends Phaser.Scene {
 		this.segmentsValue.setColor(goalReached ? '#5ee48a' : '#d9e2ff');
 
 		// Las dos jugadas que mueven el puntaje fuera de los tramos, a la vista.
+		// El bonus se repite, así que la cuenta apunta a la próxima tanda.
 		const doubles = this.flow.doubleCrossings;
+		const threshold = this.tuning.crossBonusThreshold;
 		this.crossValue.setText(
-			this.tuning.crossBonusThreshold > 0
-				? `${doubles} / ${this.tuning.crossBonusThreshold}`
-				: String(doubles)
+			threshold > 0 ? `${doubles} / ${(Math.floor(doubles / threshold) + 1) * threshold}` : String(doubles)
 		);
 		this.crossValue.setColor(this.crossBonus > 0 ? '#ffca4b' : '#8290b3');
 		this.replaceValue.setText(

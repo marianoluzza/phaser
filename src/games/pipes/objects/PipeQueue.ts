@@ -6,8 +6,12 @@ import { buildBag, turnsFlow, type PipeType, type PipeWeights } from '../constan
  * La bolsa ya evita las sequías largas, pero incluso con una bolsa justa pueden
  * caer varias rectas pegadas. Quedarse sin forma de girar mientras el agua
  * avanza no es una decisión difícil: es una mano perdida sin nada que hacer.
+ *
+ * El cruce cuenta como recta, igual que en el original: sus bolsas, ordenadas a
+ * mano, nunca pasan de cuatro piezas seguidas sin curva. Con tres, el tope
+ * adelantaría curvas por delante de los cruces y los volvería a hacer escasos.
  */
-const MAX_STRAIGHT_RUN = 3;
+const MAX_STRAIGHT_RUN = 4;
 
 /**
  * Cola de piezas que el jugador está obligado a usar en orden.
@@ -23,20 +27,26 @@ const MAX_STRAIGHT_RUN = 3;
  *
  * El contenido de la bolsa llega desde afuera porque es configurable: la cola
  * sabe repartir, no cuántos cruces conviene que haya.
+ *
+ * Además de las piezas fijas, cada vuelta suma `extra` piezas sorteadas entre
+ * esas mismas piezas. Así la vuelta no es siempre idéntica, pero en promedio
+ * cada pieza conserva el peso que le dio la configuración.
  */
 export class PipeQueue {
 	readonly size: number;
 	/** Contenido de una vuelta completa; se usa para mostrar cuánto falta. */
 	readonly bagSize: number;
 	private readonly contents: readonly PipeType[];
+	private readonly extra: number;
 	private upcoming: PipeType[] = [];
 	private bag: PipeType[] = [];
 	private straightRun = 0;
 
-	constructor(weights: PipeWeights, size: number = 5) {
+	constructor(weights: PipeWeights, extra: number = 0, size: number = 5) {
 		this.size = size;
 		this.contents = buildBag(weights);
-		this.bagSize = this.contents.length;
+		this.extra = Math.max(0, Math.floor(extra));
+		this.bagSize = this.contents.length + this.extra;
 		this.reset();
 	}
 
@@ -103,9 +113,13 @@ export class PipeQueue {
 		this.bag.unshift(curve);
 	}
 
-	/** Suma una bolsa nueva, mezclada con Fisher-Yates. */
+	/** Suma una bolsa nueva, con sus piezas extra, mezclada con Fisher-Yates. */
 	private refillBag() {
 		const shuffled = [...this.contents];
+
+		for (let count = 0; count < this.extra; count += 1) {
+			shuffled.push(this.contents[Math.floor(Math.random() * this.contents.length)]);
+		}
 
 		for (let index = shuffled.length - 1; index > 0; index -= 1) {
 			const swapIndex = Math.floor(Math.random() * (index + 1));

@@ -49,6 +49,8 @@ export type PipesTuning = {
 
 	/** Cuántas veces entra cada pieza en la bolsa. */
 	bag: PipeWeights;
+	/** Piezas sorteadas que se suman a cada vuelta, además de las fijas. */
+	bagExtra: number;
 };
 
 /** Claves numéricas: todo lo que la configuración muestra como una fila con − y +. */
@@ -86,15 +88,19 @@ export const DEFAULT_TUNING: PipesTuning = {
 	goalStep: 3,
 	goalMax: 120,
 
+	// Puntaje en las proporciones del original, a un décimo de su escala: tramo
+	// 100, segunda pasada por un cruce 500, 4000 cada cinco cruces, reemplazo
+	// −50 y pieza sin usar −100.
 	pointsPerSegment: 10,
 	replacePenalty: 5,
-	loosePenalty: 5,
+	loosePenalty: 10,
 
-	crossDoubleBonus: 25,
-	crossBonusThreshold: 3,
-	crossBonusPoints: 100,
+	crossDoubleBonus: 50,
+	crossBonusThreshold: 5,
+	crossBonusPoints: 400,
 
 	bag: { ...DEFAULT_PIPE_WEIGHTS },
+	bagExtra: 1,
 };
 
 /**
@@ -147,10 +153,16 @@ export const TUNING_GROUPS: readonly TuningGroup[] = [
 	},
 ];
 
+/** Números que se ajustan dentro del submenú de la bolsa, debajo de las piezas. */
+export const BAG_FIELDS: readonly TuningField[] = [
+	{ key: 'bagExtra', labelKey: 'pipes.config.bagExtra', min: 0, max: 10, step: 1, format: 'plain' },
+];
+
 /** Los campos sueltos, sin sus grupos; sirve para validar lo que se lee guardado. */
-export const TUNING_FIELDS: readonly TuningField[] = TUNING_GROUPS.flatMap((group) => [
-	...group.fields,
-]);
+export const TUNING_FIELDS: readonly TuningField[] = [
+	...TUNING_GROUPS.flatMap((group) => [...group.fields]),
+	...BAG_FIELDS,
+];
 
 /** Tope por pieza en la bolsa: más que esto no cambia nada y rompe el dibujo. */
 export const MAX_BAG_COUNT = 30;
@@ -173,9 +185,14 @@ export function formatTuningValue(value: number, format: TuningFormat): string {
 	return String(value);
 }
 
-/** Total de piezas de una vuelta completa de la bolsa. */
+/** Total de piezas fijas de la bolsa, sin las extra sorteadas. */
 export function bagTotal(bag: PipeWeights): number {
 	return PIPE_TYPES.reduce((total, type) => total + bag[type], 0);
+}
+
+/** Total de piezas de una vuelta completa: las fijas más las extra. */
+export function roundTotal(tuning: PipesTuning): number {
+	return bagTotal(tuning.bag) + tuning.bagExtra;
 }
 
 export function clampField(field: TuningField, value: number): number {
