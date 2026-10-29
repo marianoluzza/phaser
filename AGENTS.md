@@ -7,7 +7,8 @@ objetos, reglas y documentación.
 
 Actualmente incluye Tetris, Truco, Pipes, Astro Chess —en construcción, con su
 diseño ya documentado—, Tanques —al estilo de Battle City—, Semáforos —un cruce
-céntrico con los semáforos a mano— y Jukebox, una herramienta interna para
+céntrico con los semáforos a mano—, Galáctica —un shooter de formaciones con
+naves que evolucionan, dibujado en pxl— y Jukebox, una herramienta interna para
 probar la biblioteca de música y efectos.
 
 ## Puesta en marcha
@@ -24,8 +25,10 @@ npm install
 npm run dev
 npm run build
 npm run shots
+npm run art
 npm run sim:astro
 npm run sim:traffic
+npm run sim:galactica
 npm run audio:catalog
 npm run audio:upload:r2
 npm run deploy:pages
@@ -35,10 +38,15 @@ npm run preview
 - `npm run dev` inicia el entorno de desarrollo con recarga automática.
 - `npm run build` valida TypeScript y genera la versión de producción.
 - `npm run shots` recorre el arcade en un Chrome headless y deja capturas.
+- `npm run art` regenera las hojas de sprites a partir de las fuentes de pxl en
+  `art/` (ver [Arte en pixel art](#arte-en-pixel-art)).
 - `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
   para medir el balance.
 - `npm run sim:traffic` juega cientos de partidas de Semáforos con jugadores
   automáticos y mide duración, choques e impaciencias.
+- `npm run sim:galactica` juega campañas enteras de Galáctica con un piloto
+  automático y mide la duración de cada zona, la energía que sobra y el daño
+  por fuente.
 - `npm run audio:catalog` reconstruye el catálogo después de agregar audio.
 - `npm run audio:upload:r2` sincroniza los OGG locales con Cloudflare R2.
 - `npm run deploy:pages` compila y publica el arcade en Cloudflare Pages.
@@ -238,6 +246,35 @@ src/
     │       ├── TrafficTitleScene.ts
     │       ├── TrafficGameScene.ts
     │       └── TrafficGameOverScene.ts
+    ├── galactica/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── galactica.md
+    │   ├── constants/
+    │   │   ├── tuning.ts
+    │   │   ├── ships.ts
+    │   │   ├── families.ts
+    │   │   ├── attacks.ts
+    │   │   └── zones.ts
+    │   ├── state/
+    │   │   ├── Battle.ts
+    │   │   ├── Formation.ts
+    │   │   ├── paths.ts
+    │   │   ├── hangar.ts
+    │   │   └── rng.ts
+    │   ├── objects/
+    │   │   ├── art.ts
+    │   │   ├── SpriteLayer.ts
+    │   │   ├── PediaDemo.ts
+    │   │   ├── battleRenderer.ts
+    │   │   ├── Starfield.ts
+    │   │   └── labels.ts
+    │   └── scenes/
+    │       ├── GalacticaTitleScene.ts
+    │       ├── GalacticaPediaScene.ts
+    │       ├── GalacticaGameScene.ts
+    │       └── GalacticaResultScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -250,6 +287,9 @@ public/assets/audio/
 ├── catalog.json
 └── licenses/
 
+art/galactica/            # Fuentes de pxl (.px.js)
+public/assets/galactica/  # Hojas generadas por `npm run art`; se versionan
+
 local-assets/audio/       # Fuentes OGG locales; ignoradas por Git y Vite
 
 cloudflare/
@@ -258,6 +298,7 @@ cloudflare/
 └── README.md
 
 scripts/
+├── build-art.mjs
 └── generate-audio-catalog.mjs
 ```
 
@@ -287,7 +328,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic' | 'galactica';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -487,7 +528,8 @@ Cloudflare Pages y R2 se despliegan por separado:
 `index.html` y `catalog.json` usan `must-revalidate`. Los archivos JS/CSS de
 Vite tienen hash en el nombre y los OGG llevan `?v=<hash>`, por lo que pueden
 usar caché inmutable durante un año. En un despliegue normal no se purga caché:
-todo contenido modificado obtiene una URL diferente.
+todo contenido modificado obtiene una URL diferente. Las hojas de sprites de
+`public/assets/galactica/` no llevan hash y también usan `must-revalidate`.
 
 ## Nitidez del canvas
 
@@ -504,9 +546,36 @@ Para las escenas esto es transparente, salvo en tres casos:
   escena se usan `pointer.worldX` y `pointer.worldY`.
 - Una cámara adicional (`cameras.add`) recibe su viewport en píxeles del canvas
   y necesita `setOrigin(0).setZoom(RENDER_SCALE)`, como el visor de la
-  configuración de Pipes.
+  configuración de Pipes o los ejemplos de la Galactopedia. Se dibuja encima de
+  la cámara principal: lo que tenga que verse sobre ella va fuera de su viewport.
 - `setCrop` sobre un `Text` se mide en píxeles de su textura: hay que
   multiplicar por `text.style.resolution`, como en la bitácora de Astro Chess.
+
+## Arte en pixel art
+
+Los juegos que usan sprites (por ahora Galáctica) los dibujan con pxl, la
+skill de pixel art de Claude, como código: cada `art/<juego>/*.px.js` describe
+sprites, variantes de paleta y una o más hojas (`sheet()`).
+
+```mermaid
+flowchart LR
+    Source["art/galactica/*.px.js"] -->|"npm run art"| Sheets["public/assets/galactica<br/>PNG + JSON"]
+    Sheets -->|"load.atlas"| Phaser["Escenas"]
+```
+
+- **Un pedido por hoja, no uno por sprite.** Cada hoja es un PNG con su JSON en
+  formato de TexturePacker, que Phaser carga con `load.atlas`.
+- **Las hojas se versionan.** pxl vive en las skills de Claude, no en el
+  repositorio: así `npm run build` y el deploy no lo necesitan. Si está en otro
+  lugar, `PXL=/ruta/a/pxl.js npm run art`.
+- **Filtro `NEAREST`.** El arcade no usa `pixelArt: true` y la cámara hace zoom
+  (ver [Nitidez del canvas](#nitidez-del-canvas)): sin cambiar el filtro de cada
+  textura, el pixel art se interpola y sale borroso.
+- **Escala entera.** Los sprites se dibujan a ×3 para que cada píxel siga
+  siendo un cuadrado.
+- **Vite no vigila `art/`.** `vite.config.ts` lo deja fuera del watch, junto con
+  las capturas y las fuentes de audio locales; pxl además escribe una carpeta
+  `out/` junto a cada fuente, ignorada en Git.
 
 ## Estado y representación visual
 
@@ -543,6 +612,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 - [Diseño técnico y funcionalidades de Tetris](src/games/tetris/tetris.md)
 - [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
 - [Diseño y plan de implementación de Astro Chess](src/games/astro-chess/astro-chess.md)
+- [Diseño técnico y funcionalidades de Galáctica](src/games/galactica/galactica.md)
 - [Diseño técnico y funcionalidades de Tanques](src/games/tanks/tanks.md)
 - [Diseño técnico y funcionalidades de Semáforos](src/games/traffic/traffic.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)

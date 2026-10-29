@@ -313,6 +313,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawTrafficCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'galactica') {
+			this.drawGalacticaCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -462,6 +466,39 @@ export class LauncherScene extends Phaser.Scene {
 		graphics.fillCircle(229, 73, 10);
 		graphics.fillStyle(accentColor, 1);
 		graphics.fillRect(118, 58, 22, 4);
+	}
+
+	private drawGalacticaCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// Una formación arriba y la nave abajo disparando, en bloques de píxel:
+		// el launcher no carga las hojas de pxl, así que se dibujan a mano.
+		const graphics = this.add.graphics();
+		card.add(graphics);
+		// Siluetas de las cuatro familias: cañonera, avispa, cristal y dragón.
+		const families = [
+			['.xxxxx.', 'xxxxxxx', 'xx.x.xx', '.x...x.'],
+			['x..x..x', '.xxxxx.', '..xxx..', '...x...'],
+			['...x...', '..xxx..', '.xxxxx.', '..xxx..', '...x...'],
+			['x.....x', 'xx.x.xx', '.xxxxx.', '...x...'],
+		];
+		const ship = ['...x...', '...x...', '..xxx..', '.xxxxx.', 'xx.x.xx'];
+		const drawPattern = (pattern: string[], left: number, top: number, color: number, size = 4) => {
+			graphics.fillStyle(color, 1);
+			pattern.forEach((row, y) => [...row].forEach((cell, x) => {
+				if (cell === 'x') {
+					graphics.fillRect(left + x * size, top + y * size, size, size);
+				}
+			}));
+		};
+
+		const colors = [0xa6cf62, 0xe46ad2, 0x52cfe6, 0xef5466];
+		for (let column = 0; column < 4; column += 1) {
+			drawPattern(families[column], 60 + column * 46, 28, colors[column]);
+			drawPattern(families[(column + 1) % 4], 82 + column * 46, 54, colors[(column + 1) % 4]);
+		}
+		drawPattern(ship, 148, 100, accentColor);
+		graphics.fillStyle(0xffffff, 1);
+		graphics.fillRect(161, 80, 3, 10);
+		graphics.fillRect(161, 60, 3, 8);
 	}
 
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {

@@ -5,6 +5,10 @@
 /assets/audio/catalog.json
   Cache-Control: public, max-age=0, must-revalidate
 
+# Las hojas de sprites de pxl no llevan hash: se revalidan para tomar el arte nuevo.
+/assets/galactica/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 # Vite agrega un hash al nombre de estos archivos. Pueden guardarse un año:
 # cuando cambia el código, cambia también la URL.
 /assets/*.js

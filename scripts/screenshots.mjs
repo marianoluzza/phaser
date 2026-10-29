@@ -217,6 +217,163 @@ const FLOWS = {
 		await arcade.waitForScene('core:launcher');
 	},
 
+	galactica: async (arcade) => {
+		await arcade.waitForScene('core:launcher');
+		// Galáctica es la séptima ficha del catálogo.
+		await arcade.press('ArrowRight', 6);
+		await arcade.shot('launcher-galactica-seleccionado');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('galactica:title');
+		await arcade.page.waitForTimeout(400);
+		await arcade.shot('galactica-titulo');
+		// La Aguja empieza bloqueada: se ve como silueta con su condición.
+		await arcade.press('ArrowRight');
+		await arcade.shot('galactica-hangar-bloqueada');
+		await arcade.press('ArrowLeft');
+
+		// La Galactopedia: una captura por página, con los ejemplos ya andando.
+		await arcade.press('g');
+		await arcade.waitForScene('galactica:pedia');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('galactopedia-como-jugar');
+		await arcade.press('ArrowRight');
+		await arcade.page.waitForTimeout(2600);
+		await arcade.shot('galactopedia-naves');
+		await arcade.press('ArrowDown', 2);
+		await arcade.page.waitForTimeout(4200);
+		await arcade.shot('galactopedia-naves-bastion');
+		await arcade.press('ArrowRight');
+		await arcade.press('ArrowDown', 5);
+		await arcade.page.waitForTimeout(3200);
+		await arcade.shot('galactopedia-enemigos');
+		await arcade.press('ArrowRight');
+		await arcade.press('ArrowDown', 2);
+		await arcade.page.waitForTimeout(2200);
+		await arcade.shot('galactopedia-ataques-helicoide');
+		await arcade.press('ArrowDown', 7);
+		await arcade.page.waitForTimeout(3600);
+		await arcade.shot('galactopedia-ataques-plantado');
+		await arcade.press('ArrowRight');
+		await arcade.page.waitForTimeout(3500);
+		await arcade.shot('galactopedia-eventos-pod');
+		await arcade.press('ArrowDown', 5);
+		await arcade.page.waitForTimeout(6000);
+		await arcade.shot('galactopedia-jefe-cristal');
+		await arcade.press('Escape');
+		await arcade.waitForScene('galactica:title');
+
+		// El despegue: motores, la nave saliendo por la bahía y el corte a la zona.
+		await arcade.press('Enter');
+		await arcade.page.waitForTimeout(250);
+		await arcade.shot('galactica-despegue-motores');
+		await arcade.page.waitForTimeout(550);
+		await arcade.shot('galactica-despegue-vuelo');
+		await arcade.waitForScene('galactica:game');
+		const battle = (expression) =>
+			arcade.page.evaluate(`(() => { const battle = window.arcade.scene.getScene('galactica:game').battle; return ${expression}; })()`);
+		await arcade.page.waitForTimeout(2600);
+		await arcade.shot('galactica-entrada');
+
+		// Se mueve y dispara un rato para ver la formación armada.
+		await arcade.page.keyboard.down('Space');
+		await arcade.page.keyboard.down('ArrowLeft');
+		await arcade.page.waitForTimeout(900);
+		await arcade.page.keyboard.up('ArrowLeft');
+		await arcade.page.waitForTimeout(5000);
+		await arcade.shot('galactica-formacion');
+
+		// Los eventos se provocan en vez de esperarlos: lo que importa es cómo se ven.
+		await battle(`(battle.player.shield = 99, battle.startEvent('comets'), battle.startEvent('pod'), true)`);
+		await arcade.page.waitForTimeout(700);
+		await arcade.shot('galactica-aviso-cometas');
+		await arcade.page.waitForTimeout(900);
+		await arcade.shot('galactica-cometas-y-pod');
+		await battle(`(battle.startEvent('asteroids'), true)`);
+		await arcade.page.waitForTimeout(2200);
+		await arcade.shot('galactica-asteroides');
+
+		// Un kamikaze plantado con su radio de explosión marcado.
+		await battle(`(() => { const enemy = battle.enemies.find((e) => e.state === 'formation'); if (enemy) battle.startManeuver(enemy, 'planted'); return true; })()`);
+		await arcade.page.waitForTimeout(1500);
+		await arcade.shot('galactica-kamikaze-plantado');
+
+		// Tres núcleos de una: la nave evoluciona a mk2.
+		await battle(`(['core', 'core', 'core', 'double'].forEach((kind, i) => battle.pickups.push({ id: 90000 + i, x: battle.player.x, y: battle.player.y - 40 - i * 30, kind, age: 0 })), true)`);
+		await arcade.page.waitForTimeout(1300);
+		await arcade.shot('galactica-evolucion');
+		await arcade.page.keyboard.up('Space');
+
+		await arcade.press('p');
+		await arcade.shot('galactica-pausa');
+		await arcade.press('p');
+
+		// Se vacía la zona y se llama al jefe.
+		await battle(`(battle.enemies = [], battle.wave = battle.waveCount - 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, true)`);
+		await arcade.page.waitForTimeout(1200);
+		await arcade.shot('galactica-jefe-aviso');
+		await arcade.page.keyboard.down('Space');
+		await arcade.page.waitForTimeout(5000);
+		await arcade.shot('galactica-jefe');
+		await arcade.page.keyboard.up('Space');
+
+		await battle('(battle.killBoss(battle.boss), true)');
+		await arcade.page.waitForTimeout(1200);
+		await arcade.shot('galactica-jefe-derribado');
+		await arcade.waitForScene('galactica:result');
+		await arcade.page.waitForTimeout(2400);
+		await arcade.shot('galactica-zona-liberada');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('galactica:game');
+		await arcade.page.waitForTimeout(4500);
+		await arcade.shot('galactica-zona-2');
+
+		// Las zonas 3 y 4, con su jefe, empezando directamente desde el estado.
+		for (const zone of [3, 4]) {
+			await arcade.page.evaluate(`window.arcade.scene.getScene('galactica:game').scene.start('galactica:game', { zone: ${zone}, shipId: 'bastion', score: 0, hp: 100, cores: 8 })`);
+			await arcade.page.waitForTimeout(800);
+			await arcade.waitForScene('galactica:game');
+			await arcade.page.waitForTimeout(5000);
+			await arcade.shot(`galactica-zona-${zone}`);
+			await battle(`(battle.player.shield = 99, battle.enemies = [], battle.wave = battle.waveCount - 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, true)`);
+			await arcade.page.waitForTimeout(7000);
+			await arcade.shot(`galactica-zona-${zone}-jefe`);
+		}
+
+		await battle(`(battle.player.invulnerable = 0, battle.player.shield = 0, battle.damagePlayer('ram', 500), true)`);
+		await arcade.page.waitForTimeout(1500);
+		await arcade.shot('galactica-game-over');
+		await arcade.waitForScene('galactica:result');
+		await arcade.page.waitForTimeout(2400);
+		await arcade.shot('galactica-nave-derribada');
+
+		await arcade.press('m');
+		await arcade.waitForScene('galactica:title');
+		await arcade.press('ArrowRight');
+		await arcade.shot('galactica-hangar-aguja');
+
+		// En inglés: los textos son otros y tienen que entrar en los mismos lugares.
+		await arcade.page.evaluate(() => localStorage.setItem('arcade.locale', 'en'));
+		await arcade.page.reload();
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('ArrowRight', 6);
+		await arcade.press('Enter');
+		await arcade.waitForScene('galactica:title');
+		await arcade.page.waitForTimeout(300);
+		await arcade.shot('galactica-titulo-en');
+		await arcade.press('Enter');
+		await arcade.waitForScene('galactica:game');
+		await arcade.page.waitForTimeout(3000);
+		await arcade.shot('galactica-partida-en');
+		await arcade.page.evaluate(() => localStorage.setItem('arcade.locale', 'es'));
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('galactica:title');
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
+
 	traffic: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		// Semáforos es la sexta ficha del catálogo.
