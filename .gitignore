@@ -44,3 +44,5 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# Salidas locales de pxl junto a cada .px.js; las hojas que usa el juego van a public.
+/art/**/out/
