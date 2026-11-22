@@ -359,8 +359,13 @@ flowchart LR
 
 ## Audio
 
-Como en Tanques, la biblioteca no tiene láseres ni explosiones: se eligieron
-efectos de interfaz de Kenney cortos que cumplen ese papel. Hay tres músicas:
+El combate usa Sci-Fi Sounds de Kenney: el láser corto para el disparo propio
+(suena hasta cada 90 ms), impactos metálicos, explosiones de dos tamaños, el
+campo de fuerza para el escudo y una compuerta para las cápsulas. Avisos,
+premios, evolución, fin de zona y fin de partida usan Digital Audio, con tonos
+de arcade. Los menús siguen con los efectos de interfaz del resto del arcade.
+Todo está en `audio.ts`: cambiar un sonido es cambiar una URL del catálogo
+(se copia desde el Jukebox). Hay tres músicas:
 el título (*Lost in Space*), las oleadas (*Retro-Synthwave*) y los jefes
 (*Cloak of Darkness STAGE 3*).
 

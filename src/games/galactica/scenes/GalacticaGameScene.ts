@@ -79,7 +79,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 			this,
 			GALACTICA_AUDIO.gameMusic, GALACTICA_AUDIO.bossMusic, GALACTICA_AUDIO.shoot, GALACTICA_AUDIO.hit,
 			GALACTICA_AUDIO.explosion, GALACTICA_AUDIO.bigExplosion, GALACTICA_AUDIO.blast, GALACTICA_AUDIO.playerHit,
-			GALACTICA_AUDIO.shield, GALACTICA_AUDIO.pickup, GALACTICA_AUDIO.evolve, GALACTICA_AUDIO.warning,
+			GALACTICA_AUDIO.shield, GALACTICA_AUDIO.podOpen, GALACTICA_AUDIO.pickup, GALACTICA_AUDIO.evolve, GALACTICA_AUDIO.warning,
 			GALACTICA_AUDIO.zoneClear, GALACTICA_AUDIO.gameOver, GALACTICA_AUDIO.pauseToggle, GALACTICA_AUDIO.confirm,
 		);
 	}
@@ -269,6 +269,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 				this.playSfx(GALACTICA_AUDIO.warning.cacheKey);
 				break;
 			case 'podOpened':
+				this.playSfx(GALACTICA_AUDIO.podOpen.cacheKey);
 				if (event.ships) {
 					this.announce(i18n.t('galactica.game.podShips'), '', '#ff647c');
 				}

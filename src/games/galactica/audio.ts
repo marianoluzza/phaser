@@ -2,12 +2,16 @@ import type Phaser from 'phaser';
 
 const R2 = 'https://pub-40dcb8cd66b94e2ab050da55f65f9d2a.r2.dev/audio';
 const UI = `${R2}/sfx/kenney/interface-sounds/Audio`;
+const SCIFI = `${R2}/sfx/kenney/sci-fi-sounds/Audio`;
+const DIGITAL = `${R2}/sfx/kenney/digital-audio/Audio`;
 
 /**
  * Assets de audio propios de Galáctica.
  *
- * Como en Tanques, la biblioteca no tiene láseres ni explosiones: se eligieron
- * efectos de interfaz cortos que cumplen ese papel debajo de la música.
+ * El combate suena con Sci-Fi Sounds (láseres, impactos, explosiones y el
+ * escudo) y los avisos y premios con Digital Audio, más cercano a un arcade de
+ * los ochenta. Los menús comparten los efectos de interfaz del resto del
+ * arcade. El disparo propio tiene que ser cortísimo: suena cada 90 ms.
  */
 export const GALACTICA_AUDIO = {
 	titleMusic: {
@@ -24,19 +28,20 @@ export const GALACTICA_AUDIO = {
 	},
 	confirm: { cacheKey: 'galactica:sfx:confirm', url: `${UI}/confirmation_001.ogg?v=063564703b6094d7` },
 	select: { cacheKey: 'galactica:sfx:select', url: `${UI}/select_002.ogg?v=4cc6ac5341b9b2c8` },
-	shoot: { cacheKey: 'galactica:sfx:shoot', url: `${UI}/tick_002.ogg?v=869442f54214be90` },
-	hit: { cacheKey: 'galactica:sfx:hit', url: `${UI}/click_003.ogg?v=2fa929138bc3a0f4` },
-	explosion: { cacheKey: 'galactica:sfx:explosion', url: `${UI}/glitch_002.ogg?v=1da06a2e63ce131f` },
-	bigExplosion: { cacheKey: 'galactica:sfx:big-explosion', url: `${UI}/glitch_004.ogg?v=d0f4db4d12f88592` },
-	blast: { cacheKey: 'galactica:sfx:blast', url: `${UI}/drop_002.ogg?v=4ac4d1cef7e93696` },
-	playerHit: { cacheKey: 'galactica:sfx:player-hit', url: `${UI}/error_006.ogg?v=a97513d7fd2b12b1` },
-	shield: { cacheKey: 'galactica:sfx:shield', url: `${UI}/glass_002.ogg?v=08e972c73e53c91d` },
-	pickup: { cacheKey: 'galactica:sfx:pickup', url: `${UI}/maximize_003.ogg?v=df16f25d45189f5d` },
-	evolve: { cacheKey: 'galactica:sfx:evolve', url: `${UI}/confirmation_003.ogg?v=3091bf0be0497f82` },
-	unlock: { cacheKey: 'galactica:sfx:unlock', url: `${UI}/maximize_006.ogg?v=f050b3bb77cb0b90` },
-	warning: { cacheKey: 'galactica:sfx:warning', url: `${UI}/question_002.ogg?v=46056f10c70dda86` },
-	zoneClear: { cacheKey: 'galactica:sfx:zone-clear', url: `${UI}/confirmation_004.ogg?v=568967a3d9f8a8f6` },
-	gameOver: { cacheKey: 'galactica:sfx:game-over', url: `${UI}/error_003.ogg?v=885b28175c7b5111` },
+	shoot: { cacheKey: 'galactica:sfx:shoot', url: `${SCIFI}/laserSmall_000.ogg?v=72b589eadd417812` },
+	hit: { cacheKey: 'galactica:sfx:hit', url: `${SCIFI}/impactMetal_004.ogg?v=0032710d1fc88c21` },
+	explosion: { cacheKey: 'galactica:sfx:explosion', url: `${SCIFI}/explosionCrunch_000.ogg?v=4b597d658d0ae101` },
+	bigExplosion: { cacheKey: 'galactica:sfx:big-explosion', url: `${SCIFI}/explosionCrunch_004.ogg?v=9c3a1c73cadf0de5` },
+	blast: { cacheKey: 'galactica:sfx:blast', url: `${SCIFI}/lowFrequency_explosion_000.ogg?v=3cb48d86dab63140` },
+	playerHit: { cacheKey: 'galactica:sfx:player-hit', url: `${DIGITAL}/phaserDown1.ogg?v=d2d046cd0247045f` },
+	shield: { cacheKey: 'galactica:sfx:shield', url: `${SCIFI}/forceField_000.ogg?v=c2916f2a062c8ddd` },
+	podOpen: { cacheKey: 'galactica:sfx:pod-open', url: `${SCIFI}/doorOpen_000.ogg?v=5b7e07eccd4413ad` },
+	pickup: { cacheKey: 'galactica:sfx:pickup', url: `${DIGITAL}/powerUp2.ogg?v=83786b43d828a399` },
+	evolve: { cacheKey: 'galactica:sfx:evolve', url: `${DIGITAL}/powerUp1.ogg?v=8c361b624b560c0b` },
+	unlock: { cacheKey: 'galactica:sfx:unlock', url: `${DIGITAL}/powerUp3.ogg?v=59e7591f7a068882` },
+	warning: { cacheKey: 'galactica:sfx:warning', url: `${DIGITAL}/lowThreeTone.ogg?v=b4b3bc7420e71bfb` },
+	zoneClear: { cacheKey: 'galactica:sfx:zone-clear', url: `${DIGITAL}/threeTone1.ogg?v=bdf21eb12e65507f` },
+	gameOver: { cacheKey: 'galactica:sfx:game-over', url: `${DIGITAL}/zapThreeToneDown.ogg?v=272e60bc62a1685f` },
 	pauseToggle: {
 		cacheKey: 'galactica:sfx:pause-toggle',
 		url: `${R2}/sfx/kenney/ui-audio/Audio/switch1.ogg?v=efdd1d1e2904fb2d`,
