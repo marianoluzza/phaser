@@ -10,7 +10,7 @@ public/assets/audio/
 └── licenses/
 ```
 
-Los 220 audios catalogados viven en el bucket Cloudflare R2
+Los 355 audios catalogados viven en el bucket Cloudflare R2
 `phaser-arcade-assets`. Las fuentes locales se conservan bajo
 `local-assets/audio`, carpeta ignorada por Git y por Vite.
 
@@ -32,7 +32,7 @@ flowchart LR
 Los packs instalados actualmente declaran licencia **CC0**:
 
 - Música: Abstraction / Tallbeard Studios, bundles 2026 Q1 y 2026 Q2.
-- Efectos: Kenney, packs Interface Sounds y UI Audio.
+- Efectos: Kenney, packs Interface Sounds, UI Audio, Sci-Fi Sounds y Digital Audio.
 
 Las copias versionadas de `_LICENSE.txt`, `License.txt` y los README originales
 están en `licenses`. Otra copia permanece junto al pack local. No deben borrarse
@@ -46,7 +46,8 @@ aunque la licencia también aparezca resumida en el catálogo.
    `public/assets/audio/licenses`.
 3. Usar OGG para reproducción en el juego.
 4. Registrar la colección en `scripts/generate-audio-catalog.mjs`.
-5. Ejecutar `npm run audio:upload:r2`.
+5. Ejecutar `npm run audio:upload:r2 -- sfx/<autor>/<colección>` (sin carpeta
+   vuelve a subir toda la biblioteca).
 6. Ejecutar `npm run audio:catalog`.
 7. Abrir el Jukebox y verificar reproducción, volumen y URL.
 

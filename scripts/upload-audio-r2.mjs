@@ -123,7 +123,10 @@ async function uploadFile(filePath) {
 	throw new Error(`No se pudo subir ${relativePath}.`);
 }
 
-const files = (await findOggFiles(audioRoot)).sort((left, right) =>
+// Una carpeta opcional (`npm run audio:upload:r2 -- sfx/kenney/sci-fi-sounds`)
+// sube sólo un pack nuevo en vez de volver a subir toda la biblioteca.
+const uploadRoot = path.resolve(audioRoot, process.argv[2] ?? '.');
+const files = (await findOggFiles(uploadRoot)).sort((left, right) =>
 	left.localeCompare(right, 'en'),
 );
 let nextFileIndex = 0;

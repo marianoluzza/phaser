@@ -69,6 +69,20 @@ const collections = [
 		collection: 'UI Audio',
 		license: 'CC0',
 	},
+	{
+		kind: 'sfx',
+		directory: path.join(audioSourceDirectory, 'sfx', 'kenney', 'sci-fi-sounds', 'Audio'),
+		source: 'Kenney',
+		collection: 'Sci-Fi Sounds',
+		license: 'CC0',
+	},
+	{
+		kind: 'sfx',
+		directory: path.join(audioSourceDirectory, 'sfx', 'kenney', 'digital-audio', 'Audio'),
+		source: 'Kenney',
+		collection: 'Digital Audio',
+		license: 'CC0',
+	},
 ];
 
 function toPublicUrl(filePath) {
