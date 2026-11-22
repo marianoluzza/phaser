@@ -20,7 +20,12 @@ const PORT = Number(process.env.ARCADE_PORT ?? 5173);
 const DEV_URL = `http://localhost:${PORT}/`;
 const SHOTS_DIR = 'screenshots';
 
-export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {}) {
+/**
+ * `viewport` es el tamaño de la ventana en píxeles CSS. El de 800×600 deja el
+ * mundo en su ancho mínimo; uno más ancho ejercita el ancho elástico de
+ * core/renderScale.ts.
+ */
+export async function openArcade({ headless = true, shotsDir = SHOTS_DIR, viewport = { width: 800, height: 600 } } = {}) {
 	rmSync(shotsDir, { recursive: true, force: true });
 	mkdirSync(shotsDir, { recursive: true });
 
@@ -33,8 +38,8 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {})
 	});
 
 	// Densidad 2, como un monitor HiDPI: ejercita el zoom de core/renderScale.ts.
-	// Las coordenadas de click siguen siendo las de 800×600.
-	const page = await browser.newPage({ viewport: { width: 800, height: 600 }, deviceScaleFactor: 2 });
+	// Las coordenadas de click son siempre las de la escena (ver `toPage`).
+	const page = await browser.newPage({ viewport, deviceScaleFactor: 2 });
 	const errors = [];
 	page.on('console', (message) => {
 		if (message.type() === 'error') errors.push(message.text());
@@ -64,36 +69,44 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {})
 			}
 		},
 
-		/** Click en coordenadas del canvas, que es la única forma de apuntarle. */
+		/** Click en coordenadas de la escena, que es la única forma de apuntarle. */
 		async click(x, y) {
-			const canvas = page.locator('canvas');
-			await canvas.click({ position: { x, y } });
+			const point = await toPage(page, x, y);
+			await page.mouse.click(point.x, point.y);
 			await page.waitForTimeout(220);
 		},
 
-		/** Lleva el puntero a un punto del canvas sin apretar: para ver lo que aparece al pasar. */
+		/** Lleva el puntero a un punto de la escena sin apretar: para ver lo que aparece al pasar. */
 		async move(x, y) {
-			const box = await page.locator('canvas').boundingBox();
-			await page.mouse.move(box.x + x, box.y + y, { steps: 4 });
+			const point = await toPage(page, x, y);
+			await page.mouse.move(point.x, point.y, { steps: 4 });
 			await page.waitForTimeout(220);
 		},
 
-		/** Gira la rueda del mouse sobre un punto del canvas. */
+		/** Gira la rueda del mouse sobre un punto de la escena. */
 		async wheel(x, y, deltaY) {
-			const box = await page.locator('canvas').boundingBox();
-			await page.mouse.move(box.x + x, box.y + y);
+			const point = await toPage(page, x, y);
+			await page.mouse.move(point.x, point.y);
 			await page.mouse.wheel(0, deltaY);
 			await page.waitForTimeout(220);
 		},
 
-		/** Arrastra de un punto a otro del canvas, con pasos intermedios como una mano. */
+		/** Arrastra de un punto a otro de la escena, con pasos intermedios como una mano. */
 		async drag(from, to) {
-			const box = await page.locator('canvas').boundingBox();
-			await page.mouse.move(box.x + from.x, box.y + from.y);
+			const start = await toPage(page, from.x, from.y);
+			const end = await toPage(page, to.x, to.y);
+			await page.mouse.move(start.x, start.y);
 			await page.mouse.down();
-			await page.mouse.move(box.x + to.x, box.y + to.y, { steps: 10 });
+			await page.mouse.move(end.x, end.y, { steps: 10 });
 			await page.mouse.up();
 			await page.waitForTimeout(220);
+		},
+
+		/** Cambia el tamaño de la ventana y espera a que el arcade se reacomode. */
+		async resize(width, height) {
+			await page.setViewportSize({ width, height });
+			// `main.ts` espera 150 ms quieta a la ventana antes de recalcular.
+			await page.waitForTimeout(600);
 		},
 
 		async shot(name) {
@@ -116,6 +129,25 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR } = {})
 			server.stop();
 		},
 	};
+}
+
+/**
+ * Pasa coordenadas de la escena a píxeles de la página. Según el ancho de la
+ * ventana, la cámara principal centra el área clásica de 800 (scroll negativo)
+ * o la escena ocupa todo el ancho; el canvas además está escalado por CSS.
+ */
+function toPage(page, x, y) {
+	return page.evaluate(([x, y]) => {
+		const game = window.arcade;
+		const active = game.scene.getScenes(true);
+		const camera = active[active.length - 1].cameras.main;
+		const box = game.canvas.getBoundingClientRect();
+		const css = box.width / game.canvas.width;
+		return {
+			x: box.left + (x - camera.scrollX) * camera.zoom * css,
+			y: box.top + (y - camera.scrollY) * camera.zoom * css,
+		};
+	}, [x, y]);
 }
 
 function currentSceneKey(page) {

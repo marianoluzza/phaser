@@ -7,6 +7,7 @@ import { openArcade } from './arcade-driver.mjs';
  *   npm run shots            recorre el launcher y Astro Chess
  *   npm run shots -- pipes   recorre sólo el flujo indicado
  *   npm run shots -- --show  con ventana visible, para mirarlo en vivo
+ *   npm run shots -- --size=1280x720  con otra ventana (por defecto 800×600)
  *
  * Cada flujo verifica la escena activa además de sacar la foto: una captura
  * prueba que algo se dibujó, no que sea la pantalla correcta.
@@ -15,6 +16,40 @@ const FLOWS = {
 	launcher: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		await arcade.shot('launcher');
+	},
+
+	/**
+	 * Ancho elástico: el launcher usa todo el ancho y los juegos todavía en
+	 * 800×600 quedan centrados. Cada cambio de ventana reacomoda lo que esté
+	 * abierto sin perder la ficha elegida.
+	 */
+	ancho: async (arcade) => {
+		await arcade.waitForScene('core:launcher');
+		await arcade.resize(1280, 720);
+		await arcade.shot('ancho-launcher-16x9');
+		await arcade.press('ArrowRight', 6);
+		await arcade.resize(1600, 800);
+		await arcade.waitForScene('core:launcher');
+		await arcade.shot('ancho-launcher-2x1-galactica');
+
+		// La Galactopedia tiene cámaras extra para sus ejemplos: se corren con la principal.
+		await arcade.press('Enter');
+		await arcade.waitForScene('galactica:title');
+		await arcade.press('g');
+		await arcade.waitForScene('galactica:pedia');
+		await arcade.press('ArrowRight');
+		await arcade.page.waitForTimeout(1500);
+		await arcade.shot('ancho-galactopedia-2x1');
+		await arcade.resize(1100, 825);
+		await arcade.page.waitForTimeout(1000);
+		await arcade.shot('ancho-galactopedia-4x3');
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('galactica:title');
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+		await arcade.shot('ancho-launcher-4x3');
+		await arcade.resize(800, 600);
 	},
 
 	'astro-chess': async (arcade) => {
@@ -576,6 +611,8 @@ const FLOWS = {
 
 const args = process.argv.slice(2);
 const headless = !args.includes('--show');
+const size = args.find((arg) => arg.startsWith('--size='))?.slice('--size='.length);
+const [width, height] = (size ?? '800x600').split('x').map(Number);
 const names = args.filter((arg) => !arg.startsWith('--'));
 const flows = names.length ? names : ['launcher', 'astro-chess'];
 
@@ -586,7 +623,7 @@ if (unknown.length) {
 	process.exit(1);
 }
 
-const arcade = await openArcade({ headless });
+const arcade = await openArcade({ headless, viewport: { width, height } });
 
 try {
 	for (const name of flows) {
