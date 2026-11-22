@@ -3,6 +3,7 @@ import { audioManager } from '../audio/AudioManager';
 import { CORE_AUDIO, loadCoreAudio } from '../audio/coreAudio';
 import { GAME_CATALOG, type GameDefinition } from '../gameCatalog';
 import { i18n, type Locale } from '../i18n/i18n';
+import { GAME_WIDTH, useFullWidth } from '../renderScale';
 import { CORE_SCENES } from '../sceneKeys';
 
 /**
@@ -14,16 +15,18 @@ import { CORE_SCENES } from '../sceneKeys';
  */
 const CARD_WIDTH = 330;
 const CARD_HEIGHT = 285;
-const CAROUSEL_X = 400;
 const CAROUSEL_Y = 315;
+/** Margen de los textos del encabezado y del pie respecto de cada borde. */
+const MARGIN_X = 70;
 const DOTS_Y = 492;
 const DOT_SPACING = 18;
 const SLIDE_DURATION = 180;
 
 /**
- * Ranuras del carrusel según la distancia a la ficha elegida. La última está
- * fuera de la pantalla: ahí esperan las fichas que no se ven y por ahí entran
- * las que dan la vuelta al otro extremo de la lista.
+ * Ranuras del carrusel según la distancia a la ficha elegida. Cuántas se ven
+ * depende del ancho de la pantalla: la primera que no entra (ver `hiddenSlot`)
+ * es donde esperan las fichas que no se ven y por donde entran las que dan la
+ * vuelta al otro extremo de la lista.
  *
  * Las laterales se apagan con un velo opaco y no con transparencia: una ficha
  * translúcida dejaría ver a la que tiene detrás.
@@ -33,12 +36,17 @@ const CAROUSEL_SLOTS = [
 	{ x: 255, scale: 0.62, dim: 0.5 },
 	{ x: 395, scale: 0.45, dim: 0.75 },
 	{ x: 560, scale: 0.35, dim: 0.75 },
+	{ x: 700, scale: 0.28, dim: 0.75 },
 ];
-const HIDDEN_SLOT = CAROUSEL_SLOTS.length - 1;
+/** Una ranura cuenta como visible si asoma al menos esto dentro de la pantalla. */
+const MIN_PEEK = 40;
 
 export class LauncherScene extends Phaser.Scene {
 	/** Índice en `GAME_CATALOG` de la ficha que ocupa el centro del carrusel. */
 	private selectedGameIndex = 0;
+	private carouselX = 0;
+	/** Primera ranura de `CAROUSEL_SLOTS` que queda fuera de la pantalla. */
+	private hiddenSlot = 0;
 
 	private leftKey!: Phaser.Input.Keyboard.Key;
 	private rightKey!: Phaser.Input.Keyboard.Key;
@@ -59,9 +67,15 @@ export class LauncherScene extends Phaser.Scene {
 		loadCoreAudio(this);
 	}
 
-	/** `create` se ejecuta cada vez que entramos a esta escena. */
-	create() {
-		this.selectedGameIndex = 0;
+	/**
+	 * `create` se ejecuta cada vez que entramos a esta escena. Al redibujarla
+	 * (otro idioma, otro tamaño de pantalla) se conserva la ficha elegida.
+	 */
+	create(data: { selectedGameIndex?: number } = {}) {
+		useFullWidth(this, () => this.redraw());
+		this.selectedGameIndex = data.selectedGameIndex ?? 0;
+		this.carouselX = GAME_WIDTH / 2;
+		this.hiddenSlot = this.findHiddenSlot();
 		this.gameCards = [];
 		this.cardSurfaces = [];
 		this.cardVeils = [];
@@ -77,8 +91,19 @@ export class LauncherScene extends Phaser.Scene {
 		this.configureKeyboard();
 		this.configureWheel();
 		this.refreshSelection();
-		audioManager.playMusic(this, CORE_AUDIO.launcherMusic.cacheKey);
-		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
+		audioManager.continueMusic(this, CORE_AUDIO.launcherMusic.cacheKey);
+	}
+
+	/** Los textos son objetos del canvas: reiniciar la escena los redibuja. */
+	private redraw() {
+		this.scene.restart({ selectedGameIndex: this.selectedGameIndex });
+	}
+
+	private findHiddenSlot() {
+		const hidden = CAROUSEL_SLOTS.findIndex(
+			(slot) => this.carouselX + slot.x - (CARD_WIDTH * slot.scale) / 2 > GAME_WIDTH - MIN_PEEK
+		);
+		return hidden === -1 ? CAROUSEL_SLOTS.length - 1 : hidden;
 	}
 
 	/** `update` corre una vez por frame y acá se consulta el teclado. */
@@ -102,54 +127,103 @@ export class LauncherScene extends Phaser.Scene {
 
 		const graphics = this.add.graphics();
 		graphics.fillStyle(0x101b36, 1);
-		graphics.fillCircle(700, 40, 260);
+		graphics.fillCircle(GAME_WIDTH - 100, 40, 260);
 		graphics.fillStyle(0x17234a, 0.55);
 		graphics.fillCircle(90, 570, 210);
 
 		// Una grilla tenue le da al launcher una identidad relacionada con Tetris.
 		graphics.lineStyle(1, 0x29416f, 0.16);
-		for (let x = 0; x <= 800; x += 40) {
+		for (let x = 0; x <= GAME_WIDTH; x += 40) {
 			graphics.lineBetween(x, 0, x, 600);
 		}
 		for (let y = 0; y <= 600; y += 40) {
-			graphics.lineBetween(0, y, 800, y);
+			graphics.lineBetween(0, y, GAME_WIDTH, y);
 		}
 	}
 
 	private drawHeader() {
-		this.add.text(70, 58, 'ARCADE', {
+		this.add.text(MARGIN_X, 58, 'ARCADE', {
 			fontFamily: 'Arial Black, Arial, sans-serif',
 			fontSize: '52px',
 			color: '#f5f7ff',
 			letterSpacing: 8,
 		});
 
-		this.add.text(73, 120, i18n.t('launcher.collection'), {
+		this.add.text(MARGIN_X + 3, 120, i18n.t('launcher.collection'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '14px',
 			color: '#7f91bd',
 			letterSpacing: 3,
 		});
 
-		this.add.text(730, 76, `${GAME_CATALOG.length.toString().padStart(2, '0')}`, {
+		const right = GAME_WIDTH - MARGIN_X;
+		this.add.text(right, 76, `${GAME_CATALOG.length.toString().padStart(2, '0')}`, {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '28px',
 			color: '#46d9ff',
 		}).setOrigin(1, 0);
 
-		this.createLanguageSelector();
+		// El selector de idioma se corre a la izquierda si hay botón de pantalla completa.
+		const fullscreen = this.scale.fullscreen.available;
+		if (fullscreen) {
+			this.createFullscreenButton(right - 14, 130);
+		}
+		this.createLanguageSelector(fullscreen ? right - 40 : right - 21);
 	}
 
-	private createLanguageSelector() {
-		this.add.text(592, 130, i18n.t('launcher.language'), {
+	/** `right` es el borde derecho del último botón. */
+	private createLanguageSelector(right: number) {
+		this.add.text(right - 117, 130, i18n.t('launcher.language'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '10px',
 			color: '#6d7da8',
 			letterSpacing: 2,
 		}).setOrigin(1, 0.5);
 
-		this.createLanguageButton(625, 130, 'ES', 'es');
-		this.createLanguageButton(685, 130, 'EN', 'en');
+		this.createLanguageButton(right - 84, 130, 'ES', 'es');
+		this.createLanguageButton(right - 24, 130, 'EN', 'en');
+	}
+
+	/**
+	 * Pantalla completa, sobre todo para el celular, donde no hay F11. El
+	 * navegador sólo la concede dentro de un gesto del jugador, y Phaser pide
+	 * `pointerup`: con `pointerdown` algunos navegadores la rechazan.
+	 */
+	private createFullscreenButton(x: number, y: number) {
+		const button = this.add.rectangle(x, y, 28, 28, 0x111a31)
+			.setStrokeStyle(1, 0x40577f)
+			.setInteractive({ useHandCursor: true });
+		const icon = this.add.graphics();
+		const drawIcon = () => this.drawFullscreenIcon(icon, x, y);
+		drawIcon();
+
+		button.on('pointerup', () => this.scale.toggleFullscreen());
+		this.scale.on(Phaser.Scale.Events.ENTER_FULLSCREEN, drawIcon);
+		this.scale.on(Phaser.Scale.Events.LEAVE_FULLSCREEN, drawIcon);
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			this.scale.off(Phaser.Scale.Events.ENTER_FULLSCREEN, drawIcon);
+			this.scale.off(Phaser.Scale.Events.LEAVE_FULLSCREEN, drawIcon);
+		});
+	}
+
+	/** Cuatro esquinas: apuntan hacia afuera para entrar y hacia adentro para salir. */
+	private drawFullscreenIcon(icon: Phaser.GameObjects.Graphics, x: number, y: number) {
+		const reach = 7;
+		const arm = 4;
+		const leaving = this.scale.isFullscreen;
+		const toward = leaving ? 1 : -1;
+		icon.clear().lineStyle(2, 0x8290b3, 1);
+
+		for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+			// Vértice de la esquina; sus brazos van hacia el centro o hacia afuera.
+			const cx = x + sx * (leaving ? reach - arm : reach);
+			const cy = y + sy * (leaving ? reach - arm : reach);
+			icon.strokePoints([
+				new Phaser.Math.Vector2(cx + sx * arm * toward, cy),
+				new Phaser.Math.Vector2(cx, cy),
+				new Phaser.Math.Vector2(cx, cy + sy * arm * toward),
+			]);
+		}
 	}
 
 	private createLanguageButton(x: number, y: number, label: string, locale: Locale) {
@@ -165,8 +239,7 @@ export class LauncherScene extends Phaser.Scene {
 
 		button.on('pointerdown', () => {
 			if (i18n.setLocale(locale)) {
-				// Los textos son objetos del canvas: reiniciar la escena los redibuja.
-				this.scene.restart();
+				this.redraw();
 			}
 		});
 	}
@@ -190,24 +263,24 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	private getSlotTransform(offset: number) {
-		const distance = Math.min(Math.abs(offset), HIDDEN_SLOT);
+		const distance = Math.min(Math.abs(offset), this.hiddenSlot);
 		const slot = CAROUSEL_SLOTS[distance];
 
 		return {
-			x: CAROUSEL_X + Math.sign(offset) * slot.x,
+			x: this.carouselX + Math.sign(offset) * slot.x,
 			y: CAROUSEL_Y,
 			scale: slot.scale,
 			dim: slot.dim,
-			alpha: distance < HIDDEN_SLOT ? 1 : 0,
+			alpha: distance < this.hiddenSlot ? 1 : 0,
 			depth: 10 - distance,
-			visible: distance < HIDDEN_SLOT,
+			visible: distance < this.hiddenSlot,
 		};
 	}
 
 	private createGameCard(game: GameDefinition, index: number) {
 		// El contenido se corre medio ancho y medio alto para que la ficha se
 		// mueva y escale desde su centro, como pide el carrusel.
-		const card = this.add.container(CAROUSEL_X, CAROUSEL_Y);
+		const card = this.add.container(this.carouselX, CAROUSEL_Y);
 		const content = this.add.container(-CARD_WIDTH / 2, -CARD_HEIGHT / 2);
 		card.add(content);
 
@@ -261,7 +334,7 @@ export class LauncherScene extends Phaser.Scene {
 	private createPageDots() {
 		const count = GAME_CATALOG.length;
 		const rowWidth = (count - 1) * DOT_SPACING;
-		const startX = CAROUSEL_X - rowWidth / 2;
+		const startX = this.carouselX - rowWidth / 2;
 
 		GAME_CATALOG.forEach((_game, index) => {
 			const x = startX + index * DOT_SPACING;
@@ -511,13 +584,13 @@ export class LauncherScene extends Phaser.Scene {
 
 	private drawFooter() {
 		// El pie va debajo del carrusel y de sus puntos.
-		this.add.text(70, 522, i18n.t('launcher.chooseGame'), {
+		this.add.text(MARGIN_X, 522, i18n.t('launcher.chooseGame'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '13px',
 			color: '#6d7da8',
 			letterSpacing: 2,
 		});
-		this.add.text(70, 550, i18n.t('launcher.navigation'), {
+		this.add.text(MARGIN_X, 550, i18n.t('launcher.navigation'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '16px',
 			color: '#d9e2ff',
@@ -584,7 +657,7 @@ export class LauncherScene extends Phaser.Scene {
 			}
 
 			if (previous - shift !== offset) {
-				const entry = this.getSlotTransform(Math.sign(offset) * HIDDEN_SLOT);
+				const entry = this.getSlotTransform(Math.sign(offset) * this.hiddenSlot);
 				card.setPosition(entry.x, entry.y).setScale(entry.scale).setAlpha(0);
 			}
 
@@ -613,6 +686,9 @@ export class LauncherScene extends Phaser.Scene {
 	}
 
 	private launchGame(game: GameDefinition) {
+		// La música se corta acá y no al cerrar la escena: redibujar el launcher
+		// también la cierra, y ahí tiene que seguir sonando.
+		audioManager.stopMusic();
 		// `start` detiene el launcher y activa la escena asociada a la ficha.
 		this.scene.start(game.entrySceneKey);
 	}

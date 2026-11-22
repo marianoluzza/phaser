@@ -63,6 +63,7 @@ capturas en `screenshots/`, que no se versiona.
 npm run shots                 # launcher y Astro Chess
 npm run shots -- astro-chess  # sólo un recorrido
 npm run shots -- --show       # con ventana visible
+npm run shots -- ancho --size=1280x720  # otra ventana; por defecto 800×600
 ARCADE_PORT=5180 npm run shots  # si el 5173 lo usa otro proyecto
 ```
 
@@ -82,7 +83,9 @@ Cuatro decisiones y dos trampas que conviene conocer antes de tocarlo:
   cada paso espera la clave de la escena activa en vez de dormir a ciegas.
 - La página se abre con densidad 2 (`deviceScaleFactor`), como un monitor
   HiDPI, para ejercitar el zoom de `core/renderScale.ts`. Las capturas salen de
-  1600×1200, pero los clicks se siguen dando en coordenadas de 800×600.
+  1600×1200, pero los clicks se dan en coordenadas de la escena: el driver las
+  convierte con la cámara principal, así que valen con cualquier ventana y
+  también para los juegos que todavía se dibujan en 800×600 centrados.
 - Las teclas se mantienen apretadas 80 ms. `Key.onUp` de Phaser borra el
   `justDown`, así que una tecla apretada y soltada en el mismo frame no llega
   nunca a `update()` y se pierde sin dar error.
@@ -460,7 +463,7 @@ R2 declaradas en el catálogo y usan `AudioManager` para la política común.
 ```mermaid
 flowchart LR
     Packs["local-assets/audio<br/>OGG locales"]
-    R2["Cloudflare R2<br/>213 audios"]
+    R2["Cloudflare R2<br/>355 audios"]
     Upload["scripts/upload-audio-r2.mjs"]
     Script["scripts/generate-audio-catalog.mjs"]
     Json["public/assets/audio/catalog.json"]
@@ -531,25 +534,46 @@ usar caché inmutable durante un año. En un despliegue normal no se purga cach�
 todo contenido modificado obtiene una URL diferente. Las hojas de sprites de
 `public/assets/galactica/` no llevan hash y también usan `must-revalidate`.
 
-## Nitidez del canvas
+## Tamaño y nitidez del canvas
 
-Las escenas se diseñan en 800×600, pero el canvas se crea con los píxeles que
-realmente ocupará en pantalla (ventana × densidad del monitor). Si se dibujara
-a 800×600 y el navegador lo estirara, los textos chicos y los trazos finos se
-verían borrosos. `core/renderScale.ts` calcula esa escala al arrancar y un
-plugin de escena hace zoom en la cámara principal y rasteriza cada `Text` a la
-misma resolución. `roundPixels` evita además posiciones en medio píxel.
+El mundo tiene siempre 600 unidades de alto y un ancho elástico que sigue la
+proporción de la ventana: de 800 (4:3) a 1200 (2:1). En una pantalla más ancha
+no se agranda nada, se ve más mundo a los costados. Es la solución habitual en
+juegos 2D (`keep_height` en Godot, *Match Height* en Unity).
+
+- **Por defecto, una escena usa el área clásica de 800×600.** La cámara la
+  centra y a los costados queda el fondo. Así están hoy todos los juegos.
+- **Una escena que aprovecha el ancho lo declara** con `useFullWidth(this)` en
+  `create` y se ubica con `GAME_WIDTH` en vez de `800`: el centro es
+  `GAME_WIDTH / 2` y lo de la derecha se ancla a `GAME_WIDTH - margen`. Por
+  ahora lo hace sólo el launcher, que con más ancho muestra más fichas.
+- **El ancho cambia en vivo** al redimensionar la ventana, entrar en pantalla
+  completa o girar un celular. `main.ts` espera a que la ventana se quede
+  quieta y llama a `relayout`, que ajusta el canvas, las cámaras y los textos
+  de las escenas vivas. Una escena de ancho completo se reinicia, salvo que le
+  pase a `useFullWidth` su propio `onLayout`: una partida en curso tiene que
+  reubicar sus objetos sin perder el estado.
+
+Nitidez: el canvas se crea con los píxeles que realmente ocupará en pantalla
+(ventana × densidad del monitor). Si se dibujara a 800×600 y el navegador lo
+estirara, los textos chicos y los trazos finos se verían borrosos. Un plugin de
+escena hace zoom en la cámara principal (`RENDER_SCALE`) y rasteriza cada
+`Text` a la misma resolución. `roundPixels` evita además posiciones en medio
+píxel.
 
 Para las escenas esto es transparente, salvo en tres casos:
 
 - `pointer.x` y `pointer.y` están en píxeles del canvas. Para coordenadas de la
   escena se usan `pointer.worldX` y `pointer.worldY`.
-- Una cámara adicional (`cameras.add`) recibe su viewport en píxeles del canvas
-  y necesita `setOrigin(0).setZoom(RENDER_SCALE)`, como el visor de la
-  configuración de Pipes o los ejemplos de la Galactopedia. Se dibuja encima de
-  la cámara principal: lo que tenga que verse sobre ella va fuera de su viewport.
+- Una cámara adicional (`cameras.add`) recibe su viewport en píxeles del canvas:
+  se calcula con `canvasRect`, que tiene en cuenta el zoom y el centrado, y
+  lleva `setOrigin(0).setZoom(RENDER_SCALE)`, como el visor de la configuración
+  de Pipes o los ejemplos de la Galactopedia. Al cambiar el tamaño, el plugin
+  la corre junto con la principal. Se dibuja encima de la cámara principal: lo
+  que tenga que verse sobre ella va fuera de su viewport.
 - `setCrop` sobre un `Text` se mide en píxeles de su textura: hay que
-  multiplicar por `text.style.resolution`, como en la bitácora de Astro Chess.
+  multiplicar por `text.style.resolution` y volver a recortar cuando llega
+  `LAYOUT_EVENT`, como en la bitácora de Astro Chess.
 
 ## Arte en pixel art
 
@@ -569,7 +593,7 @@ flowchart LR
   repositorio: así `npm run build` y el deploy no lo necesitan. Si está en otro
   lugar, `PXL=/ruta/a/pxl.js npm run art`.
 - **Filtro `NEAREST`.** El arcade no usa `pixelArt: true` y la cámara hace zoom
-  (ver [Nitidez del canvas](#nitidez-del-canvas)): sin cambiar el filtro de cada
+  (ver [Tamaño y nitidez del canvas](#tamaño-y-nitidez-del-canvas)): sin cambiar el filtro de cada
   textura, el pixel art se interpola y sale borroso.
 - **Escala entera.** Los sprites se dibujan a ×3 para que cada píxel siga
   siendo un cuadrado.

@@ -37,6 +37,14 @@ class AudioManager {
 		this.currentMusic.play();
 	}
 
+	/** Si esa pista ya está sonando la deja seguir: un menú que se redibuja no la corta. */
+	continueMusic(scene: Phaser.Scene, cacheKey: string) {
+		if (this.currentMusic?.key === cacheKey && this.currentMusic.isPlaying) {
+			return;
+		}
+		this.playMusic(scene, cacheKey);
+	}
+
 	playSfx(scene: Phaser.Scene, cacheKey: string) {
 		// Un efecto remoto puede fallar al cargar por red o CORS. El sonido es
 		// opcional: nunca debe interrumpir una regla, un puntaje o una transición.

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
-import { RENDER_SCALE } from '../../../core/renderScale';
+import { canvasRect, RENDER_SCALE } from '../../../core/renderScale';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { PIPE_TYPES, type PipeType } from '../constants/pipeTypes';
 import {
@@ -164,10 +164,7 @@ export class PipesConfigScene extends Phaser.Scene {
 		// El viewport se mide en píxeles reales del canvas y el zoom acompaña a la
 		// cámara principal (ver core/renderScale.ts).
 		this.listCamera = this.cameras.add(
-			VIEWPORT.x * RENDER_SCALE,
-			VIEWPORT.y * RENDER_SCALE,
-			VIEWPORT.width * RENDER_SCALE,
-			VIEWPORT.height * RENDER_SCALE
+			...canvasRect(this, VIEWPORT.x, VIEWPORT.y, VIEWPORT.width, VIEWPORT.height)
 		);
 		this.listCamera.setOrigin(0).setZoom(RENDER_SCALE).setScroll(VIEWPORT.x, VIEWPORT.y);
 

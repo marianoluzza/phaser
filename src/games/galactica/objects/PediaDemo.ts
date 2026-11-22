@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import { RENDER_SCALE } from '../../../core/renderScale';
+import { canvasRect, RENDER_SCALE } from '../../../core/renderScale';
 import { FAMILY_COLORS } from '../constants/families';
 import type { ShipId } from '../constants/ships';
 import { EVOLUTION_CORES, FIELD_H, FIELD_W, STEP } from '../constants/tuning';
@@ -57,7 +57,7 @@ export class PediaDemo {
 		this.scene = scene;
 		// La escena destruye sus cámaras y objetos al cerrarse: el ejemplo no necesita limpieza propia.
 		scene.cameras
-			.add(area.x * RENDER_SCALE, area.y * RENDER_SCALE, area.size * RENDER_SCALE, area.size * RENDER_SCALE)
+			.add(...canvasRect(scene, area.x, area.y, area.size, area.size))
 			.setOrigin(0)
 			.setZoom((RENDER_SCALE * area.size) / FIELD_W)
 			.setScroll(ORIGIN.x, ORIGIN.y);

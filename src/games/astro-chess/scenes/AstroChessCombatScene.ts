@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { LAYOUT_EVENT } from '../../../core/renderScale';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
 import { RAIDER } from '../constants/enemies';
 import { PIECES } from '../constants/pieces';
@@ -183,6 +184,10 @@ export class AstroChessCombatScene extends Phaser.Scene {
 
 		audioManager.playMusic(this, ASTRO_AUDIO.introMusic.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
+		// Un cambio de tamaño vuelve a rasterizar los textos con otra resolución
+		// y el recorte de la bitácora, medido en píxeles de textura, queda viejo.
+		this.events.on(LAYOUT_EVENT, this.clipLog, this);
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(LAYOUT_EVENT, this.clipLog, this));
 
 		const keyboard = this.input.keyboard!;
 		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);

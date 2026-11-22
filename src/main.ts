@@ -3,12 +3,7 @@ import Phaser from 'phaser';
 import './style.css';
 import { GAME_SCENES } from './core/gameCatalog';
 import { LauncherScene } from './core/scenes/LauncherScene';
-import {
-  DESIGN_HEIGHT,
-  DESIGN_WIDTH,
-  RENDER_SCALE,
-  RenderScalePlugin,
-} from './core/renderScale';
+import { canvasSize, relayout, RenderScalePlugin } from './core/renderScale';
 
 /**
  * Punto de entrada de la aplicación.
@@ -20,21 +15,35 @@ import {
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   // El canvas tiene la resolución real de pantalla; ver core/renderScale.ts.
-  width: DESIGN_WIDTH * RENDER_SCALE,
-  height: DESIGN_HEIGHT * RENDER_SCALE,
+  ...canvasSize(),
   // Evita posiciones en medio píxel, que reparten cada trazo en dos columnas.
   roundPixels: true,
   backgroundColor: '#080d1a',
   parent: 'app',
   scene: [LauncherScene, ...GAME_SCENES],
   scale: {
-    // FIT conserva la proporción del juego en pantallas chicas.
+    // FIT conserva la proporción mientras el ancho del mundo se pone al día
+    // con la ventana, y en ventanas más angostas que 4:3 o más anchas que 2:1.
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    // La pantalla completa abarca el fondo de la página, no sólo el canvas.
+    fullscreenTarget: 'app',
   },
   plugins: {
     scene: [{ key: 'RenderScalePlugin', plugin: RenderScalePlugin, mapping: 'renderScale' }],
   },
+});
+
+/**
+ * Mientras se arrastra el borde de la ventana, `Scale.FIT` estira el canvas
+ * que ya hay. Recién cuando se queda quieta se recalculan el ancho del mundo y
+ * la resolución: cada recálculo reinicia los menús y vuelve a rasterizar los
+ * textos.
+ */
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => relayout(game), 150);
 });
 
 /**
