@@ -1,0 +1,279 @@
+spritekiln: 1
+name: minero
+extends: side_humanoid
+mirror: true
+size: 64
+palette: [gothic, socavon]
+camera: {pitch: 0, scale: 0.05, center: [0, 1.12, 0]}
+
+brief:
+  summary: minero petiso y decidido de Socavón, con un casco demasiado grande
+  reference: arte conceptual de Mariano (protagonista.png), perfil
+  must_keep: [casco violeta de ala ancha, linterna encendida al frente, bufanda amarilla con puntas atrás, campera ladrillo, morral en la cadera]
+  head: "casco enorme hasta las cejas, pelo castaño en la nuca, mandíbula suave y mentón corto; sólo ojo (cara mínima, sin nariz ni bigote)"
+  simplify: [la cara queda en ojo y pelo (cara mínima a 40 px), las costuras desaparecen]
+
+review:
+  keep:
+    casco: {parts: [helmet, brim], min_px: 30}
+    linterna: {parts: [lamp_lens], min_px: 4}
+    bufanda: {parts: [scarf], min_px: 8}
+
+remove: [use.sword, use.hair, parts.smear, parts.coat, parts.belt,
+         animations.run, animations.jump, animations.rise, animations.fall, animations.land,
+         animations.crouch, animations.attack, animations.hurt, animations.death]
+
+materials:
+  skin: {ramp: skin}
+  cloth: {ramp: jacket}
+  jacket: {ramp: jacket}
+  trousers: {ramp: trousers}
+  leather: {ramp: boot}
+  helmet: {ramp: helmet, finish: soft}
+  housing: {ramp: iron}
+  lens: {ramp: lamp, emissive: true, band: 3}
+  scarf: {ramp: scarf}
+  satchel: {ramp: satchel}
+  hair: {ramp: breeches, bands: [1, 2]}
+  ink: {ramp: ink, emissive: true, band: 0, outline: false}
+  sack: {ramp: sack}
+  gold: {ramp: gold, finish: metal}
+  wood: {ramp: timber}
+  iron: {ramp: iron, finish: metal}
+
+channels:
+  bag: 0          # bolsa al hombro
+  pick: 0         # pico en la mano derecha
+  pick_angle: 0   # giro del pico: + hacia adelante
+  flap: 0         # puntas de la bufanda
+
+bones:
+  torso_rot: {parent: root, pos: "[0, 0.70 + bob, 0]", rot: "[lean, twist, roll]"}
+  headbase: {parent: pelvis, pos: [0, 0.58, 0.03], inherit_rot: false, inherit_scale: false, rot: "[lean*0.5, twist, roll]"}
+  head: {parent: headbase, rot: "[head_pitch, head_yaw, 0]", scale: 1.8}
+  shoulder_L: {parent: pelvis, pos: [0.25, 0.46, 0]}
+  pickbone: {parent: wrist_R, rot: "[pick_angle, 0, 0]", inherit_rot: false}
+
+ik:
+  arm_L: {lengths: [0.27, 0.26]}
+  leg_L: {lengths: [0.34, 0.33]}
+
+parts:
+  torso:
+    material: jacket
+    space: pelvis
+    blend: 0.06
+    prims:
+      - ellipsoid: {c: [0, 0.10, 0], r: [0.22, 0.14, 0.20]}
+      - ellipsoid: {c: [0, 0.30, 0], r: [0.22, 0.22, 0.22]}
+  seat:
+    material: trousers
+    space: pelvis
+    prims:
+      - ellipsoid: {c: [0, -0.06, 0], r: [0.20, 0.13, 0.19]}
+  neck: {material: skin, prims: [{cone: {a: [0, 0.45, 0], b: [0, 0.60, 0.03], r: [0.08, 0.08]}}]}
+  arm_L: {material: jacket}
+  hand_L:
+    material: skin
+    space: wrist_L
+    prims:
+      - sphere: {c: [0, 0, 0.03], r: 0.092}
+  leg_L: {material: trousers}
+  boot_L:
+    material: leather
+    space: sole_L
+    blend: 0.03
+    prims:
+      - cone: {a: [0, 0.10, 0], b: [0, -0.01, 0], r: [0.085, 0.085]}
+      - ellipsoid: {c: [0, -0.035, 0.07], r: [0.085, 0.07, 0.15]}
+  eye_L:
+    material: ink
+    space: head
+    priority: 3
+    prims:
+      - box: {c: [0.10, 0.115, 0.085], half: [0.03, 0.04, 0.022]}
+  hair_back:
+    material: hair
+    space: head
+    prims:
+      - ellipsoid: {c: [0, 0.12, -0.08], r: [0.14, 0.11, 0.09]}
+  helmet:
+    material: helmet
+    space: head
+    blend: 0.01
+    prims:
+      - ellipsoid: {c: [0, 0.20, -0.025], r: [0.165, 0.16, 0.175]}
+    cut:
+      - plane: {n: [0, -1, 0], at: -0.185}
+  brim:
+    material: helmet
+    space: head
+    prims:
+      - ellipsoid: {c: [0, 0.195, 0], r: [0.19, 0.03, 0.235], rot: [-0.12, 0, 0]}
+  lamp_case:
+    material: housing
+    space: head
+    prims:
+      - cylinder: {a: [0, 0.265, 0.12], b: [0, 0.265, 0.18], r: 0.065}
+  lamp_lens:
+    material: lens
+    space: head
+    priority: 3
+    prims:
+      - ellipsoid: {c: [0, 0.265, 0.20], r: [0.058, 0.06, 0.036]}
+  scarf:
+    material: scarf
+    space: pelvis
+    blend: 0.02
+    prims:
+      - ellipsoid: {c: [0, 0.505, 0.02], r: [0.21, 0.085, 0.22]}
+  scarf_tails:
+    material: scarf
+    space: pelvis
+    when: "bag < 0.5"
+    prims:
+      - tube: {pts: [[0, 0.50, -0.16], [0.05, "0.52 + 0.05*flap", -0.28], [0.05, "0.40 + 0.10*flap", -0.40]], r: [0.07, 0.045]}
+  satchel:
+    material: satchel
+    space: pelvis
+    prims:
+      - box: {c: [0.20, 0.0, -0.19], half: [0.05, 0.12, 0.10], round: 0.03}
+  sack:
+    material: sack
+    space: pelvis
+    when: "bag > 0.5"
+    blend: 0.05
+    prims:
+      - ellipsoid: {c: [0.04, 0.42, -0.40], r: [0.23, 0.28, 0.25]}
+      - cone: {a: [0.04, 0.62, -0.32], b: [0.06, 0.74, -0.18], r: [0.09, 0.07]}
+  sack_coin:
+    material: gold
+    space: pelvis
+    when: "bag > 0.5"
+    prims:
+      - cylinder: {a: [0.22, 0.40, -0.42], b: [0.30, 0.40, -0.42], r: 0.11}
+  pick_handle:
+    material: wood
+    space: pickbone
+    when: "pick > 0.5"
+    priority: 2
+    prims:
+      - cylinder: {a: [0, -0.12, 0.02], b: [0, 0.55, 0.02], r: 0.04}
+  pick_head:
+    material: iron
+    space: pickbone
+    when: "pick > 0.5"
+    priority: 2
+    prims:
+      - tube: {pts: [[0, 0.40, -0.26], [0, 0.64, 0.02], [0, 0.40, 0.30]], r: 0.048}
+
+animations:
+  idle:
+    frames: 4
+    ms: 220
+    channels: {bob: "0.025*sin(p)", flap: "0.5*sin(p)", foot_L: [0.12, 0, 0.11], foot_R: [0.12, 0, -0.09],
+               hand_L: [0.31, 0.02, 0.10], hand_R: [0.31, 0.02, 0.02]}
+  walk:
+    frames: 6
+    ms: 85
+    channels: {lean: 0.18, bob: "-0.03 - 0.035*sin(2*p)", flap: "1.2 + 0.5*sin(2*p)",
+               foot_L: "[0.12, 0.16*pos(-sin(p)), 0.02 + 0.27*cos(p)]",
+               foot_R: "[0.12, 0.16*pos(sin(p)), 0.02 - 0.27*cos(p)]",
+               hand_L: "[0.31, 0.06, 0.05 - 0.22*cos(p)]", hand_R: "[0.31, 0.06, 0.05 + 0.22*cos(p)]"}
+  carry_idle:
+    frames: 4
+    ms: 240
+    channels: {bag: 1, lean: 0.25, bob: "-0.04 + 0.025*sin(p)", foot_L: [0.12, 0, 0.12], foot_R: [0.12, 0, -0.10],
+               hand_L: [0.22, 0.52, 0.02], hand_R: [0.22, 0.40, 0.10]}
+  carry:
+    frames: 6
+    ms: 110
+    channels: {bag: 1, lean: 0.30, bob: "-0.06 - 0.035*sin(2*p)",
+               foot_L: "[0.12, 0.12*pos(-sin(p)), 0.04 + 0.22*cos(p)]",
+               foot_R: "[0.12, 0.12*pos(sin(p)), 0.04 - 0.22*cos(p)]",
+               hand_L: [0.22, 0.52, 0.02], hand_R: [0.22, 0.40, 0.10]}
+  pick_idle:
+    frames: 4
+    ms: 220
+    channels: {pick: 1, pick_angle: 0.55, bob: "0.025*sin(p)", flap: "0.5*sin(p)", foot_L: [0.12, 0, 0.11],
+               foot_R: [0.12, 0, -0.09], hand_L: [0.31, 0.02, 0.10], hand_R: [0.26, 0.16, 0.36]}
+  pick_walk:
+    frames: 6
+    ms: 95
+    channels: {pick: 1, pick_angle: 0.55, lean: 0.16, bob: "-0.03 - 0.035*sin(2*p)", flap: 1,
+               foot_L: "[0.12, 0.15*pos(-sin(p)), 0.02 + 0.25*cos(p)]",
+               foot_R: "[0.12, 0.15*pos(sin(p)), 0.02 - 0.25*cos(p)]",
+               hand_L: "[0.31, 0.06, 0.05 - 0.20*cos(p)]", hand_R: [0.26, 0.16, 0.36]}
+  strike:
+    loop: false
+    keys:
+      - {ms: 90, set: {pick: 1, pick_angle: -1.0, lean: -0.15, hand_L: [0.20, 0.60, 0.05], hand_R: [0.20, 0.66, 0.0],
+                       foot_L: [0.12, 0, 0.14], foot_R: [0.12, 0, -0.12]}}
+      - {ms: 70, event: hit, set: {pick: 1, pick_angle: 1.2, lean: 0.4, bob: -0.08, hand_L: [0.18, 0.25, 0.38],
+                       hand_R: [0.18, 0.22, 0.40], foot_L: [0.12, 0, 0.18], foot_R: [0.12, 0, -0.14]}}
+      - {ms: 140, set: {pick: 1, pick_angle: 0.6, lean: 0.25, bob: -0.05, hand_L: [0.22, 0.18, 0.30],
+                       hand_R: [0.22, 0.16, 0.32], foot_L: [0.12, 0, 0.16], foot_R: [0.12, 0, -0.12]}}
+  push:
+    frames: 6
+    ms: 95
+    channels: {lean: 0.42, bob: "-0.09 - 0.03*sin(2*p)", flap: 1,
+               foot_L: "[0.12, 0.14*pos(-sin(p)), -0.02 + 0.24*cos(p)]",
+               foot_R: "[0.12, 0.14*pos(sin(p)), -0.02 - 0.24*cos(p)]",
+               hand_L: [0.22, 0.12, 0.44], hand_R: [0.22, 0.12, 0.44]}
+  climb:
+    frames: 4
+    ms: 120
+    channels: {lean: 0.05, head_pitch: -0.12,
+               foot_L: "[0.12, 0.16 + 0.14*cos(p), 0.22]", foot_R: "[0.12, 0.16 - 0.14*cos(p), 0.22]",
+               hand_L: "[0.20, 0.64 - 0.14*cos(p), 0.28]", hand_R: "[0.20, 0.64 + 0.14*cos(p), 0.28]"}
+  climb_carry:
+    frames: 4
+    ms: 140
+    channels: {bag: 1, lean: 0.1,
+               foot_L: "[0.12, 0.16 + 0.14*cos(p), 0.22]", foot_R: "[0.12, 0.16 - 0.14*cos(p), 0.22]",
+               hand_L: [0.22, 0.52, 0.02], hand_R: "[0.20, 0.64 + 0.12*cos(p), 0.28]"}
+  climb_pick:
+    frames: 4
+    ms: 140
+    channels: {pick: 1, pick_angle: -1.1, lean: 0.1,
+               foot_L: "[0.12, 0.16 + 0.14*cos(p), 0.22]", foot_R: "[0.12, 0.16 - 0.14*cos(p), 0.22]",
+               hand_L: "[0.20, 0.64 - 0.12*cos(p), 0.28]", hand_R: [0.26, 0.30, 0.10]}
+  hang:
+    frames: 4
+    ms: 140
+    channels: {lean: "0.12*sin(p)", flap: 1,
+               foot_L: "[0.12, 0.14, 0.05 + 0.14*sin(p)]", foot_R: "[0.12, 0.20, -0.10 + 0.14*sin(p)]",
+               hand_L: "[0.17, 1.0, 0.12*cos(p)]", hand_R: "[0.17, 1.0, -0.12*cos(p)]"}
+  # horizontal, de pies y manos: tiene que caber entre la vagoneta y el techo (20 px)
+  grip:
+    frames: 4
+    ms: 130
+    channels: {lean: 1.42, bob: 0.72, head_pitch: -0.45, flap: -1,
+               foot_L: "[0.12, 1.86, -0.46 + 0.04*sin(p)]", foot_R: [0.12, 1.84, -0.30],
+               hand_L: [0.22, 0.45, -0.52], hand_R: [0.22, 0.38, -0.52]}
+  # agachado adentro de la vagoneta: se dibuja detrás de ella
+  ride:
+    frames: 4
+    ms: 130
+    channels: {lean: 0.5, bob: "-0.30 - 0.04*sin(p)", head_pitch: -0.2, flap: "1.2 + 0.4*sin(p)",
+               foot_L: [0.12, 0, 0.16], foot_R: [0.12, 0, -0.14],
+               hand_L: [0.22, 0.60, 0.34], hand_R: [0.22, 0.60, 0.30]}
+  ride_carry:
+    frames: 4
+    ms: 130
+    channels: {bag: 1, lean: 0.5, bob: "-0.30 - 0.04*sin(p)", head_pitch: -0.2,
+               foot_L: [0.12, 0, 0.16], foot_R: [0.12, 0, -0.14],
+               hand_L: [0.22, 0.52, 0.02], hand_R: [0.22, 0.60, 0.30]}
+  ride_pick:
+    frames: 4
+    ms: 130
+    channels: {pick: 1, pick_angle: 0.55, lean: 0.5, bob: "-0.30 - 0.04*sin(p)", head_pitch: -0.2, flap: 1.2,
+               foot_L: [0.12, 0, 0.16], foot_R: [0.12, 0, -0.14],
+               hand_L: [0.22, 0.60, 0.34], hand_R: [0.26, 0.16, 0.36]}
+  caught:
+    loop: false
+    keys:
+      - {ms: 120, set: {lean: -0.35, head_pitch: -0.3, flap: 2, foot_L: [0.12, 0.10, 0.22], foot_R: [0.12, 0, -0.12],
+                        hand_L: [0.30, 0.80, 0.10], hand_R: [0.30, 0.80, -0.10]}}
+      - {ms: 900, set: {bob: -0.36, lean: -0.25, head_pitch: 0.25, foot_L: [0.12, 0, 0.44], foot_R: [0.12, 0, 0.36],
+                        pitch_foot_L: -0.8, pitch_foot_R: -0.8, hand_L: [0.32, 0.0, -0.10], hand_R: [0.32, 0.0, -0.10]}}

@@ -1,0 +1,165 @@
+spritekiln: 1
+name: tiles
+kind: prop
+view: side
+mirror: false
+directions: [s]
+size: 24
+palette: [gothic, socavon]
+camera: {pitch: 0, scale: 0.05, center: [0, 0.6, 0]}
+# Excepción al estilo: un tile llena su cuadro y se repite. Con contorno, la
+# mina quedaría cuadriculada.
+render: {outline: none}
+
+brief:
+  summary: tiles de 24 px de Socavón; cada animación es un tile
+  simplify: [sin contorno exterior porque se repiten; el corte al borde que avisa QA es intencional]
+
+materials:
+  rock: {ramp: rock}
+  rock_dark: {ramp: rock, bands: [1, 2]}
+  soil: {ramp: soil}
+  deep: {ramp: deep}
+  deep_stone: {ramp: deep, bands: [2, 4]}
+  brick: {ramp: brick}
+  mortar: {ramp: brick, bands: [1, 1]}
+  crack: {ramp: hole}
+  wood: {ramp: timber}
+  iron: {ramp: iron, finish: metal}
+
+channels: {v: 0}
+
+parts:
+  rock_base:
+    when: "v <= 3"
+    material: rock_dark
+    prims:
+      - box: {c: [0, 0.6, -0.4], half: [0.7, 0.7, 0.05]}
+  rocks_a:
+    when: "v == 0 or v == 2"
+    material: rock
+    prims:
+      - ellipsoid: {c: [-0.34, 0.30, -0.2], r: [0.27, 0.22, 0.14]}
+      - ellipsoid: {c: [0.30, 0.22, -0.2], r: [0.24, 0.17, 0.14]}
+      - ellipsoid: {c: [0.12, 0.66, -0.2], r: [0.30, 0.21, 0.14]}
+      - ellipsoid: {c: [-0.40, 0.90, -0.2], r: [0.17, 0.15, 0.14]}
+      - ellipsoid: {c: [0.38, 1.02, -0.2], r: [0.18, 0.13, 0.14]}
+  rocks_b:
+    when: "v == 1 or v == 3"
+    material: rock
+    prims:
+      - ellipsoid: {c: [-0.20, 0.20, -0.2], r: [0.22, 0.16, 0.14]}
+      - ellipsoid: {c: [0.36, 0.44, -0.2], r: [0.20, 0.25, 0.14]}
+      - ellipsoid: {c: [-0.28, 0.62, -0.2], r: [0.28, 0.20, 0.14]}
+      - ellipsoid: {c: [0.10, 0.98, -0.2], r: [0.31, 0.16, 0.14]}
+  topsoil:
+    when: "v <= 1"
+    material: soil
+    blend: 0.05
+    prims:
+      - box: {c: [0, 1.15, 0], half: [0.7, 0.11, 0.1]}
+      - ellipsoid: {c: [-0.36, 1.05, 0.05], r: [0.22, 0.12, 0.1]}
+      - ellipsoid: {c: [0.24, 1.07, 0.05], r: [0.28, 0.10, 0.1]}
+
+  back:
+    when: "v >= 4 and v <= 6"
+    material: deep
+    prims:
+      - box: {c: [0, 0.6, -0.4], half: [0.7, 0.7, 0.05]}
+  back_a:
+    when: "v == 4"
+    material: deep_stone
+    prims:
+      - ellipsoid: {c: [-0.22, 0.78, -0.3], r: [0.24, 0.14, 0.08]}
+      - ellipsoid: {c: [0.32, 0.30, -0.3], r: [0.18, 0.12, 0.08]}
+  back_b:
+    when: "v == 5"
+    material: deep_stone
+    prims:
+      - ellipsoid: {c: [0.16, 0.92, -0.3], r: [0.20, 0.12, 0.08]}
+  back_post:
+    when: "v == 6"
+    material: wood
+    prims:
+      - box: {c: [0, 0.6, -0.2], half: [0.12, 0.7, 0.06]}
+
+  mortar:
+    when: "v == 7 or v == 8"
+    material: mortar
+    prims:
+      - box: {c: [0, 0.6, -0.1], half: [0.5, 0.7, 0.05]}
+  bricks:
+    when: "v == 7 or v == 8"
+    material: brick
+    prims:
+      - box: {c: [-0.22, 0.14, 0.05], half: [0.22, 0.12, 0.06], round: 0.04}
+      - box: {c: [0.28, 0.14, 0.05], half: [0.18, 0.12, 0.06], round: 0.04}
+      - box: {c: [-0.30, 0.44, 0.05], half: [0.14, 0.12, 0.06], round: 0.04}
+      - box: {c: [0.16, 0.44, 0.05], half: [0.27, 0.12, 0.06], round: 0.04}
+      - box: {c: [-0.22, 0.74, 0.05], half: [0.22, 0.12, 0.06], round: 0.04}
+      - box: {c: [0.28, 0.74, 0.05], half: [0.18, 0.12, 0.06], round: 0.04}
+      - box: {c: [-0.30, 1.04, 0.05], half: [0.14, 0.12, 0.06], round: 0.04}
+      - box: {c: [0.16, 1.04, 0.05], half: [0.27, 0.12, 0.06], round: 0.04}
+  cracks:
+    when: "v == 8"
+    material: crack
+    priority: 3
+    prims:
+      - cylinder: {a: [-0.10, 1.2, 0.2], b: [0.14, 0.84, 0.2], r: 0.05}
+      - cylinder: {a: [0.14, 0.84, 0.2], b: [-0.14, 0.50, 0.2], r: 0.06}
+      - cylinder: {a: [-0.14, 0.50, 0.2], b: [0.10, 0.06, 0.2], r: 0.05}
+      - cylinder: {a: [-0.14, 0.56, 0.2], b: [-0.42, 0.70, 0.2], r: 0.04}
+  rubble:
+    when: "v == 9"
+    material: brick
+    prims:
+      - box: {c: [-0.30, 0.10, 0], half: [0.16, 0.11, 0.08], rot: [0, 0, 0.3], round: 0.03}
+      - box: {c: [0.10, 0.07, 0.02], half: [0.13, 0.09, 0.08], rot: [0, 0, -0.4], round: 0.03}
+      - box: {c: [0.36, 0.06, 0], half: [0.11, 0.08, 0.08], round: 0.03}
+
+  ladder_rungs:
+    when: "v == 10"
+    material: wood
+    prims:
+      - box: {c: [0, 0.16, 0], half: [0.36, 0.06, 0.04]}
+      - box: {c: [0, 0.56, 0], half: [0.36, 0.06, 0.04]}
+      - box: {c: [0, 0.96, 0], half: [0.36, 0.06, 0.04]}
+  ladder_rails:
+    when: "v == 10"
+    material: wood
+    prims:
+      - box: {c: [-0.36, 0.6, 0.1], half: [0.085, 0.7, 0.05]}
+      - box: {c: [0.36, 0.6, 0.1], half: [0.085, 0.7, 0.05]}
+
+  sleepers:
+    when: "v == 11"
+    material: wood
+    prims:
+      - box: {c: [-0.3, 0.06, 0], half: [0.12, 0.07, 0.05]}
+      - box: {c: [0.3, 0.06, 0], half: [0.12, 0.07, 0.05]}
+  rail:
+    when: "v == 11"
+    material: iron
+    prims:
+      - box: {c: [0, 0.16, 0.1], half: [0.7, 0.05, 0.05]}
+
+  beam:
+    when: "v == 12"
+    material: wood
+    prims:
+      - box: {c: [0, 1.06, 0], half: [0.7, 0.14, 0.08]}
+
+animations:
+  floor_a: {frames: 1, channels: {v: 0}}
+  floor_b: {frames: 1, channels: {v: 1}}
+  rock_a: {frames: 1, channels: {v: 2}}
+  rock_b: {frames: 1, channels: {v: 3}}
+  back_a: {frames: 1, channels: {v: 4}}
+  back_b: {frames: 1, channels: {v: 5}}
+  back_post: {frames: 1, channels: {v: 6}}
+  wall: {frames: 1, channels: {v: 7}}
+  wall_cracked: {frames: 1, channels: {v: 8}}
+  rubble: {frames: 1, channels: {v: 9}}
+  ladder: {frames: 1, channels: {v: 10}}
+  rail: {frames: 1, channels: {v: 11}}
+  beam: {frames: 1, channels: {v: 12}}

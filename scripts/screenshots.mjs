@@ -13,6 +13,333 @@ import { openArcade } from './arcade-driver.mjs';
  * prueba que algo se dibujó, no que sea la pantalla correcta.
  */
 const FLOWS = {
+	/**
+	 * Socavón de punta a punta: la primera mina entera con el teclado (con los
+	 * serenos quietos, para que el recorrido sea repetible), la mina de
+	 * abajo, una persecución de verdad, el fin de la partida y la veta sin fin.
+	 */
+	socavon: async (arcade) => {
+		const { page } = arcade;
+		const state = () => page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			return {
+				x: mine.player.x, y: mine.player.y, hands: mine.player.hands, keys: mine.player.keys,
+				delivered: mine.delivered, status: mine.status, lives: mine.lives,
+			};
+		});
+		const expect = async (key, value) => {
+			const actual = (await state())[key];
+			if (actual !== value) throw new Error(`Socavón: ${key} = ${actual}, se esperaba ${value}`);
+		};
+		const hold = async (key, reached) => {
+			await page.keyboard.down(key);
+			try {
+				await page.waitForFunction(reached.test, reached.value, { timeout: 15000, polling: 'raf' });
+			} finally {
+				await page.keyboard.up(key);
+			}
+			await page.waitForTimeout(80);
+		};
+		const walk = async (x) => {
+			const from = (await state()).x;
+			if (Math.abs(from - x) < 0.25) return;
+			await hold(x > from ? 'ArrowRight' : 'ArrowLeft', {
+				value: [x, Math.sign(x - from)],
+				test: ([goal, side]) => (window.arcade.scene.getScene('socavon:game').mine.player.x - goal) * side >= -0.1,
+			});
+		};
+		const climb = async (y) => {
+			const from = (await state()).y;
+			await hold(y > from ? 'ArrowDown' : 'ArrowUp', {
+				value: y,
+				test: (goal) => window.arcade.scene.getScene('socavon:game').mine.player.y === goal,
+			});
+		};
+		const use = () => arcade.press('Space');
+
+		await arcade.waitForScene('core:launcher');
+		// Socavón es la anteúltima ficha del catálogo, antes del Jukebox.
+		await arcade.press('ArrowLeft', 2);
+		await arcade.shot('socavon-launcher');
+		await arcade.press('Enter');
+		await arcade.waitForScene('socavon:title');
+		await arcade.shot('socavon-titulo');
+		await arcade.press('Enter');
+		await arcade.waitForScene('socavon:game');
+		await page.waitForTimeout(700);
+		await arcade.shot('socavon-mina1');
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			mine.threats = false;
+			for (const guard of mine.guards) Object.assign(guard, { x: guard.home.x, y: guard.home.y, facing: 1, moving: false });
+		});
+
+		await walk(11);
+		await climb(1);
+		await walk(9);
+		await use();
+		await expect('hands', 'bag');
+		await arcade.shot('socavon-con-bolsa');
+		await walk(11);
+		await climb(0);
+		await walk(5);
+		await use();
+		await expect('delivered', 1);
+		await walk(15);
+		await use();
+		await walk(5);
+		await use();
+		await expect('delivered', 2);
+
+		await walk(11);
+		await climb(1);
+		await walk(13);
+		await use();
+		await expect('hands', 'pick');
+		await arcade.shot('socavon-con-pico');
+		await walk(4);
+		await climb(2);
+		await walk(14.6);
+		await use();
+		await expect('keys', 1);
+		await walk(18);
+		await use();
+		await arcade.shot('socavon-muro-golpeado');
+		await page.waitForTimeout(300);
+		await use();
+		await page.waitForTimeout(300);
+		await use();
+		await page.waitForTimeout(400);
+		await use();
+		await expect('hands', null);
+		await walk(21);
+		await use();
+		await expect('hands', 'bag');
+		await walk(5);
+		await use();
+		await expect('delivered', 3);
+
+		await walk(10);
+		await climb(3);
+		await walk(4);
+		await use();
+		await walk(10);
+		await climb(2);
+		await walk(5);
+		await use();
+		await expect('delivered', 4);
+		// R15: un sereno de verdad, plantado en el camino del medio a la bóveda.
+		// Se entra por la bajada del otro lado, a su espalda.
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.guards[0], { x: 15, y: 3, facing: -1, waitFor: 999, route: [], goal: null, mode: 'patrol', moving: false });
+			mine.threats = true;
+		});
+		await walk(25);
+		await climb(3);
+		await walk(22);
+		await arcade.shot('socavon-por-el-otro-lado');
+		await expect('lives', 3);
+		await use();
+		await page.evaluate(() => {
+			window.arcade.scene.getScene('socavon:game').mine.threats = false;
+		});
+		await expect('keys', 0);
+		await expect('lives', 3);
+		await arcade.shot('socavon-boveda');
+		for (const total of [5, 6]) {
+			await walk(22);
+			await use();
+			await expect('hands', 'bag');
+			await walk(25);
+			await climb(2);
+			await walk(5);
+			await use();
+			await expect('delivered', total);
+			if (total === 5) {
+				await walk(25);
+				await climb(3);
+			}
+		}
+		await expect('status', 'cleared');
+		await arcade.shot('socavon-mina-vacia');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('socavon:game');
+		await page.waitForTimeout(700);
+		await expect('status', 'playing');
+		await expect('delivered', 0);
+		await arcade.shot('socavon-mina2');
+
+		// Carretilla, manijas y oscuridad.
+		const put = (x, y) => page.evaluate(([px, py]) => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.player, { x: px, y: py, state: 'walk' });
+			mine.threats = false;
+		}, [x, y]);
+		await put(9, 1);
+		await walk(10.2);
+		await page.waitForTimeout(500);
+		await arcade.shot('socavon-manijas');
+		await put(23, 2);
+		await page.waitForTimeout(700);
+		await use();
+		await expect('hands', 'barrow');
+		await walk(20);
+		await arcade.shot('socavon-carretilla');
+		await use();
+
+		// R16: colgarse, que pase la vagoneta, caerle adentro y bajarse, con el teclado.
+		await put(13, 2);
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			for (const guard of mine.guards) {
+				Object.assign(guard, { x: 3, y: 0, mode: 'patrol', waitFor: 999, ignoreFor: 999, route: [], goal: null, moving: false });
+			}
+			Object.assign(mine.carts.find((cart) => cart.y === 2), { x: 6, direction: 1, waitFor: 1.5 });
+			mine.threats = true;
+		});
+		await arcade.shot('socavon-agarre-en-el-techo');
+		await hold('ArrowUp', { value: 'grip', test: (wanted) => window.arcade.scene.getScene('socavon:game').mine.player.state === wanted });
+		// Se congela en el cruce para mirar que no se toquen.
+		await page.waitForFunction(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			if (scene.mine.carts.find((cart) => cart.y === 2).x < 12.9) return false;
+			scene.paused = true;
+			return true;
+		}, null, { timeout: 15000, polling: 'raf' });
+		await arcade.shot('socavon-pasa-por-abajo');
+		await expect('lives', 3);
+		await page.evaluate(() => {
+			window.arcade.scene.getScene('socavon:game').paused = false;
+		});
+		await page.waitForFunction(() => {
+			const cart = window.arcade.scene.getScene('socavon:game').mine.carts.find((other) => other.y === 2);
+			return cart.direction < 0 && cart.waitFor <= 0 && cart.x < 14.9;
+		}, null, { timeout: 15000, polling: 'raf' });
+		await hold('ArrowDown', { value: null, test: () => window.arcade.scene.getScene('socavon:game').mine.player.state !== 'grip' });
+		await page.waitForFunction(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			if (scene.mine.player.state !== 'ride' || scene.mine.player.x > 10) return false;
+			scene.paused = true;
+			return true;
+		}, null, { timeout: 5000, polling: 'raf' });
+		await arcade.shot('socavon-viajando');
+		await page.evaluate(() => {
+			window.arcade.scene.getScene('socavon:game').paused = false;
+		});
+		await page.waitForFunction(
+			() => window.arcade.scene.getScene('socavon:game').mine.player.cart?.waitFor > 0,
+			null,
+			{ timeout: 5000, polling: 'raf' }
+		);
+		await arcade.shot('socavon-vagoneta-detenida');
+		const riderIs = (state) => page.waitForFunction(
+			(wanted) => window.arcade.scene.getScene('socavon:game').mine.player.state === wanted,
+			state,
+			{ timeout: 3000, polling: 'raf' }
+		);
+		await use();
+		await riderIs('walk');
+		await expect('lives', 3);
+		// Y de vuelta arriba, con Espacio desde el piso.
+		await use();
+		await riderIs('ride');
+		await use();
+		await riderIs('walk');
+		await expect('lives', 3);
+
+		// R16.4: colgado, el sereno lo agarra.
+		await put(13, 4);
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			mine.player.stamina = 6;
+		});
+		await hold('ArrowUp', { value: 'grip', test: (wanted) => window.arcade.scene.getScene('socavon:game').mine.player.state === wanted });
+		await page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			const { mine } = scene;
+			Object.assign(mine.guards[0], { x: 11.6, y: 4, facing: 1, mode: 'chase', timer: 9, ignoreFor: 0, shakenFor: 3 });
+			scene.view.update(0);
+			scene.paused = true;
+		});
+		await arcade.shot('socavon-viene-por-el-colgado');
+		await page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			for (const cart of scene.mine.carts) cart.waitFor = 999;
+			scene.mine.threats = true;
+			scene.paused = false;
+		});
+		await page.waitForFunction(
+			() => window.arcade.scene.getScene('socavon:game').mine.lives === 2,
+			null,
+			{ timeout: 4000, polling: 'raf' }
+		);
+		await page.waitForTimeout(1900);
+		await page.evaluate(() => {
+			window.arcade.scene.getScene('socavon:game').mine.lives = 3;
+		});
+		await put(20, 2);
+		await page.waitForTimeout(700);
+		await arcade.press('x');
+		await page.waitForTimeout(500);
+		await arcade.shot('socavon-sin-linterna');
+		await arcade.press('p');
+		await arcade.shot('socavon-pausa');
+		await arcade.press('p');
+
+		await arcade.press('x');
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.player, { x: 12, y: 0, state: 'walk', invincible: 0 });
+			Object.assign(mine.guards[0], { x: 19, y: 0, facing: -1, waitFor: 9, route: [] });
+			mine.lives = 1;
+			mine.threats = true;
+		});
+		await page.waitForTimeout(1100);
+		await arcade.shot('socavon-persecucion');
+		await arcade.waitForScene('socavon:result');
+		await arcade.shot('socavon-fin');
+		await arcade.press('m');
+		await arcade.waitForScene('socavon:title');
+
+		await arcade.press('ArrowRight');
+		await arcade.shot('socavon-veta-titulo');
+		await arcade.resize(1280, 640);
+		await arcade.waitForScene('socavon:title');
+		await arcade.shot('socavon-veta-titulo-ancho');
+		await arcade.press('Enter');
+		await arcade.waitForScene('socavon:game');
+		await page.waitForTimeout(700);
+		await arcade.shot('socavon-generada-ancho');
+		await page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			scene.scene.restart({ run: { score: 0, lives: 3, depth: 9, seed: 48151, campaign: false } });
+		});
+		await page.waitForTimeout(1500);
+		await arcade.shot('socavon-generada-profunda');
+		await arcade.resize(800, 600);
+		await arcade.shot('socavon-achicada-en-vivo');
+		await arcade.press('Escape');
+		await arcade.waitForScene('socavon:title');
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+
+		await page.evaluate(() => localStorage.setItem('arcade.locale', 'en'));
+		await page.reload();
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('ArrowLeft', 2);
+		await arcade.shot('socavon-launcher-en');
+		await arcade.press('Enter');
+		await arcade.waitForScene('socavon:title');
+		await arcade.shot('socavon-titulo-en');
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+		await page.evaluate(() => localStorage.setItem('arcade.locale', 'es'));
+		await page.reload();
+		await arcade.waitForScene('core:launcher');
+	},
+
 	launcher: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		await arcade.shot('launcher');

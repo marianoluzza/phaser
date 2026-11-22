@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "shots": "node scripts/screenshots.mjs",
     "art": "node scripts/build-art.mjs",
+    "art:socavon": "node scripts/build-socavon-art.mjs",
+    "test:socavon": "node scripts/socavon-test.mjs",
     "sim:astro": "node scripts/astro-sim.mjs",
     "sim:traffic": "node scripts/traffic-sim.mjs",
     "sim:galactica": "node scripts/galactica-sim.mjs",

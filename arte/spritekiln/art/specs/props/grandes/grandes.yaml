@@ -1,0 +1,216 @@
+spritekiln: 1
+name: grandes
+kind: prop
+view: side
+mirror: false
+directions: [s]
+size: 72
+palette: [gothic, socavon]
+camera: {pitch: 0, scale: 0.05, center: [0, 1.5, 0]}
+
+brief:
+  summary: objetos grandes de Socavón; cada animación es un objeto o un estado suyo
+  reference: arte conceptual de Mariano (objetos-de-la-mina.png)
+  must_keep: [bóveda con volante dorado, oro adentro al abrirla, vagoneta de hierro, carretilla de madera, jaula del montacargas, nicho]
+
+materials:
+  steel: {ramp: iron, finish: metal}
+  frame: {ramp: rock}
+  wood: {ramp: timber}
+  gold: {ramp: gold, finish: metal}
+  sack: {ramp: sack}
+  hole: {ramp: hole}
+  deep: {ramp: deep}
+
+channels: {v: 0, load: 0, spin: 0}
+
+parts:
+  vault_stones:
+    when: "v == 0 or v == 1"
+    material: frame
+    prims:
+      - ellipsoid: {c: [-0.92, 0.28, -0.2], r: [0.22, 0.30, 0.2]}
+      - ellipsoid: {c: [-0.94, 0.86, -0.2], r: [0.20, 0.30, 0.2]}
+      - ellipsoid: {c: [-0.88, 1.44, -0.2], r: [0.22, 0.28, 0.2]}
+      - ellipsoid: {c: [-0.56, 1.90, -0.2], r: [0.33, 0.22, 0.2]}
+      - ellipsoid: {c: [0.04, 2.04, -0.2], r: [0.34, 0.20, 0.2]}
+      - ellipsoid: {c: [0.60, 1.90, -0.2], r: [0.32, 0.22, 0.2]}
+      - ellipsoid: {c: [0.90, 1.42, -0.2], r: [0.22, 0.30, 0.2]}
+      - ellipsoid: {c: [0.94, 0.84, -0.2], r: [0.20, 0.30, 0.2]}
+      - ellipsoid: {c: [0.92, 0.28, -0.2], r: [0.22, 0.30, 0.2]}
+  vault_hole:
+    when: "v == 1"
+    material: hole
+    prims:
+      - box: {c: [0, 0.94, -0.1], half: [0.76, 0.92, 0.05]}
+  vault_door:
+    when: "v == 0"
+    material: steel
+    prims:
+      - box: {c: [0, 0.94, 0.1], half: [0.74, 0.92, 0.08], round: 0.06}
+  vault_panel:
+    when: "v == 0"
+    material: steel
+    prims:
+      - box: {c: [0, 0.94, 0.26], half: [0.56, 0.72, 0.06], round: 0.05}
+  vault_wheel:
+    when: "v == 0"
+    material: gold
+    prims:
+      - torus: {c: [0, 0.98, 0.40], R: 0.31, r: 0.07, rot: [1.5708, 0, 0]}
+      - box: {c: [0, 0.98, 0.40], half: [0.28, 0.045, 0.04]}
+      - box: {c: [0, 0.98, 0.40], half: [0.045, 0.28, 0.04]}
+  vault_hinges:
+    when: "v == 0"
+    material: steel
+    prims:
+      - box: {c: [-0.74, 0.48, 0.3], half: [0.08, 0.16, 0.06]}
+      - box: {c: [-0.74, 1.40, 0.3], half: [0.08, 0.16, 0.06]}
+  vault_open_door:
+    when: "v == 1"
+    material: steel
+    prims:
+      - box: {c: [1.06, 0.92, 0.3], half: [0.20, 0.94, 0.07], round: 0.05}
+  vault_open_wheel:
+    when: "v == 1"
+    material: gold
+    prims:
+      - ellipsoid: {c: [1.06, 0.98, 0.44], r: [0.10, 0.28, 0.06]}
+  ingots:
+    when: "v == 1"
+    material: gold
+    prims:
+      - box: {c: [-0.30, 0.16, 0.05], half: [0.24, 0.12, 0.1]}
+      - box: {c: [0.28, 0.16, 0.05], half: [0.24, 0.12, 0.1]}
+      - box: {c: [0.0, 0.40, 0.08], half: [0.24, 0.11, 0.1]}
+
+  cart_body:
+    when: "v == 2"
+    material: steel
+    prims:
+      - extrude: {c: [0, 0.80, 0], depth: 0.5, round: 0.04,
+                  profile: {polygon: [[-0.62, -0.42], [0.62, -0.42], [0.84, 0.38], [-0.84, 0.38]]}}
+  cart_rim:
+    when: "v == 2"
+    material: steel
+    prims:
+      - box: {c: [0, 1.20, 0.1], half: [0.92, 0.10, 0.3], round: 0.03}
+  cart_ribs:
+    when: "v == 2"
+    material: deep
+    prims:
+      - box: {c: [-0.36, 0.78, 0.30], half: [0.04, 0.28, 0.04]}
+      - box: {c: [0.36, 0.78, 0.30], half: [0.04, 0.28, 0.04]}
+  cart_wheels:
+    when: "v == 2"
+    material: steel
+    prims:
+      - cylinder: {a: [-0.42, 0.26, 0.28], b: [-0.42, 0.26, 0.44], r: 0.25}
+      - cylinder: {a: [0.42, 0.26, 0.28], b: [0.42, 0.26, 0.44], r: 0.25}
+  cart_hubs:
+    when: "v == 2"
+    material: deep
+    prims:
+      - box: {c: [-0.42, 0.26, 0.46], half: [0.16, 0.05, 0.03], rot: "[0, 0, spin]"}
+      - box: {c: [0.42, 0.26, 0.46], half: [0.16, 0.05, 0.03], rot: "[0, 0, spin]"}
+
+  barrow_body:
+    when: "v == 3"
+    material: wood
+    prims:
+      - extrude: {c: [0.1, 0.68, 0], depth: 0.5, round: 0.03,
+                  profile: {polygon: [[-0.52, -0.26], [0.46, -0.26], [0.70, 0.28], [-0.62, 0.28]]}}
+  barrow_plank:
+    when: "v == 3"
+    material: wood
+    prims:
+      - box: {c: [0.1, 0.90, 0.28], half: [0.66, 0.08, 0.04]}
+  barrow_handle:
+    when: "v == 3"
+    material: wood
+    prims:
+      - cylinder: {a: [-0.3, 0.60, 0.3], b: [-1.10, 0.86, 0.3], r: 0.06}
+      - cylinder: {a: [-0.38, 0.50, 0.2], b: [-0.48, 0.04, 0.2], r: 0.07}
+  barrow_wheel:
+    when: "v == 3"
+    material: steel
+    prims:
+      - cylinder: {a: [0.52, 0.30, 0.36], b: [0.52, 0.30, 0.50], r: 0.29}
+  barrow_hub:
+    when: "v == 3"
+    material: wood
+    prims:
+      - cylinder: {a: [0.52, 0.30, 0.50], b: [0.52, 0.30, 0.56], r: 0.13}
+  load_1:
+    when: "v == 3 and load >= 1"
+    material: sack
+    prims: [{ellipsoid: {c: [-0.22, 1.10, 0], r: [0.28, 0.26, 0.2]}}]
+  load_2:
+    when: "v == 3 and load >= 2"
+    material: sack
+    prims: [{ellipsoid: {c: [0.36, 1.10, 0.02], r: [0.28, 0.26, 0.2]}}]
+  load_3:
+    when: "v == 3 and load >= 3"
+    material: sack
+    prims: [{ellipsoid: {c: [0.08, 1.36, 0.1], r: [0.28, 0.26, 0.2]}}]
+
+  hoist_back:
+    when: "v == 4"
+    material: hole
+    prims:
+      - box: {c: [0, 1.16, -0.2], half: [0.86, 1.10, 0.05]}
+  hoist_frame:
+    when: "v == 4"
+    material: wood
+    prims:
+      - box: {c: [-0.88, 1.20, 0], half: [0.12, 1.16, 0.1]}
+      - box: {c: [0.88, 1.20, 0], half: [0.12, 1.16, 0.1]}
+  hoist_lintel:
+    when: "v == 4"
+    material: wood
+    prims:
+      - box: {c: [0, 2.26, 0.14], half: [1.06, 0.14, 0.1]}
+  hoist_pulley:
+    when: "v == 4"
+    material: gold
+    prims:
+      - cylinder: {a: [0, 2.22, 0.2], b: [0, 2.22, 0.36], r: 0.20}
+  hoist_rope:
+    when: "v == 4"
+    material: sack
+    prims:
+      - cylinder: {a: [0, 0.56, -0.05], b: [0, 2.2, -0.05], r: 0.045}
+  hoist_deck:
+    when: "v == 4"
+    material: steel
+    prims:
+      - box: {c: [0, 0.10, 0.05], half: [0.76, 0.10, 0.1]}
+      - box: {c: [0, 0.50, 0.0], half: [0.70, 0.05, 0.05]}
+
+  niche_posts:
+    when: "v == 5"
+    material: wood
+    prims:
+      - box: {c: [-0.66, 0.96, 0], half: [0.11, 0.96, 0.08]}
+      - box: {c: [0.66, 0.96, 0], half: [0.11, 0.96, 0.08]}
+  niche_lintel:
+    when: "v == 5"
+    material: wood
+    prims:
+      - box: {c: [0, 1.94, 0.1], half: [0.82, 0.13, 0.08]}
+  niche_hole:
+    when: "v == 5"
+    material: hole
+    prims:
+      - box: {c: [0, 0.96, -0.12], half: [0.62, 0.95, 0.05]}
+
+animations:
+  vault_closed: {frames: 1, channels: {v: 0}}
+  vault_open: {frames: 1, channels: {v: 1}}
+  cart: {frames: 4, ms: 70, channels: {v: 2, spin: "-0.5*p"}}
+  barrow_0: {frames: 1, channels: {v: 3, load: 0}}
+  barrow_1: {frames: 1, channels: {v: 3, load: 1}}
+  barrow_2: {frames: 1, channels: {v: 3, load: 2}}
+  barrow_3: {frames: 1, channels: {v: 3, load: 3}}
+  hoist: {frames: 1, channels: {v: 4}}
+  niche: {frames: 1, channels: {v: 5}}

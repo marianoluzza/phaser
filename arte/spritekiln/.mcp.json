@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "spritekiln": {
+      "command": "spritekiln",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

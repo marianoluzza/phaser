@@ -390,6 +390,10 @@ export class LauncherScene extends Phaser.Scene {
 			this.drawGalacticaCover(card, accentColor);
 			return;
 		}
+		if (coverType === 'socavon') {
+			this.drawSocavonCover(card, accentColor);
+			return;
+		}
 
 		this.drawTetrisCover(card, accentColor);
 	}
@@ -572,6 +576,48 @@ export class LauncherScene extends Phaser.Scene {
 		graphics.fillStyle(0xffffff, 1);
 		graphics.fillRect(161, 80, 3, 10);
 		graphics.fillRect(161, 60, 3, 8);
+	}
+
+	private drawSocavonCover(card: Phaser.GameObjects.Container, accentColor: number) {
+		// Una galería con el minero, su bolsa y la linterna del sereno detrás, en
+		// bloques de píxel: el launcher no carga el atlas de spritekiln.
+		const graphics = this.add.graphics();
+		card.add(graphics);
+		const block = (color: number, x: number, y: number, width: number, height: number, alpha = 1) => {
+			graphics.fillStyle(color, alpha);
+			graphics.fillRect(x, y, width, height);
+		};
+
+		block(0x432a22, 18, 18, 294, 24);
+		block(0x432a22, 18, 120, 294, 30);
+		block(0x79492c, 18, 114, 294, 8);
+		for (let x = 30; x < 280; x += 38) {
+			block(0x5a392c, x, 24, 18, 10);
+			block(0x5a392c, x + 10, 130, 18, 10);
+		}
+		for (const x of [262, 290]) block(0x9c562a, x, 42, 6, 72);
+		for (let y = 50; y < 110; y += 16) block(0x9c562a, 268, y, 22, 5);
+
+		graphics.fillStyle(0xffd257, 0.12);
+		graphics.fillTriangle(82, 66, 180, 46, 180, 114);
+		// El sereno: boina, canas, chaleco y piernas.
+		block(0x7b8339, 54, 54, 28, 8);
+		block(0xcec6cb, 54, 62, 10, 10);
+		block(0xeda67e, 64, 62, 16, 12);
+		block(0x304237, 54, 74, 26, 24);
+		block(0x553934, 56, 98, 8, 16);
+		block(0x553934, 70, 98, 8, 16);
+		// El minero: casco, linterna, bufanda, campera y piernas.
+		block(0x85599a, 186, 48, 28, 10);
+		block(0x85599a, 180, 58, 42, 6);
+		block(0xffd257, 214, 50, 8, 8);
+		block(0xeda67e, 194, 64, 18, 10);
+		block(0xf0a51f, 186, 74, 26, 6);
+		block(0xc54d23, 188, 80, 24, 18);
+		block(0x2f6379, 190, 98, 8, 16);
+		block(0x2f6379, 204, 98, 8, 16);
+		block(0xc99a6c, 158, 72, 26, 28);
+		block(accentColor, 167, 82, 8, 8);
 	}
 
 	private drawTrucoCover(card: Phaser.GameObjects.Container, accentColor: number) {

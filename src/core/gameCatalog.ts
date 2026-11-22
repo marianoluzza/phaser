@@ -3,6 +3,7 @@ import { astroChessGame } from '../games/astro-chess';
 import { galacticaGame } from '../games/galactica';
 import { jukeboxGame } from '../games/jukebox';
 import { pipesGame } from '../games/pipes';
+import { socavonGame } from '../games/socavon';
 import { tanksGame } from '../games/tanks';
 import { tetrisGame } from '../games/tetris';
 import { trafficGame } from '../games/traffic';
@@ -21,7 +22,7 @@ export type GameDefinition = {
 	descriptionKey: TranslationKey;
 	controlsKey: TranslationKey;
 	accentColor: number;
-	coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic' | 'galactica';
+	coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic' | 'galactica' | 'socavon';
 	/** Primera pantalla que se abre al elegir el juego desde el launcher. */
 	entrySceneKey: string;
 	/** Clases de Scene que Phaser debe registrar para ejecutar el juego. */
@@ -42,6 +43,7 @@ export const GAME_CATALOG: GameDefinition[] = [
 	tanksGame,
 	trafficGame,
 	galacticaGame,
+	socavonGame,
 	jukeboxGame,
 ];
 

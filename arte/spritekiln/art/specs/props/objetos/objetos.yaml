@@ -1,0 +1,174 @@
+spritekiln: 1
+name: objetos
+kind: prop
+view: side
+mirror: false
+directions: [s]
+size: 40
+palette: [gothic, socavon]
+camera: {pitch: 0, scale: 0.05, center: [0, 0.9, 0]}
+
+brief:
+  summary: objetos chicos de Socavón; cada animación es un objeto o un estado suyo
+  reference: arte conceptual de Mariano (objetos-de-la-mina.png)
+  must_keep: [bolsa con moneda, pico, lámpara encendida y apagada, campana en su ménsula, manija de techo, hierro en C del agarre sobre los rieles]
+
+materials:
+  sack: {ramp: sack}
+  tie: {ramp: timber}
+  gold: {ramp: gold, finish: metal}
+  ink: {ramp: ink, emissive: true, band: 0, outline: false}
+  wood: {ramp: timber}
+  iron: {ramp: iron, finish: metal}
+  flame: {ramp: lamp, emissive: true, band: 3}
+  core: {ramp: lamp, emissive: true, band: 4}
+  dead: {ramp: deep}
+
+channels: {v: 0, swing: 0}
+
+bones:
+  bell: {parent: root, pos: [0.16, 1.40, 0], rot: "[0, 0, swing]"}
+
+parts:
+  bag:
+    when: "v == 0"
+    material: sack
+    blend: 0.07
+    prims:
+      - ellipsoid: {c: [0, 0.30, 0], r: [0.43, 0.31, 0.30]}
+      - ellipsoid: {c: [0, 0.48, 0], r: [0.30, 0.30, 0.26]}
+      - cone: {a: [0, 0.68, 0], b: [0, 0.92, 0], r: [0.10, 0.20]}
+  bag_tie:
+    when: "v == 0"
+    material: tie
+    prims:
+      - cylinder: {a: [0, 0.71, 0], b: [0, 0.77, 0], r: 0.19}
+  bag_coin:
+    when: "v == 0"
+    material: gold
+    prims:
+      - cylinder: {a: [0, 0.36, 0.22], b: [0, 0.36, 0.38], r: 0.19}
+  bag_mark:
+    when: "v == 0"
+    material: ink
+    priority: 3
+    prims:
+      - box: {c: [0, 0.36, 0.40], half: [0.035, 0.10, 0.03]}
+
+  pick_handle:
+    when: "v == 1"
+    material: wood
+    prims:
+      - cylinder: {a: [-0.28, 0.08, 0], b: [0.22, 0.88, 0], r: 0.07}
+  pick_head:
+    when: "v == 1"
+    material: iron
+    prims:
+      - tube: {pts: [[-0.40, 0.72, 0.04], [0.20, 1.12, 0.06], [0.56, 0.36, 0.04]], r: 0.085}
+
+  chain:
+    when: "v == 2 or v == 3"
+    material: iron
+    prims:
+      - cylinder: {a: [0, 1.22, 0], b: [0, 1.78, 0], r: 0.04}
+  lamp_top:
+    when: "v == 2 or v == 3"
+    material: iron
+    prims:
+      - cone: {a: [0, 1.10, 0], b: [0, 1.22, 0], r: [0.25, 0.08]}
+  lamp_base:
+    when: "v == 2 or v == 3"
+    material: iron
+    prims:
+      - cylinder: {a: [0, 0.53, 0], b: [0, 0.64, 0], r: 0.24}
+  lamp_bars:
+    when: "v == 2 or v == 3"
+    material: iron
+    prims:
+      - cylinder: {a: [-0.22, 0.62, 0], b: [-0.22, 1.10, 0], r: 0.04}
+      - cylinder: {a: [0.22, 0.62, 0], b: [0.22, 1.10, 0], r: 0.04}
+  lamp_glass:
+    when: "v == 2"
+    material: flame
+    prims:
+      - ellipsoid: {c: [0, 0.86, 0], r: [0.19, 0.26, 0.16]}
+  lamp_core:
+    when: "v == 2"
+    material: core
+    priority: 2
+    prims:
+      - cone: {a: [0, 0.76, 0.17], b: [0, 0.94, 0.17], r: [0.08, 0.03]}
+  lamp_dead:
+    when: "v == 3"
+    material: dead
+    prims:
+      - ellipsoid: {c: [0, 0.86, 0], r: [0.19, 0.26, 0.16]}
+
+  bracket:
+    when: "v == 4"
+    material: wood
+    prims:
+      - box: {c: [-0.48, 1.30, 0], half: [0.11, 0.36, 0.1]}
+      - box: {c: [-0.12, 1.48, 0], half: [0.36, 0.07, 0.08]}
+  bell_body:
+    when: "v == 4"
+    material: gold
+    space: bell
+    blend: 0.03
+    prims:
+      - cone: {a: [0, -0.16, 0.12], b: [0, -0.52, 0.12], r: [0.16, 0.29]}
+    cut:
+      - plane: {n: [0, -1, 0], at: 0.60}
+  bell_rope:
+    when: "v == 4"
+    material: wood
+    space: bell
+    prims:
+      - cylinder: {a: [0, -0.55, 0], b: [0, -0.98, 0], r: 0.045}
+      - sphere: {c: [0, -1.02, 0], r: 0.08}
+
+  strap:
+    when: "v == 5"
+    material: wood
+    prims:
+      - box: {c: [0, 1.60, 0], half: [0.07, 0.18, 0.05]}
+  grip:
+    when: "v == 5"
+    material: iron
+    prims:
+      - torus: {c: [0, 1.28, 0], R: 0.19, r: 0.06, rot: [1.5708, 0, 0]}
+
+  staple:
+    when: "v == 7"
+    material: iron
+    blend: 0.02
+    prims:
+      - cylinder: {a: [-0.50, 1.60, 0], b: [0.50, 1.60, 0], r: 0.055}
+      - cylinder: {a: [-0.50, 1.60, 0], b: [-0.50, 1.75, 0], r: 0.055}
+      - cylinder: {a: [0.50, 1.60, 0], b: [0.50, 1.75, 0], r: 0.055}
+  staple_plates:
+    when: "v == 7"
+    material: iron
+    prims:
+      - box: {c: [-0.53, 1.74, 0.02], half: [0.14, 0.04, 0.06]}
+      - box: {c: [0.53, 1.74, 0.02], half: [0.14, 0.04, 0.06]}
+
+  key:
+    when: "v == 6"
+    material: gold
+    prims:
+      - torus: {c: [0, 0.86, 0], R: 0.22, r: 0.08, rot: [1.5708, 0, 0]}
+      - box: {c: [0, 0.34, 0], half: [0.08, 0.33, 0.06]}
+      - box: {c: [0.18, 0.12, 0], half: [0.14, 0.07, 0.06]}
+      - box: {c: [0.16, 0.34, 0], half: [0.11, 0.06, 0.06]}
+
+animations:
+  bag: {frames: 1, channels: {v: 0}}
+  pick: {frames: 1, channels: {v: 1}}
+  lamp_on: {frames: 1, channels: {v: 2}}
+  lamp_off: {frames: 1, channels: {v: 3}}
+  bell: {frames: 1, channels: {v: 4}}
+  bell_ring: {frames: 4, ms: 70, channels: {v: 4, swing: "0.5*sin(p + 0.7)"}}
+  handle: {frames: 1, channels: {v: 5}}
+  key: {frames: 1, channels: {v: 6}}
+  staple: {frames: 1, channels: {v: 7}}

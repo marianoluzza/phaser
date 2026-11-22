@@ -9,6 +9,10 @@
 /assets/galactica/*
   Cache-Control: public, max-age=0, must-revalidate
 
+# El atlas de spritekiln de Socavón tampoco lleva hash.
+/assets/socavon/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 # Vite agrega un hash al nombre de estos archivos. Pueden guardarse un año:
 # cuando cambia el código, cambia también la URL.
 /assets/*.js

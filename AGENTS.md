@@ -8,8 +8,9 @@ objetos, reglas y documentación.
 Actualmente incluye Tetris, Truco, Pipes, Astro Chess —en construcción, con su
 diseño ya documentado—, Tanques —al estilo de Battle City—, Semáforos —un cruce
 céntrico con los semáforos a mano—, Galáctica —un shooter de formaciones con
-naves que evolucionan, dibujado en pxl— y Jukebox, una herramienta interna para
-probar la biblioteca de música y efectos.
+naves que evolucionan, dibujado en pxl—, Socavón —sigilo con luz y ruido en una
+mina, dibujado con spritekiln— y Jukebox, una herramienta interna para probar la
+biblioteca de música y efectos.
 
 ## Puesta en marcha
 
@@ -26,6 +27,8 @@ npm run dev
 npm run build
 npm run shots
 npm run art
+npm run art:socavon
+npm run test:socavon
 npm run sim:astro
 npm run sim:traffic
 npm run sim:galactica
@@ -40,6 +43,10 @@ npm run preview
 - `npm run shots` recorre el arcade en un Chrome headless y deja capturas.
 - `npm run art` regenera las hojas de sprites a partir de las fuentes de pxl en
   `art/` (ver [Arte en pixel art](#arte-en-pixel-art)).
+- `npm run art:socavon` regenera el atlas de Socavón con spritekiln a partir de
+  los specs de `arte/spritekiln/`.
+- `npm run test:socavon` prueba las reglas de Socavón y que 500 minas generadas
+  se puedan completar.
 - `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
   para medir el balance.
 - `npm run sim:traffic` juega cientos de partidas de Semáforos con jugadores
@@ -278,6 +285,35 @@ src/
     │       ├── GalacticaPediaScene.ts
     │       ├── GalacticaGameScene.ts
     │       └── GalacticaResultScene.ts
+    ├── socavon/
+    │   ├── index.ts
+    │   ├── sceneKeys.ts
+    │   ├── audio.ts
+    │   ├── socavon.md
+    │   ├── constants/
+    │   │   ├── tuning.ts
+    │   │   └── levels.ts
+    │   ├── state/
+    │   │   ├── Mine.ts
+    │   │   ├── guardBrain.ts
+    │   │   ├── level.ts
+    │   │   ├── generator.ts
+    │   │   ├── campaign.ts
+    │   │   ├── autopilot.ts
+    │   │   ├── run.ts
+    │   │   └── rng.ts
+    │   ├── objects/
+    │   │   ├── art.ts
+    │   │   ├── geometry.ts
+    │   │   ├── lighting.ts
+    │   │   ├── MineView.ts
+    │   │   ├── Hud.ts
+    │   │   ├── minimap.ts
+    │   │   └── ui.ts
+    │   └── scenes/
+    │       ├── SocavonTitleScene.ts
+    │       ├── SocavonGameScene.ts
+    │       └── SocavonResultScene.ts
     └── jukebox/
         ├── index.ts
         ├── sceneKeys.ts
@@ -292,6 +328,8 @@ public/assets/audio/
 
 art/galactica/            # Fuentes de pxl (.px.js)
 public/assets/galactica/  # Hojas generadas por `npm run art`; se versionan
+arte/spritekiln/          # Proyecto de spritekiln: estilo y specs de Socavón
+public/assets/socavon/    # Atlas generado por `npm run art:socavon`; se versiona
 
 local-assets/audio/       # Fuentes OGG locales; ignoradas por Git y Vite
 
@@ -302,6 +340,9 @@ cloudflare/
 
 scripts/
 ├── build-art.mjs
+├── build-socavon-art.mjs
+├── pack-socavon-art.py
+├── socavon-test.mjs
 └── generate-audio-catalog.mjs
 ```
 
@@ -331,7 +372,7 @@ export type GameDefinition = {
   descriptionKey: TranslationKey;
   controlsKey: TranslationKey;
   accentColor: number;
-  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic' | 'galactica';
+  coverType: 'tetris' | 'jukebox' | 'truco' | 'pipes' | 'astro-chess' | 'tanks' | 'traffic' | 'galactica' | 'socavon';
   entrySceneKey: string;
   scenes: Phaser.Types.Scenes.SceneType[];
 };
@@ -532,7 +573,8 @@ Cloudflare Pages y R2 se despliegan por separado:
 Vite tienen hash en el nombre y los OGG llevan `?v=<hash>`, por lo que pueden
 usar caché inmutable durante un año. En un despliegue normal no se purga caché:
 todo contenido modificado obtiene una URL diferente. Las hojas de sprites de
-`public/assets/galactica/` no llevan hash y también usan `must-revalidate`.
+`public/assets/galactica/` no llevan hash y también usan `must-revalidate`,
+igual que el atlas de `public/assets/socavon/`.
 
 ## Tamaño y nitidez del canvas
 
@@ -577,7 +619,8 @@ Para las escenas esto es transparente, salvo en tres casos:
 
 ## Arte en pixel art
 
-Los juegos que usan sprites (por ahora Galáctica) los dibujan con pxl, la
+Socavón usa spritekiln (modelos en YAML, ver su documentación y
+`arte/spritekiln/`). Galáctica dibuja sus sprites con pxl, la
 skill de pixel art de Claude, como código: cada `art/<juego>/*.px.js` describe
 sprites, variantes de paleta y una o más hojas (`sheet()`).
 
@@ -637,6 +680,7 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 - [Diseño técnico y funcionalidades de Pipes](src/games/pipes/pipes.md)
 - [Diseño y plan de implementación de Astro Chess](src/games/astro-chess/astro-chess.md)
 - [Diseño técnico y funcionalidades de Galáctica](src/games/galactica/galactica.md)
+- [Diseño técnico y funcionalidades de Socavón](src/games/socavon/socavon.md)
 - [Diseño técnico y funcionalidades de Tanques](src/games/tanks/tanks.md)
 - [Diseño técnico y funcionalidades de Semáforos](src/games/traffic/traffic.md)
 - [Diseño técnico y funcionalidades del Jukebox](src/games/jukebox/jukebox.md)
