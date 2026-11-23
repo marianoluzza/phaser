@@ -188,6 +188,43 @@ const FLOWS = {
 		await walk(20);
 		await arcade.shot('socavon-carretilla');
 		await use();
+		// R18: suelta, sigue mirando para donde se la llevaba.
+		await page.waitForTimeout(200);
+		await arcade.shot('socavon-carretilla-suelta');
+		const barrowFacing = await page.evaluate(() => window.arcade.scene.getScene('socavon:game').view.barrows[0].flipX);
+		if (!barrowFacing) throw new Error('Socavón: la carretilla suelta quedó mirando a la derecha');
+
+		// R17.1: escondido en el nicho, el sereno que pasa queda por delante.
+		await put(18, 1);
+		const hidden = (wanted) => ({ value: wanted, test: (goal) => window.arcade.scene.getScene('socavon:game').mine.player.hidden === goal });
+		await hold('ArrowUp', hidden(true));
+		const order = () => page.evaluate(() => {
+			const { view } = window.arcade.scene.getScene('socavon:game');
+			return view.root.getIndex(view.player) < view.root.getIndex(view.guards[0].body) ? 'detrás' : 'delante';
+		});
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.guards[0], { x: 18.2, y: 1, facing: -1, mode: 'patrol', moving: true, route: [], goal: null });
+		});
+		await page.waitForTimeout(300);
+		await arcade.shot('socavon-sereno-delante-del-nicho');
+		if ((await order()) !== 'detrás') throw new Error('Socavón: escondido, el minero se dibuja delante del sereno');
+		await page.evaluate(() => {
+			Object.assign(window.arcade.scene.getScene('socavon:game').mine.guards[0], { x: 3, y: 0, moving: false });
+		});
+		await hold('ArrowRight', hidden(false));
+		if ((await order()) !== 'delante') throw new Error('Socavón: fuera del nicho, el minero quedó detrás del sereno');
+
+		// R17.2: la campana se toca a mano y se calla.
+		await put(21, 4);
+		await page.waitForTimeout(200);
+		await use();
+		const alarm = () => page.evaluate(() => window.arcade.scene.getScene('socavon:game').mine.alarm);
+		if (!((await alarm()) > 7)) throw new Error('Socavón: la campana no sonó al tocarla');
+		await page.waitForTimeout(400);
+		await arcade.shot('socavon-campana-tocada');
+		await use();
+		if ((await alarm()) !== 0) throw new Error('Socavón: la campana no se calló');
 
 		// R16: colgarse, que pase la vagoneta, caerle adentro y bajarse, con el teclado.
 		await put(13, 2);

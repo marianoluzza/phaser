@@ -50,6 +50,7 @@ const EVENT_NOTICES: Partial<Record<MineEvent['type'], TranslationKey>> = {
 	vault: 'socavon.notice.vault',
 	locked: 'socavon.notice.locked',
 	silence: 'socavon.notice.silence',
+	ring: 'socavon.notice.ring',
 	spotted: 'socavon.notice.spotted',
 	slip: 'socavon.notice.slip',
 	lifeLost: 'socavon.notice.caught',

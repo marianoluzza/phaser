@@ -13,6 +13,7 @@ const ACTION_KEYS: Record<Action['kind'], TranslationKey> = {
 	pocket: 'socavon.action.pocket',
 	vault: 'socavon.action.vault',
 	silence: 'socavon.action.silence',
+	ring: 'socavon.action.ring',
 	deliver: 'socavon.action.deliver',
 	load: 'socavon.action.load',
 	hit: 'socavon.action.hit',

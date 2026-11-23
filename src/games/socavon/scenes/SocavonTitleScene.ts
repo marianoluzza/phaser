@@ -112,7 +112,11 @@ export class SocavonTitleScene extends Phaser.Scene {
 	private drawInstructions() {
 		STEPS.forEach(([clip, key], index) => {
 			const y = 278 + index * 54;
-			addClip(this, this.left + 52, y + (clip === 'objetos/bell' ? 26 : 16), clip, 1.5);
+			// Centrados en lo que se ve, no en su pie: la lámpara y la campana cuelgan.
+			const icon = addClip(this, this.left + 52, y - 4, clip, 1.5);
+			const { frame } = icon;
+			// En un cuadro recortado, x, y, width y height son lo que quedó con píxeles.
+			icon.setOrigin((frame.x + frame.width / 2) / frame.realWidth, (frame.y + frame.height / 2) / frame.realHeight);
 			addLabel(this, this.left + 92, y - 4, i18n.t(key), 14)
 				.setOrigin(0, 0.5)
 				.setWordWrapWidth(270);

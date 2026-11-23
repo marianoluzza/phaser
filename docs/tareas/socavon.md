@@ -77,6 +77,17 @@ tomadas al implementar, no pedidos del usuario.
     misma barra. Al agotarse cae a la galería de abajo; si abajo no hay galería, pierde una vida
     (decisión del asistente, avisada). Ningún pozo es tan largo que no se cruce con la barra a la
     mitad.
+- R17 Nicho y campana. Mensaje de Mariano, textual:
+  > Cuando estás oculto en la puerta, el guardia está pasando por detrás y debería pasar por
+  > delante tuyo y de la puerta. La campana tenes que poder activarla vos también. Es una forma de
+  > distraer a los guardias.
+  - R17.1 escondido en el nicho, el sereno que pasa se dibuja por delante del minero y del nicho.
+  - R17.2 con la campana callada, Espacio al lado la toca: suena 8 segundos y los serenos que no
+    persiguen ni están aturdidos van para ahí, como al abrir la bóveda. Sonando, Espacio la calla.
+    Sólo con las manos libres, y lo que esté tirado al lado se levanta antes (decisiones del
+    asistente, avisadas: cargado, Espacio sigue soltando la bolsa).
+- R18 «Arregla tambien lo de la carretilla al soltarla que queda siempre igual»: suelta, la
+  carretilla queda mirando para el lado en que se la llevaba, no siempre a la derecha.
 - R14 Convenciones del arcade: módulo propio, ES/EN, ancho elástico y lo demás sin cambios.
 
 ## Tareas
@@ -91,6 +102,8 @@ tomadas al implementar, no pedidos del usuario.
 - [x] T8 R15: camino redundante y serenos que no se clavan.
 - [x] T9 R16: agarre del techo y vagoneta como escape.
 - [x] T10 R16.13: las argollas también cansan.
+- [x] T11 R17: el sereno pasa por delante del nicho y la campana se toca a mano.
+- [x] T12 R18: la carretilla suelta conserva su lado.
 
 ## Registro de correcciones y evidencia
 
@@ -135,6 +148,14 @@ tomadas al implementar, no pedidos del usuario.
   - el jugador automático, que no usa la mecánica nueva: 139 → 138 de 270 con tres vidas, muertes
     862 → 865;
   - el generador pone algo menos de rieles: 883 → 859 minas de 1000 con vagoneta.
+- R17 y R18:
+  - tests vistos fallar: tocar la campana y su duración (2), la carretilla suelta (1). Los de
+    perseguidor y aturdido, y cargado o con algo tirado al lado, pasan desde antes y cuidan que
+    tocar no le gane a nada;
+  - recorrido de Chrome con tres chequeos: escondido, el minero queda debajo del sereno en el
+    orden de dibujo y vuelve arriba al salir; la campana tocada suena 8 s y Espacio la calla; la
+    carretilla soltada yendo a la izquierda queda espejada;
+  - 71 tests y 500 minas generadas completables, tipos y build.
 - Pendiente: balance jugado por una persona (el piloto no mide dificultad), sonido escuchado por
   una persona, controles táctiles, commit y deploy (no pedidos).
 

@@ -69,6 +69,8 @@ export const NOISE = {
 
 export const LAMP_RADIUS = 2.5;
 export const ALARM_TIME = 20;
+/** Tocada a mano, para distraer: más corta que la de la bóveda. */
+export const BELL_RING = 8;
 export const PICK_HITS = 3;
 export const PICK_COOLDOWN = 0.35;
 export const BARROW_CAPACITY = 3;

@@ -1,5 +1,5 @@
 import {
-	ALARM_TIME, BARROW_CAPACITY, CART, GRIP, GUARD, NOISE, PICK_COOLDOWN, PICK_HITS, PLAYER, REACH, SCORE,
+	ALARM_TIME, BARROW_CAPACITY, BELL_RING, CART, GRIP, GUARD, NOISE, PICK_COOLDOWN, PICK_HITS, PLAYER, REACH, SCORE,
 } from '../constants/tuning';
 import { canSee, investigateAt, isWitness, updateGuard } from './guardBrain';
 import { footing, railRange, type Level, type Node } from './level';
@@ -17,7 +17,8 @@ export type MineInput = {
 
 export type Hands = null | 'bag' | 'pick' | 'barrow';
 export type Item = { kind: 'bag' | 'pick'; x: number; y: number };
-export type Barrow = { x: number; y: number; load: number };
+/** `facing`: para dónde quedó la rueda la última vez que se la soltó. */
+export type Barrow = { x: number; y: number; load: number; facing: number };
 export type Cart = { x: number; y: number; from: number; to: number; direction: number; waitFor: number };
 export type GuardMode = 'patrol' | 'investigate' | 'search' | 'chase' | 'stunned';
 
@@ -52,7 +53,7 @@ export type MineEvent =
 		type:
 			| 'take' | 'drop' | 'deliver' | 'load' | 'key' | 'vault' | 'silence' | 'hit' | 'wallBroken'
 			| 'lamp' | 'relight' | 'hide' | 'land' | 'locked' | 'spotted' | 'stunned' | 'cartStart'
-			| 'grip' | 'slip' | 'board' | 'alight'
+			| 'grip' | 'slip' | 'board' | 'alight' | 'ring'
 			| 'lifeLost' | 'respawn' | 'cleared' | 'over';
 		x: number;
 		y: number;
@@ -93,6 +94,7 @@ export type Action =
 	| { kind: 'pocket'; guard: Guard }
 	| { kind: 'vault'; vault: { x: number; y: number; open: boolean } }
 	| { kind: 'silence' }
+	| { kind: 'ring'; bell: Node }
 	| { kind: 'deliver' }
 	| { kind: 'load'; barrow: Barrow }
 	| { kind: 'hit'; wall: { x: number; y: number; hits: number } }
@@ -146,7 +148,7 @@ export class Mine {
 			...level.find('$').map((node): Item => ({ kind: 'bag', ...node })),
 			...level.find('T').map((node): Item => ({ kind: 'pick', ...node })),
 		];
-		this.barrows = level.find('W').map((node) => ({ ...node, load: 0 }));
+		this.barrows = level.find('W').map((node) => ({ ...node, load: 0, facing: 1 }));
 		this.walls = level.find('%').map((node) => ({ ...node, hits: 0 }));
 		this.vaults = level.find('V').map((node) => ({ ...node, open: false }));
 		this.lamps = level.find('l').map((node) => ({ ...node, lit: true, offSince: 0 }));
@@ -304,7 +306,10 @@ export class Mine {
 				bestDistance = distance;
 			}
 		}
-		return best ?? board ?? (closedVault ? { kind: 'locked' } : null);
+		// Tocar la campana va al final: lo tirado al lado se levanta primero.
+		const bell = this.bells.find((other) => near(other, REACH.bell));
+		const ring: Action | null = bell ? { kind: 'ring', bell } : null;
+		return best ?? board ?? ring ?? (closedVault ? { kind: 'locked' } : null);
 	}
 
 	private act() {
@@ -326,6 +331,10 @@ export class Mine {
 			case 'silence':
 				this.alarm = 0;
 				this.emit({ type: 'silence', x, y });
+				break;
+			case 'ring':
+				this.soundAlarm(action.bell, BELL_RING);
+				this.emit({ type: 'ring', x, y });
 				break;
 			case 'deliver':
 				this.deliver();
@@ -355,6 +364,7 @@ export class Mine {
 				this.letGo();
 				// Queda donde se la veía, delante, si ahí hay piso.
 				const ahead = x + player.facing * 0.7;
+				if (barrow) barrow.facing = player.facing;
 				if (barrow && footing(this.level, this.isOpen)(Math.round(ahead), y)) barrow.x = ahead;
 				this.emit({ type: 'drop', x, y });
 				break;
@@ -401,12 +411,17 @@ export class Mine {
 		for (const side of [-0.4, 0.4]) {
 			this.items.push({ kind: 'bag', x: vault.x + side, y: vault.y });
 		}
-		this.alarm = ALARM_TIME;
-		for (const guard of this.guards) {
-			if (guard.mode !== 'stunned' && guard.mode !== 'chase') investigateAt(this, guard, { x: vault.x, y: vault.y });
-		}
+		this.soundAlarm(vault, ALARM_TIME);
 		this.emit({ type: 'vault', x: vault.x, y: vault.y });
 		this.addScore(SCORE.vault);
+	}
+
+	/** Suena la campana: los que no persiguen ni están aturdidos van a mirar ahí. */
+	private soundAlarm(where: Node, seconds: number) {
+		this.alarm = seconds;
+		for (const guard of this.guards) {
+			if (guard.mode !== 'stunned' && guard.mode !== 'chase') investigateAt(this, guard, { x: where.x, y: where.y });
+		}
 	}
 
 	private deliver() {

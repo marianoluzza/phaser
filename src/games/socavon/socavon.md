@@ -22,10 +22,13 @@ personajes, las minas y las reglas de sigilo son de Socavón.
 - **Botín.** Una bolsa por vez, y frena: cargado se corre menos que un sereno. Soltarla es la forma
   de escapar. La mina termina al entregar todo.
 - **Carretilla.** Junta hasta tres bolsas al pasar, pero se oye y no sube escaleras ni cruza pozos.
+  Suelta, queda mirando para donde se la llevaba.
 - **Llave y bóveda.** La llave se saca por la espalda, o a un sereno aturdido. Cada bóveda gasta una
   llave y da dos bolsas.
 - **Campana.** Abrir la bóveda la hace sonar 20 segundos: los serenos van para ahí y se apuran. Se
-  calla con Espacio junto a una campana.
+  calla con Espacio junto a una campana. Callada, Espacio con las manos libres la toca: suena 8
+  segundos y es la forma de distraer a los serenos, salvo al que te persigue o está aturdido. Lo
+  tirado al lado se levanta antes y, cargado, Espacio suelta la bolsa.
 - **Luz.** Con linterna o bajo una lámpara, un sereno ve a 8 celdas; a oscuras, a 2,2. Su haz
   dibuja ese alcance real. Al pasar vuelven a prender las lámparas apagadas hace más de 10 segundos.
 - **Ruido.** El pico, la carretilla y las caídas se oyen en la galería y, atenuados, en las vecinas.
@@ -44,7 +47,8 @@ personajes, las minas y las reglas de sigilo son de Socavón.
 - **Testigo.** Agachado en la vagoneta no lo ven ni lo agarran, salvo quien lo perseguía y lo vio
   subir: ése lo agarra si lo toca con la vagoneta detenida. Deja de ser testigo si lo pierde o
   queda atropellado.
-- **Nichos.** Esconden de serenos y vagonetas, salvo que te metas con un perseguidor encima.
+- **Nichos.** Esconden de serenos y vagonetas, salvo que te metas con un perseguidor encima. El
+  sereno que pasa se dibuja por delante del escondido.
 - **Siempre hay otro camino.** Ningún objetivo queda al final de un camino único: un sereno parado
   en cualquier lugar se rodea por otra galería, de ida y con el botín de vuelta.
 - **Serenos que circulan.** No descansan en rieles ni escaleras. Si no pueden llegar a quien ven,

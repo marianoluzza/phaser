@@ -244,6 +244,23 @@ try {
 		assert.equal(game.player.hands, 'bag');
 	});
 
+	await test('R18 la carretilla suelta queda mirando para donde se la llevaba', () => {
+		const game = mine('#E.......W..#');
+		walkTo(game, 9);
+		use(game);
+		assert.equal(game.player.hands, 'barrow');
+		walkTo(game, 5);
+		use(game);
+		assert.equal(game.player.hands, null);
+		assert.equal(game.barrows[0].facing, -1, 'hacia la izquierda');
+		assert.ok(game.barrows[0].x < 5, `quedó en ${game.barrows[0].x}, no delante`);
+		walkTo(game, Math.round(game.barrows[0].x));
+		use(game);
+		walkTo(game, 8);
+		use(game);
+		assert.equal(game.barrows[0].facing, 1, 'hacia la derecha');
+	});
+
 	await test('R4 la carretilla junta tres, suena, no sube y descarga', () => {
 		const game = mine('#EW$$$$.H..#', '#..........#');
 		walkTo(game, 2);
@@ -780,6 +797,57 @@ try {
 		game.player.y = 1;
 		play(game, 2.5);
 		assert.ok(game.guards[0].x < 4, `se quedó en ${game.guards[0].x}`);
+	});
+
+	await test('R17.2 con las manos libres toca la campana y los serenos van para ahí', () => {
+		const game = mine('#E..B.......G#');
+		Object.assign(game.guards[0], { facing: 1, waitFor: 9 });
+		walkTo(game, 4);
+		const events = use(game);
+		assert.ok(game.alarm > 0, 'no sonó');
+		assert.ok(events.some((event) => event.type === 'ring'), 'sin evento');
+		assert.equal(game.guards[0].mode, 'investigate');
+		walkTo(game, 1);
+		play(game, 2);
+		assert.ok(game.guards[0].x < 10, `no fue: quedó en ${game.guards[0].x}`);
+	});
+
+	await test('R17.2 suena 8 segundos y sonando Espacio la calla', () => {
+		const game = mine('#E..B.....#');
+		walkTo(game, 4);
+		use(game);
+		play(game, 7.9);
+		assert.ok(game.alarm > 0, 'se calló antes');
+		play(game, 0.2);
+		assert.equal(game.alarm, 0);
+		use(game);
+		assert.ok(game.alarm > 0);
+		use(game);
+		assert.equal(game.alarm, 0);
+	});
+
+	await test('R17.2 no distrae a quien persigue ni a quien está aturdido', () => {
+		const game = mine('#E..B......G.G#');
+		walkTo(game, 4);
+		Object.assign(game.guards[0], { mode: 'chase', timer: 9, facing: -1, x: 8 });
+		Object.assign(game.guards[1], { mode: 'stunned', timer: 3 });
+		use(game);
+		assert.equal(game.guards[0].mode, 'chase');
+		assert.equal(game.guards[1].mode, 'stunned');
+	});
+
+	await test('R17.2 cargado o con algo tirado al lado, Espacio no la toca', () => {
+		const loaded = mine('#E..B.....#');
+		loaded.player.x = 4;
+		loaded.player.hands = 'bag';
+		use(loaded);
+		assert.equal(loaded.alarm, 0);
+		assert.equal(loaded.player.hands, null);
+		const lying = mine('#E..$B....#');
+		walkTo(lying, 4);
+		use(lying);
+		assert.equal(lying.alarm, 0);
+		assert.equal(lying.player.hands, 'bag');
 	});
 
 	await test('R11 al vaciar la mina la campana se calla', () => {

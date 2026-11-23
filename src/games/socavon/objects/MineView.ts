@@ -54,6 +54,7 @@ export class MineView {
 	private stride = 0;
 	private struckAt = -Infinity;
 	private caughtAt = 0;
+	private behindGuards = false;
 
 	constructor(scene: Phaser.Scene, mine: Mine) {
 		this.scene = scene;
@@ -200,7 +201,7 @@ export class MineView {
 
 		mine.barrows.forEach((barrow, index) => {
 			const held = mine.player.barrow === barrow;
-			const facing = held ? mine.player.facing : 1;
+			const facing = held ? mine.player.facing : barrow.facing;
 			const x = centerX(barrow.x) + (held ? facing * 40 : 0);
 			showClip(this.barrows[index], `grandes/barrow_${barrow.load}`)
 				.setPosition(x, feetY(barrow.y))
@@ -361,6 +362,14 @@ export class MineView {
 			time = this.stride;
 		} else if (player.moving) {
 			clip = 'walk';
+		}
+
+		// Escondido en el nicho, el sereno que pasa le queda por delante.
+		const behind = player.hidden && this.guards.length > 0;
+		if (behind !== this.behindGuards) {
+			this.behindGuards = behind;
+			if (behind) this.root.moveBelow(this.player, this.guards[0].body);
+			else this.root.moveAbove<Phaser.GameObjects.GameObject>(this.player, this.guards[this.guards.length - 1].mark);
 		}
 
 		const blink = status === 'playing' && player.invincible > 0 && Math.floor(this.time * 10) % 2 === 0;
