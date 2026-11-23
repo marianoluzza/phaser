@@ -3,16 +3,31 @@ import { CART, GRIP, GUARD, PICK_HITS } from '../constants/tuning';
 import { sightRange } from '../state/guardBrain';
 import { railRange } from '../state/level';
 import type { Guard, Item, Mine, MineEvent } from '../state/Mine';
+import { liveSpans } from '../state/vision';
 import { addClip, showClip } from './art';
 import { CART_LIFT, centerX, feetY, GALLERY, GRIP_LIFT, mineSize, TILE } from './geometry';
 import { brightnessAt, collectLights, tintFor } from './lighting';
+import { memoryTint, multiply, Sight } from './sight';
 
 type Lit = { image: Phaser.GameObjects.Image; x: number; y: number; floor?: number };
-type GuardSprites = {
+/**
+ * Lo que se mueve tiene dos sprites: el real, que se ve sólo en vivo, y el
+ * recuerdo, una copia fija del último cuadro que se vio. Así un sereno que
+ * sube a la galería del minero aparece en vivo sin borrarse del recuerdo.
+ */
+type Remembered = {
+	real: Phaser.GameObjects.Image;
+	ghost: Phaser.GameObjects.Image;
+	wasLive: boolean;
+	/** Si hay un recuerdo vigente: se borra en cuanto se ve ese lugar sin él. */
+	remembered: boolean;
+};
+type GuardSprites = Remembered & {
 	body: Phaser.GameObjects.Image;
 	mark: Phaser.GameObjects.Text;
 	key: Phaser.GameObjects.Image;
 };
+type Shaft = { x: number; bottom: number };
 
 /** Lo que cuelga se engancha en el techo: su pie queda en el aire. */
 const HANGING_OFFSET = 25;
@@ -40,8 +55,11 @@ export class MineView {
 	private readonly lamps: Phaser.GameObjects.Image[] = [];
 	private readonly bells: Phaser.GameObjects.Image[] = [];
 	private readonly barrows: Phaser.GameObjects.Image[] = [];
-	private readonly carts: Phaser.GameObjects.Image[] = [];
+	private readonly carts: Remembered[] = [];
 	private readonly guards: GuardSprites[] = [];
+	private readonly shafts: Shaft[] = [];
+	private readonly sight: Sight;
+	private cable!: Phaser.GameObjects.Graphics;
 	private readonly items = new Map<Item, Phaser.GameObjects.Image>();
 	private readonly itemLayer: Phaser.GameObjects.Container;
 	private readonly glow: Phaser.GameObjects.Graphics;
@@ -62,6 +80,7 @@ export class MineView {
 		const size = mineSize(mine.level.width, mine.level.height);
 		this.width = size.width;
 		this.height = size.height;
+		this.sight = new Sight(mine.level.width, mine.level.height);
 
 		this.root = scene.add.container(0, 0);
 		this.buildTerrain();
@@ -76,7 +95,10 @@ export class MineView {
 		}
 		for (const guard of mine.guards) this.guards.push(this.createGuard(guard));
 		this.player = this.put(centerX(mine.player.x), feetY(mine.player.y), 'minero/idle');
-		for (const cart of mine.carts) this.carts.push(this.put(centerX(cart.x), feetY(cart.y) - CART_LIFT, 'grandes/cart'));
+		for (const cart of mine.carts) {
+			const real = this.put(centerX(cart.x), feetY(cart.y) - CART_LIFT, 'grandes/cart');
+			this.carts.push({ real, ghost: this.put(real.x, real.y, 'grandes/cart').setVisible(false), wasLive: false, remembered: false });
+		}
 
 		this.arms = scene.add.graphics();
 		this.effects = scene.add.container(0, 0);
@@ -158,17 +180,57 @@ export class MineView {
 	private drawShafts() {
 		const lowest = new Map<number, number>();
 		for (const { x, y } of this.mine.exits) lowest.set(x, Math.max(y, lowest.get(x) ?? 0));
-		const cable = this.scene.add.graphics();
-		for (const [x, y] of lowest) {
-			cable.fillStyle(0x050304, 0.5).fillRect(centerX(x) - 10, 0, 20, feetY(y) - GALLERY + TILE);
-			cable.fillStyle(0xa06d4e, 1).fillRect(centerX(x) - 2, 0, 4, feetY(y) - GALLERY + TILE);
+		for (const [x, y] of lowest) this.shafts.push({ x: centerX(x), bottom: feetY(y) - GALLERY + TILE });
+		this.cable = this.scene.add.graphics();
+		this.root.add(this.cable);
+	}
+
+	/** El cable cruza todas las galerías: se redibuja tramo por tramo, con lo que se ve de cada uno. */
+	private drawCable() {
+		const { cable, sight } = this;
+		cable.clear();
+		for (const { x, bottom } of this.shafts) {
+			for (let top = 0; top < bottom; top += TILE) {
+				const age = sight.ageAt(x, top + TILE / 2);
+				const tint = age === 0 ? 0xffffff : memoryTint(age);
+				if (tint === 0) continue;
+				const height = Math.min(TILE, bottom - top);
+				cable.fillStyle(multiply(0x050304, tint), 0.5).fillRect(x - 10, top, 20, height);
+				cable.fillStyle(multiply(0xa06d4e, tint), 1).fillRect(x - 2, top, 4, height);
+			}
 		}
-		this.root.add(cable);
+	}
+
+	/**
+	 * Muestra el sprite real si se ve en vivo. Si no, deja el recuerdo donde se
+	 * lo vio por última vez, hasta que se apaga o ese lugar vuelve a verse.
+	 */
+	private remember(entry: Remembered, live: boolean) {
+		const { real, ghost } = entry;
+		real.setVisible(live);
+		if (live) {
+			entry.wasLive = true;
+			entry.remembered = false;
+			ghost.setVisible(false);
+			return;
+		}
+		if (entry.wasLive) {
+			entry.wasLive = false;
+			entry.remembered = true;
+			ghost.setFrame(real.frame.name).setOrigin(real.originX, real.originY)
+				.setPosition(real.x, real.y).setFlipX(real.flipX).setAlpha(real.alpha);
+		}
+		const age = this.sight.ageAt(ghost.x, ghost.y - TILE);
+		// Se lo vio irse, o se volvió a mirar ahí y no estaba: el recuerdo nuevo no lo tiene.
+		if (age === 0) entry.remembered = false;
+		const tint = entry.remembered ? memoryTint(age) : 0;
+		ghost.setVisible(tint !== 0).setTint(tint);
 	}
 
 	private createGuard(guard: Guard): GuardSprites {
 		const x = centerX(guard.x);
 		const body = this.put(x, feetY(guard.y), 'sereno/idle');
+		const ghost = this.put(x, feetY(guard.y), 'sereno/idle').setVisible(false);
 		const key = this.put(x, feetY(guard.y), 'objetos/key').setScale(1);
 		const mark = this.scene.add.text(x, 0, '', {
 			fontFamily: 'Arial Black, Arial, sans-serif',
@@ -178,7 +240,7 @@ export class MineView {
 			strokeThickness: 5,
 		}).setOrigin(0.5, 1);
 		this.root.add(mark);
-		return { body, key, mark };
+		return { body, real: body, ghost, wasLive: false, remembered: false, key, mark };
 	}
 
 	update(dt: number) {
@@ -186,15 +248,30 @@ export class MineView {
 		const { mine } = this;
 		const alarm = mine.alarm > 0 ? (Math.sin(this.time * 9) + 1) / 2 : 0;
 		const lights = collectLights(mine);
-		const shade = (x: number, y: number, floor?: number) => tintFor(brightnessAt(lights, x, y, floor), alarm);
+		const { sight } = this;
+		sight.update(liveSpans(mine), this.time);
+		// En vivo, la luz; si no, el recuerdo que se apaga, o negro si nunca se vio.
+		const shade = (x: number, y: number, floor?: number) => {
+			const age = sight.ageAt(x, y);
+			return age === 0 ? tintFor(brightnessAt(lights, x, y, floor), alarm) : memoryTint(age);
+		};
+		const seen = (x: number, y: number) => sight.ageAt(x, y) === 0;
 
 		for (const { image, x, y, floor } of this.lit) image.setTint(shade(x, y, floor));
-		this.updateFixtures(alarm);
+		this.drawCable();
+		this.updateFixtures(alarm, seen);
 		this.updateItems(shade);
-		this.drawBeams();
+		const watching = mine.guards.map((guard) => seen(centerX(guard.x), feetY(guard.y) - TILE));
+		this.drawBeams(watching);
 		mine.guards.forEach((guard, index) => {
-			this.updateGuard(guard, this.guards[index]);
-			this.guards[index].body.setTint(shade(centerX(guard.x), feetY(guard.y) - TILE, 0.75));
+			const sprites = this.guards[index];
+			if (watching[index]) {
+				this.updateGuard(guard, sprites);
+				sprites.body.setTint(shade(centerX(guard.x), feetY(guard.y) - TILE, 0.75));
+			}
+			sprites.mark.setVisible(watching[index]);
+			if (!watching[index]) sprites.key.setVisible(false);
+			this.remember(sprites, watching[index]);
 		});
 		this.updatePlayer(dt);
 		this.drawArms();
@@ -209,20 +286,32 @@ export class MineView {
 				.setTint(shade(x, feetY(barrow.y) - TILE, 0.7));
 		});
 		mine.carts.forEach((cart, index) => {
-			const waiting = cart.waitFor > 0;
-			const shake = waiting && cart.waitFor < CART.warning ? Math.sin(this.time * 70) * 2 : 0;
-			showClip(this.carts[index], 'grandes/cart', waiting ? 0 : this.time)
-				.setPosition(centerX(cart.x) + shake, feetY(cart.y) - CART_LIFT)
-				.setFlipX(cart.direction < 0)
-				.setTint(shade(centerX(cart.x), feetY(cart.y) - TILE, 0.7));
+			const sprites = this.carts[index];
+			const live = seen(centerX(cart.x), feetY(cart.y) - TILE);
+			if (live) {
+				const waiting = cart.waitFor > 0;
+				const shake = waiting && cart.waitFor < CART.warning ? Math.sin(this.time * 70) * 2 : 0;
+				showClip(sprites.real, 'grandes/cart', waiting ? 0 : this.time)
+					.setPosition(centerX(cart.x) + shake, feetY(cart.y) - CART_LIFT)
+					.setFlipX(cart.direction < 0)
+					.setTint(shade(centerX(cart.x), feetY(cart.y) - TILE, 0.7));
+			}
+			this.remember(sprites, live);
 		});
 	}
 
-	private updateFixtures(alarm: number) {
-		const { mine } = this;
+	/** Lo que no se ve en vivo queda como se lo vio: una lámpara no se prende en el recuerdo. */
+	private updateFixtures(alarm: number, seen: (x: number, y: number) => boolean) {
+		const { mine, sight } = this;
 		this.glow.clear();
 		mine.lamps.forEach((lamp, index) => {
-			showClip(this.lamps[index], lamp.lit ? 'objetos/lamp_on' : 'objetos/lamp_off');
+			const x = centerX(lamp.x);
+			const y = feetY(lamp.y) - TILE;
+			if (!seen(x, y)) {
+				this.lamps[index].setTint(memoryTint(sight.ageAt(x, y)));
+				return;
+			}
+			showClip(this.lamps[index], lamp.lit ? 'objetos/lamp_on' : 'objetos/lamp_off').setTint(0xffffff);
 			if (!lamp.lit) return;
 			const flicker = Math.sin(this.time * 11 + index * 2) * 2;
 			this.glow.fillStyle(0xf39c12, 0.07);
@@ -230,6 +319,7 @@ export class MineView {
 			this.glow.fillCircle(centerX(lamp.x), feetY(lamp.y) - 59, 24 + flicker);
 		});
 		mine.bells.forEach((bell, index) => {
+			if (!seen(centerX(bell.x), feetY(bell.y) - TILE)) return;
 			showClip(this.bells[index], mine.alarm > 0 ? 'objetos/bell_ring' : 'objetos/bell', this.time);
 			if (mine.alarm <= 0) return;
 			this.glow.fillStyle(0xff3b30, 0.08 + alarm * 0.08);
@@ -269,12 +359,12 @@ export class MineView {
 	}
 
 	/** El haz llega hasta donde el sereno vería al minero con la luz de ahora. */
-	private drawBeams() {
+	private drawBeams(watching: boolean[]) {
 		const { mine, beams } = this;
 		beams.clear();
 		const range = mine.player.hidden ? GUARD.sightDark : sightRange(mine);
-		for (const guard of mine.guards) {
-			if (guard.mode === 'stunned' || !Number.isInteger(guard.y)) continue;
+		for (const [index, guard] of mine.guards.entries()) {
+			if (!watching[index] || guard.mode === 'stunned' || !Number.isInteger(guard.y)) continue;
 			let cells = range;
 			for (let step = 1; step <= Math.ceil(range); step += 1) {
 				if (mine.isSolid(Math.round(guard.x + guard.facing * step), guard.y)) {

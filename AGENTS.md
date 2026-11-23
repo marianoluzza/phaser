@@ -300,12 +300,14 @@ src/
     │   │   ├── generator.ts
     │   │   ├── campaign.ts
     │   │   ├── autopilot.ts
+    │   │   ├── vision.ts
     │   │   ├── run.ts
     │   │   └── rng.ts
     │   ├── objects/
     │   │   ├── art.ts
     │   │   ├── geometry.ts
     │   │   ├── lighting.ts
+    │   │   ├── sight.ts
     │   │   ├── MineView.ts
     │   │   ├── Hud.ts
     │   │   ├── minimap.ts

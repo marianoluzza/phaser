@@ -534,7 +534,9 @@ export class Mine {
 		if (player.state === 'hang' && input.y > 0 && this.dropBelow()) return;
 		if (player.state === 'walk' && input.y !== 0) {
 			if (input.y < 0 && this.tryGrip()) return;
-			if (player.hands !== 'barrow' && this.startClimb(input.y)) {
+			// Con ← o → apretado la escalera no lo atrapa: así se baja en un piso del medio.
+			const leaving = input.x !== 0 && !this.isSolid(Math.round(player.x) + Math.sign(input.x), player.y);
+			if (!leaving && player.hands !== 'barrow' && this.startClimb(input.y)) {
 				this.climb(dt, input.y);
 				return;
 			}

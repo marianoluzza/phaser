@@ -69,6 +69,16 @@ export const NOISE = {
 
 export const LAMP_RADIUS = 2.5;
 export const ALARM_TIME = 20;
+/** Qué se ve en vivo y cuánto dura lo que se recuerda. */
+export const VISION = {
+	/** Celdas a cada lado de la escalera que se ven en la otra punta. */
+	window: 2,
+	/** Desde qué parte del recorrido se ven las dos galerías enteras: del 30 al 70 %. */
+	middle: 0.3,
+	/** Segundos hasta que el recuerdo de una galería queda negro. */
+	memory: 12,
+};
+
 /** Tocada a mano, para distraer: más corta que la de la bóveda. */
 export const BELL_RING = 8;
 export const PICK_HITS = 3;

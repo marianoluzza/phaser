@@ -88,6 +88,67 @@ tomadas al implementar, no pedidos del usuario.
     asistente, avisadas: cargado, Espacio sigue soltando la bolsa).
 - R18 «Arregla tambien lo de la carretilla al soltarla que queda siempre igual»: suelta, la
   carretilla queda mirando para el lado en que se la llevaba, no siempre a la derecha.
+- R19 Oscuridad, memoria y oído. Mensajes de Mariano, textuales:
+  > Hoy la luz del minero no sirve para nada, quizás debería ser tan oscuro que no puedas jugar
+  > sin la luz no?
+
+  > Primero hace commit de lo que tenemos. Hasta aca está bien salvo eso. Despues, no solo haría
+  > los 3 puntos. Si no que sumaría que no puedas ver los pisos que no estás. Ahí si se vuelve de
+  > suspenso y planificación. El guardía podría un encendedor de muy poca luz cuando no hay luz
+  > para que con eso vaya a encender las linternas. De todas formas ellos no necesitan ver la
+  > linterna, son del lugar y saben donde están pero esa pequeña luz le permite ver por donde va.
+  > ¿Cómo lo ves? Más adelante podemos armar trampas, otro tipos de guardias, artefactos y
+  > artilugios. El protagonista también debería poder oir cosas dentro de un rango. Es otra forma
+  > de sentir.
+
+  > Donde no estás es negro total. De donde venis podría ser algo así como una radiografía que se
+  > va tiñiendo a negro. Es como lo que recordas. Pero fijo, sin movimiento. ¿Está bueno eso, es
+  > muy complicado? Cuando estás sobre la escalera y empezas a bajar/subir, permitiría que veas el
+  > final de la escalera, así no pasa que justo empezas a bajar y estaba el guardia y te agarra,
+  > sería mas de suerte que de planificar. Luego si cuando ya estás mitad y mitad, podes ver los 2
+  > pisos.
+
+  > dale, arrancá con la primera etapa
+
+  Los «3 puntos» son los que propuso el asistente y Mariano aceptó: oscuridad de verdad en el
+  propio piso, más lento a tientas, y que prender la linterna se note. Etapas acordadas: 1) pisos
+  negros, memoria y escalera; 2) oído; 3) oscuridad en el propio piso, lentitud a tientas,
+  linterna que se nota y encendedor del sereno.
+
+  Etapa 1:
+  - R19.1 «Donde no estás es negro total»: se ve en vivo sólo la galería en la que está el
+    minero, de punta a punta. Las demás se ven negras, con lo que se mueve oculto.
+  - R19.2 «permitiría que veas el final de la escalera»: al empezar a trepar o a caer se ve
+    también, en vivo, el otro extremo: dos celdas a cada lado (decisión del asistente).
+  - R19.3 «cuando ya estás mitad y mitad, podes ver los 2 pisos»: en el tramo del medio, del 30 al
+    70 % del recorrido (decisión del asistente), se ven las dos galerías enteras.
+  - R19.4 «una radiografía que se va tiñiendo a negro [...] fijo, sin movimiento»: lo que se dejó
+    de ver queda como se lo vio por última vez, en un tono frío, y se apaga a negro en 12 segundos
+    (decisión del asistente). Un sereno que se fue sigue en el recuerdo donde se lo vio; lo que
+    cambia mientras no se ve (una lámpara que se prende, una vagoneta que se mueve) no cambia en
+    el recuerdo. Lo nunca visto es negro.
+  - R19.5 La etapa 1 sólo cambia lo que se ve: las reglas del juego, el piloto y el balance quedan
+    iguales.
+- R20 Correcciones de la etapa 1. Mensajes de Mariano, textuales:
+  > El muro tiene que restringir la vista igual que le restringe al guardia. Las escaleras que
+  > duran más de un piso no permiten bajar en los intermedios. A veces cuando volves a un piso, el
+  > recuerdo muestra un guardia subiendo la escalera pero no es real y solo se ve yendo al piso, si
+  > no vas al piso el recuerdo no lo muestra, o sea, volver te crea un recuerdo o no se si lo
+  > oculta y realmente estaba. No, creo que se lo que pasa, como está ahi arriba, cuando vas al
+  > piso no lo ves, pero en el recuerdo lo viste irse, supongo que esa parte del recuerdo no se
+  > actualiza cuando volves. Cuando cruzas un pozo, deberías poder ver lo de abajo.
+
+  > Lo del recuerdo y el sereno es que no limpia las posiciones de cosas dinamicas el nuevo
+  > recuerdo, creo que es eso
+
+  - R20.1 la roca y los muros sin romper cortan la vista como al sereno: se ve el muro, no lo de
+    atrás. También en la ventana de la escalera.
+  - R20.2 en una escalera de varios pisos, con ← o → apretado la escalera no atrapa: se baja en el
+    piso del medio aunque ↓ siga apretado. Sin ← ni →, sigue de largo como antes.
+  - R20.3 colgado de las argollas se ve la galería de abajo alrededor del minero, dos celdas a cada
+    lado, como en la escalera.
+  - R20.4 lo que se mueve y se recuerda se borra del recuerdo en cuanto se ve ese lugar sin él:
+    al sereno que se lo vio irse no lo trae el recuerdo de esa galería.
 - R14 Convenciones del arcade: módulo propio, ES/EN, ancho elástico y lo demás sin cambios.
 
 ## Tareas
@@ -104,6 +165,10 @@ tomadas al implementar, no pedidos del usuario.
 - [x] T10 R16.13: las argollas también cansan.
 - [x] T11 R17: el sereno pasa por delante del nicho y la campana se toca a mano.
 - [x] T12 R18: la carretilla suelta conserva su lado.
+- [x] T13 R19 etapa 1: pisos negros, memoria que se apaga y vista desde la escalera.
+- [x] T13b R20: muros que tapan, escaleras de varios pisos, recuerdo que se limpia, pozos.
+- [ ] T14 R19 etapa 2: oído.
+- [ ] T15 R19 etapa 3: oscuridad en el propio piso, a tientas, linterna que se nota, encendedor.
 
 ## Registro de correcciones y evidencia
 
@@ -156,6 +221,21 @@ tomadas al implementar, no pedidos del usuario.
     orden de dibujo y vuelve arriba al salir; la campana tocada suena 8 s y Espacio la calla; la
     carretilla soltada yendo a la izquierda queda espejada;
   - 71 tests y 500 minas generadas completables, tipos y build.
+- R19 etapa 1:
+  - 6 tests de la regla de qué se ve (R19.1 a R19.3), vistos fallar contra un esqueleto vacío;
+    77 tests y 500 minas generadas completables, sin tocar reglas ni piloto (R19.5);
+  - recorrido de Chrome con chequeos sobre la escena real: lo nunca visto sale negro; al bajar se
+    ve el pie de la escalera y cuatro celdas más allá no; en el medio se ven las dos galerías; el
+    sereno que se fue queda en el recuerdo donde se lo vio; a los 12 s el recuerdo es negro;
+  - el primer tinte del recuerdo (gris neutro) casi no se distinguía de lo vivo en las capturas:
+    marrón y apenas más oscuro. Se pasó a un azul que, sobre la paleta cálida, deja gris frío.
+- R20:
+  - 4 tests vistos fallar: muro y roca (2), pozo (1) y escalera de varios pisos, que siguió de
+    largo hasta y = 1,67 con → apretado;
+  - el sereno fantasma, reproducido en Chrome antes de dar el arreglo por bueno: con el arreglo
+    desactivado, el recuerdo lo traía (`ghost: true`); con el arreglo, no. Causa: el recuerdo de lo
+    que se mueve quedaba guardado aunque se viera ese lugar vacío, y reaparecía al irse;
+  - recorrido de Chrome: detrás del muro, negro; 81 tests, 500 minas y build.
 - Pendiente: balance jugado por una persona (el piloto no mide dificultad), sonido escuchado por
   una persona, controles táctiles, commit y deploy (no pedidos).
 

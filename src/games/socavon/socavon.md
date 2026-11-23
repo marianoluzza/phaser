@@ -56,6 +56,14 @@ personajes, las minas y las reglas de sigilo son de Socavón.
   4 segundos, mientras parpadean, la vagoneta no los vuelve a tirar.
 - **Entrada.** La patrulla no pasa por la galería de arriba: es el respiro al llegar y al revivir.
   Un ruido o una persecución sí pueden llevar a un sereno hasta ahí.
+- **Lo que se ve.** Sólo la galería en la que estás, hasta la roca o un muro sin romper, como el
+  sereno. Al empezar a trepar o a caer, y colgado de las argollas, se ve también la galería de
+  abajo o de arriba, dos celdas a cada lado; en el medio de la escalera, las dos galerías enteras.
+  Se puede dar la vuelta a mitad de escalera: asomarse es gratis.
+- **Lo que se recuerda.** Lo que se dejó de ver queda fijo, como se lo vio, en gris azulado, y se
+  apaga a negro en 12 segundos. Un sereno que se fue sigue en el recuerdo hasta que se vuelve a
+  mirar ahí; una lámpara que se prende no cambia en el recuerdo. Lo nunca visto es negro.
+- **Escaleras largas.** Con ← o → apretado se baja en el piso del medio; si no, se sigue de largo.
 
 Los números están en `constants/tuning.ts`.
 
@@ -73,7 +81,14 @@ flowchart LR
 ```
 
 `Mine.step(dt, input)` avanza el estado y devuelve eventos. La escena los convierte en sonidos y
-efectos. `Mine.action()` decide qué hace Espacio y también alimenta la ayuda, así que no pueden
+efectos.
+
+Qué se ve en vivo es una regla sin Phaser (`state/vision.ts`, con tests). La vista guarda cuándo
+se vio por última vez cada tile (`objects/sight.ts`) y con eso tiñe: en vivo, la luz; si no, el
+recuerdo o negro. Serenos y vagonetas tienen dos sprites, el real, que sólo se muestra en vivo, y
+una copia fija del último cuadro visto, para que el recuerdo no se mueva aunque ellos sí. El tinte
+del recuerdo multiplica con un azul que, sobre la paleta cálida de la mina, deja grises fríos sin
+filtros por pieza. `Mine.action()` decide qué hace Espacio y también alimenta la ayuda, así que no pueden
 contradecirse.
 
 ## Formato de una mina

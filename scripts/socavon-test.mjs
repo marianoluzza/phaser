@@ -244,6 +244,109 @@ try {
 		assert.equal(game.player.hands, 'bag');
 	});
 
+	{
+		const { liveSpans } = await load('state/vision');
+		const { VISION } = await load('constants/tuning');
+		/** Las celdas vivas de cada galería, como texto: `0:0-9` es la galería 0 entera. */
+		const spans = (game) => liveSpans(game).map(({ y, from, to }) => `${y}:${from}-${to}`).sort().join(' ');
+		const ladder = () => mine('#E..H.....#', '#.........#', '#.........#');
+		/** Trepa hasta que el recorrido entre las dos galerías llegue a `part`. */
+		const climbTo = (game, direction, part) => {
+			for (let i = 0; i < 600; i += 1) {
+				const done = direction > 0 ? game.player.y - Math.floor(game.player.y) : Math.ceil(game.player.y) - game.player.y;
+				if (game.player.state === 'climb' && done >= part) return;
+				game.step(STEP, { ...STILL, y: direction });
+			}
+			assert.fail(`no llegó al ${part * 100} % de la escalera`);
+		};
+
+		await test('R19.1 en una galería se ve sólo esa, de punta a punta', () => {
+			const game = ladder();
+			assert.equal(spans(game), '0:0-10');
+			walkTo(game, 7);
+			assert.equal(spans(game), '0:0-10');
+		});
+
+		await test('R19.2 al empezar a bajar se ve el pie de la escalera', () => {
+			const game = ladder();
+			walkTo(game, 4);
+			climbTo(game, 1, 0.05);
+			assert.equal(spans(game), `0:0-10 1:${4 - VISION.window}-${4 + VISION.window}`);
+		});
+
+		await test('R19.2 al empezar a subir se ve la boca de arriba', () => {
+			const game = ladder();
+			Object.assign(game.player, { x: 4, y: 1 });
+			climbTo(game, -1, 0.05);
+			assert.equal(spans(game), `0:${4 - VISION.window}-${4 + VISION.window} 1:0-10`);
+		});
+
+		await test('R19.3 en el medio de la escalera se ven las dos galerías', () => {
+			const game = ladder();
+			walkTo(game, 4);
+			climbTo(game, 1, 0.5);
+			assert.equal(spans(game), '0:0-10 1:0-10');
+			climbTo(game, 1, 0.8);
+			assert.equal(spans(game), `0:${4 - VISION.window}-${4 + VISION.window} 1:0-10`);
+		});
+
+		await test('R19.2 al caer de una argolla se ve abajo, alrededor', () => {
+			const game = mine('#E.hhh....#', '#.........#');
+			walkTo(game, 4);
+			game.step(STEP, { ...STILL, y: 1 });
+			game.step(STEP, { ...STILL });
+			assert.equal(game.player.state, 'fall');
+			assert.equal(spans(game), `0:0-10 1:${4 - VISION.window}-${4 + VISION.window}`);
+		});
+
+		await test('R20.1 un muro o la roca cortan la vista, como al sereno', () => {
+			const walled = mine('#E..%....#');
+			assert.equal(spans(walled), '0:0-4');
+			const rock = mine('#E..#....#');
+			assert.equal(spans(rock), '0:0-4');
+			// Roto, se ve a través.
+			const broken = mine('#E..%....#');
+			broken.walls[0].hits = 3;
+			assert.equal(spans(broken), '0:0-9');
+		});
+
+		await test('R20.1 el muro también corta la ventana de la escalera', () => {
+			const game = mine('#E..H.....#', '#....%....#');
+			walkTo(game, 4);
+			climbTo(game, 1, 0.05);
+			assert.equal(spans(game), `0:0-10 1:${4 - VISION.window}-5`);
+		});
+
+		await test('R20.3 colgado sobre un pozo se ve abajo, alrededor', () => {
+			const game = mine('#E.hhhh...#', '#.........#');
+			walkTo(game, 5);
+			assert.equal(game.player.state, 'hang');
+			assert.equal(spans(game), `0:0-10 1:${5 - VISION.window}-${5 + VISION.window}`);
+		});
+
+		await test('R19.2 la ventana no se sale de la mina', () => {
+			const game = mine('#EH.....#', '#.......#');
+			walkTo(game, 2);
+			climbTo(game, 1, 0.05);
+			assert.equal(spans(game), `0:0-8 1:0-${2 + VISION.window}`);
+		});
+	}
+
+	await test('R20.2 en una escalera de varios pisos se baja en el del medio', () => {
+		const game = mine('#E..H.....#', '#...H.....#', '#.........#');
+		walkTo(game, 4);
+		// ↓ apretado todo el tiempo y → al llegar: se baja en la galería 1.
+		for (let i = 0; i < 600 && game.player.y < 1; i += 1) game.step(STEP, { ...STILL, y: 1 });
+		play(game, 0.5, { x: 1, y: 1 });
+		assert.equal(game.player.y, 1, `siguió bajando: y = ${game.player.y}`);
+		assert.ok(game.player.x > 4.5, `no salió de la escalera: x = ${game.player.x}`);
+		// Sin → sigue de largo hasta abajo, como antes.
+		const through = mine('#E..H.....#', '#...H.....#', '#.........#');
+		walkTo(through, 4);
+		play(through, 3, { y: 1 });
+		assert.equal(through.player.y, 2);
+	});
+
 	await test('R18 la carretilla suelta queda mirando para donde se la llevaba', () => {
 		const game = mine('#E.......W..#');
 		walkTo(game, 9);

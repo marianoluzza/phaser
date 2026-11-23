@@ -226,6 +226,97 @@ const FLOWS = {
 		await use();
 		if ((await alarm()) !== 0) throw new Error('Socavón: la campana no se calló');
 
+		// R19: lo que no se ve es negro; lo que se dejó de ver, un recuerdo fijo que se apaga.
+		const look = (x, row) => page.evaluate(([cx, r]) => {
+			const { view } = window.arcade.scene.getScene('socavon:game');
+			const piece = view.lit.find((other) => Math.floor(other.x / 48) === cx && Math.floor(other.y / 48) === r);
+			const age = view.sight.ageAt(piece.x, piece.y);
+			return { tint: piece.image.tint, age: age === Infinity ? 'nunca' : age };
+		}, [x, row]);
+		const fail = (what, value) => {
+			throw new Error(`Socavón: ${what} (${JSON.stringify(value)})`);
+		};
+		// La galería 3 nunca se vio: el minero llegó a la 4 sin pasar por ella.
+		const never = await look(10, 10);
+		if (never.age !== 'nunca' || never.tint !== 0) fail('la galería nunca vista no es negra', never);
+		const pausedAt = (low, high) => page.waitForFunction(([from, to]) => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			const { y } = scene.mine.player;
+			if (y <= from || y >= to) return false;
+			scene.paused = true;
+			return true;
+		}, [low, high], { timeout: 8000, polling: 'raf' });
+		const resume = () => page.evaluate(() => {
+			window.arcade.scene.getScene('socavon:game').paused = false;
+		});
+		const watchman = () => page.evaluate(() => {
+			const sprites = window.arcade.scene.getScene('socavon:game').view.guards[0];
+			return { body: sprites.body.visible, ghost: sprites.ghost.visible, ghostX: sprites.ghost.x };
+		});
+
+		await put(5, 1);
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.guards[0], { x: 9, y: 1, facing: -1, mode: 'patrol', moving: false, waitFor: 999, route: [], goal: null });
+		});
+		await page.waitForTimeout(200);
+		if (!(await watchman()).body) fail('no se ve al sereno de la propia galería', await watchman());
+		await page.keyboard.down('ArrowDown');
+		await pausedAt(1.03, 1.25);
+		// R19.2: el pie de la escalera se ve; cuatro celdas más allá, no.
+		const foot = await look(5, 8);
+		const beyond = await look(9, 8);
+		if (foot.age !== 0) fail('al bajar no se ve el pie de la escalera', foot);
+		if (beyond.age === 0) fail('al bajar se ve más que el pie de la escalera', beyond);
+		await arcade.shot('socavon-asomarse-a-la-escalera');
+		await resume();
+		await pausedAt(1.42, 1.58);
+		// R19.3: en el medio, las dos galerías enteras.
+		const up = await look(20, 4);
+		const down = await look(20, 8);
+		if (up.age !== 0 || down.age !== 0) fail('en el medio no se ven las dos galerías', { up, down });
+		await arcade.shot('socavon-mitad-y-mitad');
+		await resume();
+		await page.waitForFunction(() => window.arcade.scene.getScene('socavon:game').mine.player.y === 2, null, { timeout: 8000, polling: 'raf' });
+		await page.keyboard.up('ArrowDown');
+		// R19.4: el sereno se va, pero el recuerdo lo deja donde se lo vio.
+		await page.evaluate(() => {
+			Object.assign(window.arcade.scene.getScene('socavon:game').mine.guards[0], { x: 20 });
+		});
+		await page.waitForTimeout(300);
+		const remembered = await watchman();
+		if (remembered.body || !remembered.ghost || remembered.ghostX !== 9 * 48 + 24) fail('el recuerdo no deja al sereno donde se lo vio', remembered);
+		const memory = await look(14, 4);
+		if (memory.age === 0 || memory.age === 'nunca' || memory.tint === 0) fail('la galería de arriba no quedó como recuerdo', memory);
+		await arcade.shot('socavon-recuerdo');
+		await page.waitForTimeout(12300);
+		const faded = await look(14, 4);
+		if (faded.tint !== 0 || (await watchman()).ghost) fail('a los 12 s el recuerdo no está negro', { faded, guard: await watchman() });
+		await arcade.shot('socavon-recuerdo-apagado');
+
+		// R20.1: el muro corta la vista, como al sereno.
+		await put(10, 3);
+		await page.waitForTimeout(200);
+		const before = await look(11, 10);
+		const behind = await look(14, 10);
+		if (before.age !== 0 || behind.age === 0) fail('el muro no corta la vista', { before, behind });
+		await arcade.shot('socavon-muro-tapa');
+		// R20.4: al sereno que se lo vio irse no lo trae el recuerdo de esa galería.
+		await put(7, 1);
+		await page.evaluate(() => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			Object.assign(mine.guards[0], { x: 3, y: 0.6, mode: 'patrol', moving: false, waitFor: 999, route: [], goal: null });
+		});
+		await page.waitForTimeout(250);
+		if (!(await watchman()).body) fail('no se ve al sereno que trepa desde la propia galería', await watchman());
+		await page.evaluate(() => {
+			Object.assign(window.arcade.scene.getScene('socavon:game').mine.guards[0], { y: 0.2 });
+		});
+		await page.waitForTimeout(250);
+		await put(7, 2);
+		await page.waitForTimeout(250);
+		if ((await watchman()).ghost) fail('el recuerdo trae al sereno que se lo vio irse', await watchman());
+
 		// R16: colgarse, que pase la vagoneta, caerle adentro y bajarse, con el teclado.
 		await put(13, 2);
 		await page.evaluate(() => {
