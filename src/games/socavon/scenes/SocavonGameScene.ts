@@ -10,6 +10,7 @@ import { MineView } from '../objects/MineView';
 import { phrase } from '../objects/ui';
 import { SOCAVON_SCENES } from '../sceneKeys';
 import { minePlan } from '../state/campaign';
+import { eventLoudness, type Heard } from '../state/hearing';
 import { parseLevel } from '../state/level';
 import { Mine, type MineEvent, type MineInput } from '../state/Mine';
 import { newRun, type Run } from '../state/run';
@@ -18,6 +19,9 @@ const STEP = 1 / 60;
 /** Tras un tirón no se recupera más que esto: evita atropellos invisibles. */
 const MAX_FRAME = 0.1;
 const BELL_EVERY = 1.1;
+/** Los pasos oídos, bajos y más graves que el golpecito original. */
+const STEP_VOLUME = 0.5;
+const STEP_RATE = 0.7;
 
 const EVENT_SOUNDS: Partial<Record<MineEvent['type'], SocavonAudioAsset>> = {
 	take: SOCAVON_AUDIO.take,
@@ -172,7 +176,7 @@ export class SocavonGameScene extends Phaser.Scene {
 
 		for (const event of events) this.react(event);
 		this.ringBell(dt);
-		this.view.update(dt);
+		for (const step of this.view.update(dt)) this.hearStep(step);
 		this.hud.update(this.mine, dt);
 		this.moveCamera(dt);
 
@@ -192,9 +196,18 @@ export class SocavonGameScene extends Phaser.Scene {
 	private react(event: MineEvent) {
 		this.view.react(event);
 		const sound = EVENT_SOUNDS[event.type];
-		if (sound) audioManager.playSfx(this, sound.cacheKey);
+		const volume = eventLoudness(this.mine, event);
+		if (sound && volume > 0) audioManager.playSfx(this, sound.cacheKey, { volume });
 		const notice = EVENT_NOTICES[event.type];
 		if (notice) this.hud.showNotice(notice);
+	}
+
+	private hearStep(step: Heard) {
+		audioManager.playSfx(this, SOCAVON_AUDIO.step.cacheKey, {
+			volume: STEP_VOLUME * step.loudness,
+			pan: step.pan,
+			rate: STEP_RATE * (step.kind === 'run' ? 1.1 : 1),
+		});
 	}
 
 	private ringBell(dt: number) {

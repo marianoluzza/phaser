@@ -63,6 +63,11 @@ personajes, las minas y las reglas de sigilo son de Socavón.
 - **Lo que se recuerda.** Lo que se dejó de ver queda fijo, como se lo vio, en gris azulado, y se
   apaga a negro en 12 segundos. Un sereno que se fue sigue en el recuerdo hasta que se vuelve a
   mirar ahí; una lámpara que se prende no cambia en el recuerdo. Lo nunca visto es negro.
+- **Lo que se oye.** Los pasos de los serenos (corriendo, desde más lejos), las vagonetas en
+  marcha y la campana, como el sereno oye al minero: entero en la propia galería, atenuado en la
+  de arriba y la de abajo, y a través de muros y roca. Donde no se ve, cada paso o traqueteo deja
+  una onda en su lugar, que no queda en el recuerdo. Suena más bajo cuanto más lejos y del lado
+  de donde viene; lo que no se oye, como una vagoneta que arranca tres galerías abajo, no suena.
 - **Escaleras largas.** Con ← o → apretado se baja en el piso del medio; si no, se sigue de largo.
 
 Los números están en `constants/tuning.ts`.
@@ -88,7 +93,9 @@ se vio por última vez cada tile (`objects/sight.ts`) y con eso tiñe: en vivo, 
 recuerdo o negro. Serenos y vagonetas tienen dos sprites, el real, que sólo se muestra en vivo, y
 una copia fija del último cuadro visto, para que el recuerdo no se mueva aunque ellos sí. El tinte
 del recuerdo multiplica con un azul que, sobre la paleta cálida de la mina, deja grises fríos sin
-filtros por pieza. `Mine.action()` decide qué hace Espacio y también alimenta la ayuda, así que no pueden
+filtros por pieza. Qué se oye también es una regla sin Phaser (`state/hearing.ts`): la vista lleva
+el compás de cada cosa que suena y la escena hace sonar los pasos con volumen y paneo.
+`Mine.action()` decide qué hace Espacio y también alimenta la ayuda, así que no pueden
 contradecirse.
 
 ## Formato de una mina

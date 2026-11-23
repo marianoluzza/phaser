@@ -301,6 +301,7 @@ src/
     │   │   ├── campaign.ts
     │   │   ├── autopilot.ts
     │   │   ├── vision.ts
+    │   │   ├── hearing.ts
     │   │   ├── run.ts
     │   │   └── rng.ts
     │   ├── objects/

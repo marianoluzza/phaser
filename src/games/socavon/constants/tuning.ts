@@ -79,6 +79,20 @@ export const VISION = {
 	memory: 12,
 };
 
+/**
+ * Hasta dónde oye el minero, en celdas: el espejo de `NOISE`. A la galería de
+ * arriba y a la de abajo llega por `NOISE.throughFloor`.
+ */
+export const HEARING = {
+	walk: 5,
+	/** Corriendo o yendo hacia un ruido. */
+	run: 8,
+	cart: 10,
+	bell: 14,
+	/** Un sereno que prende una lámpara. */
+	relight: 6,
+};
+
 /** Tocada a mano, para distraer: más corta que la de la bóveda. */
 export const BELL_RING = 8;
 export const PICK_HITS = 3;

@@ -3,6 +3,7 @@ import { CART, GRIP, GUARD, PICK_HITS } from '../constants/tuning';
 import { sightRange } from '../state/guardBrain';
 import { railRange } from '../state/level';
 import type { Guard, Item, Mine, MineEvent } from '../state/Mine';
+import { heard, type Heard } from '../state/hearing';
 import { liveSpans } from '../state/vision';
 import { addClip, showClip } from './art';
 import { CART_LIFT, centerX, feetY, GALLERY, GRIP_LIFT, mineSize, TILE } from './geometry';
@@ -36,6 +37,8 @@ const EYES = 62;
 const RIDE_LIFT = 17;
 /** Lo que baja el sprite mientras se suelta del agarre. */
 const DROP_FALL = 40;
+/** Cada cuánto suena lo que se oye: un paso, un traqueteo, un golpe de campana. */
+const BEAT: Record<Heard['kind'], number> = { walk: 0.45, run: 0.3, cart: 0.25, bell: 1.1 };
 
 /**
  * Dibuja una mina a partir de su estado, sin guardar nada del juego. Todo vive
@@ -73,6 +76,8 @@ export class MineView {
 	private struckAt = -Infinity;
 	private caughtAt = 0;
 	private behindGuards = false;
+	/** Lo que falta para el próximo golpe de cada cosa que se oye. */
+	private beats = new Map<object, number>();
 
 	constructor(scene: Phaser.Scene, mine: Mine) {
 		this.scene = scene;
@@ -243,7 +248,8 @@ export class MineView {
 		return { body, real: body, ghost, wasLive: false, remembered: false, key, mark };
 	}
 
-	update(dt: number) {
+	/** Devuelve los pasos que sonaron en este cuadro, para que la escena los haga oír. */
+	update(dt: number): Heard[] {
 		this.time += dt;
 		const { mine } = this;
 		const alarm = mine.alarm > 0 ? (Math.sin(this.time * 9) + 1) / 2 : 0;
@@ -298,6 +304,48 @@ export class MineView {
 			}
 			this.remember(sprites, live);
 		});
+		return this.listen(dt, seen);
+	}
+
+	/**
+	 * Lleva el compás de lo que se oye. Cada golpe deja una onda donde no se ve
+	 * en vivo (lo que se ve no la necesita) y, si es un paso, se devuelve para
+	 * que suene.
+	 */
+	private listen(dt: number, seen: (x: number, y: number) => boolean) {
+		const steps: Heard[] = [];
+		const sounds = heard(this.mine);
+		const sources = new Set(sounds.map((sound) => sound.source));
+		for (const source of this.beats.keys()) if (!sources.has(source)) this.beats.delete(source);
+		for (const sound of sounds) {
+			const left = (this.beats.get(sound.source) ?? 0) - dt;
+			if (left > 0) {
+				this.beats.set(sound.source, left);
+				continue;
+			}
+			this.beats.set(sound.source, BEAT[sound.kind]);
+			if (sound.kind === 'walk' || sound.kind === 'run') steps.push(sound);
+			const x = centerX(sound.x);
+			const y = feetY(sound.y);
+			if (!seen(x, y - TILE)) this.echo(sound, x, y);
+		}
+		return steps;
+	}
+
+	/** La onda de lo oído: pasos al pie, la vagoneta sobre el riel, la campana en el techo. */
+	private echo(sound: Heard, x: number, y: number) {
+		const shape = {
+			walk: { dy: -6, width: 48, height: 16, line: 3 },
+			run: { dy: -6, width: 60, height: 20, line: 3 },
+			cart: { dy: -14, width: 96, height: 24, line: 4 },
+			bell: { dy: -70, width: 64, height: 64, line: 4 },
+		}[sound.kind];
+		const echo = this.scene.add.ellipse(x, y + shape.dy, shape.width, shape.height)
+			.setStrokeStyle(shape.line, 0xd6e2ff, 0.55 + 0.45 * sound.loudness)
+			.setScale(0.5)
+			.setName('heard');
+		this.effects.add(echo);
+		this.scene.tweens.add({ targets: echo, scale: 1.3, alpha: 0, duration: 560, onComplete: () => echo.destroy() });
 	}
 
 	/** Lo que no se ve en vivo queda como se lo vio: una lámpara no se prende en el recuerdo. */

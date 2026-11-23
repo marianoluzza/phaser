@@ -45,14 +45,19 @@ class AudioManager {
 		this.playMusic(scene, cacheKey);
 	}
 
-	playSfx(scene: Phaser.Scene, cacheKey: string) {
+	/**
+	 * `volume` es relativo al volumen de efectos elegido: un sonido lejano lo
+	 * pide más bajo sin saltearse la preferencia del jugador.
+	 */
+	playSfx(scene: Phaser.Scene, cacheKey: string, options: { volume?: number; pan?: number; rate?: number } = {}) {
 		// Un efecto remoto puede fallar al cargar por red o CORS. El sonido es
 		// opcional: nunca debe interrumpir una regla, un puntaje o una transición.
 		if (!scene.cache.audio.exists(cacheKey)) {
 			return;
 		}
 
-		scene.sound.play(cacheKey, { volume: this.sfxVolume });
+		const { volume = 1, ...rest } = options;
+		scene.sound.play(cacheKey, { ...rest, volume: this.sfxVolume * volume });
 	}
 
 	stopMusic() {

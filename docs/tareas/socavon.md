@@ -129,6 +129,22 @@ tomadas al implementar, no pedidos del usuario.
     el recuerdo. Lo nunca visto es negro.
   - R19.5 La etapa 1 sólo cambia lo que se ve: las reglas del juego, el piloto y el balance quedan
     iguales.
+
+  Etapa 2 («Sigamos», 2026-11-23). Decisiones del asistente, avisadas:
+  - R19.6 «El protagonista también debería poder oir cosas dentro de un rango»: el minero oye los
+    pasos de los serenos (corriendo, desde más lejos), las vagonetas en marcha y la campana. El
+    alcance es el espejo de cómo el sereno oye al minero: entero en la misma galería, atenuado en
+    la de arriba y la de abajo, nada más lejos. El sonido atraviesa muros y roca. Lo quieto no se
+    oye.
+  - R19.7 «Es otra forma de sentir»: donde no se ve en vivo, lo que se oye deja una onda en su
+    lugar, a cada paso o traqueteo. Dice dónde y qué (pasos al pie, la vagoneta sobre el riel, la
+    campana en el techo), no quién es ni para dónde mira, y no queda en el recuerdo. Lo que se ve
+    no lleva onda.
+  - R19.8 Y suena: cada paso oído se escucha más bajo cuanto más lejos y del lado de donde viene.
+    Los sonidos de los demás (la vagoneta que arranca, el sereno que prende una lámpara o al que
+    atropellan) siguen la misma regla: lo que no se oye no suena. La campana se sigue oyendo en
+    toda la mina, porque es la alarma, y los sonidos del minero no cambian.
+  - R19.9 La etapa 2 sólo cambia lo que se percibe: reglas, piloto y balance iguales.
 - R20 Correcciones de la etapa 1. Mensajes de Mariano, textuales:
   > El muro tiene que restringir la vista igual que le restringe al guardia. Las escaleras que
   > duran más de un piso no permiten bajar en los intermedios. A veces cuando volves a un piso, el
@@ -167,7 +183,7 @@ tomadas al implementar, no pedidos del usuario.
 - [x] T12 R18: la carretilla suelta conserva su lado.
 - [x] T13 R19 etapa 1: pisos negros, memoria que se apaga y vista desde la escalera.
 - [x] T13b R20: muros que tapan, escaleras de varios pisos, recuerdo que se limpia, pozos.
-- [ ] T14 R19 etapa 2: oído.
+- [x] T14 R19 etapa 2: oído.
 - [ ] T15 R19 etapa 3: oscuridad en el propio piso, a tientas, linterna que se nota, encendedor.
 
 ## Registro de correcciones y evidencia
@@ -236,6 +252,15 @@ tomadas al implementar, no pedidos del usuario.
     desactivado, el recuerdo lo traía (`ghost: true`); con el arreglo, no. Causa: el recuerdo de lo
     que se mueve quedaba guardado aunque se viera ese lugar vacío, y reaparecía al irse;
   - recorrido de Chrome: detrás del muro, negro; 81 tests, 500 minas y build.
+- R19 etapa 2 (2026-11-23):
+  - 8 tests de qué se oye (R19.6 y R19.8), 7 vistos fallar contra un esqueleto vacío; el de lo
+    quieto o aturdido pasa desde antes y cuida que no se oiga de más. 89 tests y 500 minas
+    generadas completables, sin tocar reglas ni piloto (R19.9);
+  - recorrido de Chrome sobre la escena real: los pasos de la galería de arriba suenan y dejan
+    onda; los del sereno que se ve suenan sin onda; quieto, ni suena ni deja onda;
+  - la primera onda (30 × 10 px, trazo de 2) casi no se veía en la captura: se agrandó;
+  - no hay pasos en la biblioteca de audio: se usa `tick_004` de Interface Sounds, más grave
+    (`rate` 0,7). Falta escucharlo.
 - Pendiente: balance jugado por una persona (el piloto no mide dificultad), sonido escuchado por
   una persona, controles táctiles, commit y deploy (no pedidos).
 

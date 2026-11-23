@@ -26,6 +26,8 @@ export const SOCAVON_AUDIO = {
 	hide: { cacheKey: 'socavon:sfx:hide', url: `${UI}/drop_004.ogg?v=10738707f9300f9b` },
 	locked: { cacheKey: 'socavon:sfx:locked', url: `${UI}/error_002.ogg?v=76810ec365f41078` },
 	lamp: { cacheKey: 'socavon:sfx:lamp', url: `${UI}/glass_001.ogg?v=183eebee20eb0a53` },
+	/** Un golpecito seco que, más grave, pasa por un paso en la roca. */
+	step: { cacheKey: 'socavon:sfx:step', url: `${UI}/tick_004.ogg?v=0253d5f7d8d2afbb` },
 	hit: { cacheKey: 'socavon:sfx:hit', url: `${SCIFI}/impactMetal_001.ogg?v=4a2b76f20052819c` },
 	wallBroken: { cacheKey: 'socavon:sfx:wall-broken', url: `${SCIFI}/explosionCrunch_000.ogg?v=4b597d658d0ae101` },
 	cartStart: { cacheKey: 'socavon:sfx:cart-start', url: `${SCIFI}/impactMetal_003.ogg?v=ef29c3943ee70161` },

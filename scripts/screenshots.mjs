@@ -317,6 +317,41 @@ const FLOWS = {
 		await page.waitForTimeout(250);
 		if ((await watchman()).ghost) fail('el recuerdo trae al sereno que se lo vio irse', await watchman());
 
+		// R19.6 y R19.7: los pasos de arriba, que no se ven, se oyen y dejan su onda.
+		const hearing = () => page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			return { echoes: scene.view.effects.list.filter((node) => node.name === 'heard').length, steps: scene.heardSteps ?? 0 };
+		});
+		const walker = (values) => page.evaluate((guard) => {
+			const scene = window.arcade.scene.getScene('socavon:game');
+			if (!scene.heardSteps) {
+				scene.heardSteps = 0;
+				const hear = scene.hearStep.bind(scene);
+				scene.hearStep = (step) => {
+					scene.heardSteps += 1;
+					hear(step);
+				};
+			}
+			Object.assign(scene.mine.guards[0], { mode: 'patrol', waitFor: 999, route: [], goal: null }, guard);
+		}, values);
+		await walker({ x: 8, y: 1, moving: true });
+		await page.waitForTimeout(600);
+		const above = await hearing();
+		if (above.echoes === 0 || above.steps === 0) fail('los pasos de la galería de arriba no se oyen', above);
+		await arcade.shot('socavon-pasos-arriba');
+		// En la propia galería se lo ve: suena, pero sin onda.
+		await walker({ x: 9, y: 2, moving: true });
+		await page.waitForTimeout(800);
+		const beside = await hearing();
+		if (beside.echoes !== 0 || beside.steps <= above.steps) fail('el sereno que se ve lleva onda o no suena', beside);
+		// Quieto, no se oye.
+		await walker({ x: 8, y: 1, moving: false });
+		await page.waitForTimeout(200);
+		const stopped = await hearing();
+		await page.waitForTimeout(700);
+		const still = await hearing();
+		if (still.echoes !== 0 || still.steps !== stopped.steps) fail('el sereno quieto se oye', { stopped, still });
+
 		// R16: colgarse, que pase la vagoneta, caerle adentro y bajarse, con el teclado.
 		await put(13, 2);
 		await page.evaluate(() => {

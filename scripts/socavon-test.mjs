@@ -332,6 +332,82 @@ try {
 		});
 	}
 
+	{
+		const { heard, eventLoudness } = await load('state/hearing');
+		const { HEARING, NOISE } = await load('constants/tuning');
+		/** Un sereno en `x` de la galería `y`, caminando, corriendo o quieto. */
+		const withGuard = (rows, x, y, values = {}) => {
+			const game = mine(...rows);
+			const guard = mine('#E.G......#').guards[0];
+			Object.assign(guard, { x, y, home: { x, y }, moving: true, mode: 'patrol' }, values);
+			game.guards.push(guard);
+			return game;
+		};
+		const wide = ['#E....................#', '#.....................#', '#.....................#'];
+		const only = (game) => heard(game).map(({ kind, x, y }) => `${kind}@${x},${y}`).join(' ');
+
+		await test('R19.6 se oyen los pasos de un sereno cercano, y corriendo desde más lejos', () => {
+			assert.equal(only(withGuard(wide, 1 + 4, 0)), 'walk@5,0');
+			assert.equal(only(withGuard(wide, 1 + HEARING.walk + 1, 0)), '', 'caminando, demasiado lejos');
+			assert.equal(only(withGuard(wide, 1 + HEARING.walk + 1, 0, { mode: 'chase' })), `run@${HEARING.walk + 2},0`);
+		});
+
+		await test('R19.6 lo quieto o aturdido no se oye', () => {
+			assert.equal(only(withGuard(wide, 3, 0, { moving: false })), '');
+			assert.equal(only(withGuard(wide, 3, 0, { mode: 'stunned' })), '');
+		});
+
+		await test('R19.6 el sonido atraviesa muros y roca', () => {
+			assert.equal(only(withGuard(['#E.%.#.....#'], 4, 0)), 'walk@4,0');
+		});
+
+		await test('R19.6 en la galería de al lado se oye atenuado, y más lejos nada', () => {
+			const near = HEARING.walk * NOISE.throughFloor;
+			assert.equal(only(withGuard(wide, 1 + Math.floor(near), 1)), `walk@${1 + Math.floor(near)},1`);
+			assert.equal(only(withGuard(wide, 1 + Math.ceil(near) + 1, 1)), '', 'abajo y lejos');
+			assert.equal(only(withGuard(wide, 1, 2)), '', 'dos galerías más abajo');
+			const below = heard(withGuard(wide, 2, 1))[0].loudness;
+			const beside = heard(withGuard(wide, 2, 0))[0].loudness;
+			assert.ok(below < beside, `abajo ${below}, al lado ${beside}`);
+		});
+
+		await test('R19.6 más lejos se oye más bajo y del lado de donde viene', () => {
+			const close = heard(withGuard(wide, 2, 0))[0];
+			const far = heard(withGuard(wide, 5, 0))[0];
+			assert.ok(far.loudness < close.loudness, `${far.loudness} no es menos que ${close.loudness}`);
+			assert.ok(far.pan > 0, 'a la derecha');
+			const game = withGuard(wide, 2, 0);
+			game.player.x = 6;
+			assert.ok(heard(game)[0].pan < 0, 'a la izquierda');
+		});
+
+		await test('R19.6 la vagoneta se oye en marcha, no detenida', () => {
+			const game = mine('#E.........#', '#C========.#');
+			game.player.y = 1;
+			game.player.x = 9;
+			game.carts[0].waitFor = 1;
+			assert.equal(only(game), '');
+			game.carts[0].waitFor = 0;
+			assert.equal(only(game), 'cart@1,1');
+		});
+
+		await test('R19.6 la campana se oye mientras suena', () => {
+			const game = mine('#E....B...#');
+			assert.equal(only(game), '');
+			game.alarm = 5;
+			assert.equal(only(game), 'bell@6,0');
+		});
+
+		await test('R19.8 lo que no se oye no suena, y lo del minero suena siempre', () => {
+			const game = mine('#E.........#', '#..........#', '#..........#', '#C========.#');
+			assert.equal(eventLoudness(game, { type: 'cartStart', x: 1, y: 3 }), 0, 'tres galerías abajo');
+			assert.ok(eventLoudness(game, { type: 'cartStart', x: 3, y: 0 }) > 0, 'en la misma galería');
+			assert.equal(eventLoudness(game, { type: 'relight', x: 9, y: 2 }), 0);
+			assert.equal(eventLoudness(game, { type: 'take', x: 1, y: 0 }), 1);
+			assert.equal(eventLoudness(game, { type: 'spotted', x: 9, y: 3 }), 1, 'los avisos no se atenúan');
+		});
+	}
+
 	await test('R20.2 en una escalera de varios pisos se baja en el del medio', () => {
 		const game = mine('#E..H.....#', '#...H.....#', '#.........#');
 		walkTo(game, 4);
