@@ -1,4 +1,5 @@
 import type { Family } from './families';
+import type { PassageId } from './passages';
 
 export type EventKind = 'pod' | 'asteroids' | 'comets';
 
@@ -18,11 +19,15 @@ export type WaveDef = {
 export type ZoneDef = {
 	family: Family;
 	waves: WaveDef[];
+	/** El tramo entre la segunda oleada y la tercera. */
+	passage: PassageId;
 	/** Segundos que dura la energía llena. */
 	energySeconds: number;
 	/** Segundos entre ataques con la formación completa; baja a medida que se vacía. */
 	attackEvery: number;
 	maxAttackers: number;
+	/** Segundos entre disparos desde la formación. */
+	stationFireEvery: number;
 	events: Array<[EventKind, number]>;
 	/** Segundos entre eventos, mínimo y máximo. */
 	eventEvery: [number, number];
@@ -33,56 +38,64 @@ export type ZoneDef = {
 export const ZONES: ZoneDef[] = [
 	{
 		family: 'terran',
+		passage: 'crossing',
 		waves: [
 			{ formation: ['..2222..', '.111111.', '.111111.'], entries: ['top', 'loop', 'side'] },
 			{ formation: ['...33...', '.222222.', '11111111', '11111111'], entries: ['top', 'swirl', 'loop', 'side'] },
 			{ formation: ['..3..3..', '22222222', '11111111', '.111111.'], entries: ['top', 'loop', 'swirl', 'side'] },
 		],
 		energySeconds: 120,
-		attackEvery: 1.9,
-		maxAttackers: 2,
+		attackEvery: 1.45,
+		maxAttackers: 3,
+		stationFireEvery: 5,
 		events: [['pod', 3], ['asteroids', 2]],
 		eventEvery: [14, 22],
 		sky: { space: 0x080b18, nebula: 0x14305a, stars: 0xd9e2ff },
 	},
 	{
 		family: 'insect',
+		passage: 'convoy',
 		waves: [
 			{ formation: ['..2222..', '11111111', '11111111'], entries: ['swirl', 'loop', 'side'] },
 			{ formation: ['..3..3..', '.222222.', '11111111', '11111111'], entries: ['top', 'swirl', 'loop', 'side'] },
 			{ formation: ['.3.33.3.', '22222222', '11111111', '11111111', '.111111.'], entries: ['top', 'loop', 'swirl', 'side', 'loop'] },
 		],
 		energySeconds: 125,
-		attackEvery: 1.4,
-		maxAttackers: 3,
+		attackEvery: 1.05,
+		maxAttackers: 4,
+		stationFireEvery: 5,
 		events: [['pod', 3], ['comets', 2]],
 		eventEvery: [12, 20],
 		sky: { space: 0x0e0816, nebula: 0x4a1a52, stars: 0xf6d8ff },
 	},
 	{
 		family: 'crystal',
+		passage: 'storm',
 		waves: [
 			{ formation: ['..2222..', '.111111.', '.111111.'], entries: ['top', 'swirl', 'loop'] },
 			{ formation: ['...33...', '.222222.', '11111111', '.111111.'], entries: ['top', 'loop', 'swirl', 'side'] },
 			{ formation: ['..3333..', '.222222.', '11111111', '11111111'], entries: ['top', 'swirl', 'loop', 'side'] },
 		],
 		energySeconds: 130,
-		attackEvery: 1.6,
-		maxAttackers: 3,
+		attackEvery: 1.2,
+		maxAttackers: 4,
+		stationFireEvery: 4.2,
 		events: [['asteroids', 3], ['pod', 2], ['comets', 1]],
 		eventEvery: [11, 18],
 		sky: { space: 0x061018, nebula: 0x0f4a5c, stars: 0xc4fbff },
 	},
 	{
 		family: 'mythic',
+		passage: 'combined',
 		waves: [
 			{ formation: ['..2222..', '.111111.', '11111111'], entries: ['top', 'loop', 'swirl'] },
 			{ formation: ['..3..3..', '.222222.', '11111111', '11111111'], entries: ['top', 'swirl', 'loop', 'side'] },
 			{ formation: ['.3.33.3.', '22222222', '.222222.', '11111111'], entries: ['top', 'loop', 'swirl', 'side'] },
 		],
 		energySeconds: 135,
-		attackEvery: 1.3,
-		maxAttackers: 4,
+		attackEvery: 0.9,
+		maxAttackers: 5,
+		stationFireEvery: 3.6,
 		events: [['comets', 3], ['pod', 2], ['asteroids', 2]],
 		eventEvery: [10, 16],
 		sky: { space: 0x140608, nebula: 0x5a1a1e, stars: 0xffe0c8 },

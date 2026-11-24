@@ -238,6 +238,26 @@ sprite("rock_2", { w: 16, h: 16 },
   ellipse(8, 8, 7, 5, "m"), ellipse(7, 7, 5, 3, "b"),
   circ(4, 8, 1, "M"), px(11, 6, "M"), px(12, 9, "M"), shade([0, 10, 16, 6]))
 
+// Carguero de los convoyes: mira a la derecha y el juego lo espeja. La bodega
+// encendida (x de 11 a 20) es lo único que se rompe: el casco va apagado.
+sprite("freighter", { w: 32, h: 16 },
+  poly([3, 2, 25, 2, 30, 6, 30, 9, 25, 12, 3, 12, 1, 9, 1, 4], "S"),
+  rect(4, 1, 6, 3, "M"), rect(12, 1, 6, 2, "M"), rect(19, 1, 5, 3, "M"),
+  hline(4, 1, 6, "m"), hline(12, 1, 6, "m"), hline(19, 1, 5, "m"),
+  hline(3, 4, 22, "s"), hline(3, 9, 8, "M"), hline(21, 9, 5, "M"),
+  vline(8, 5, 6, "M"), vline(23, 5, 6, "M"),
+  rect(26, 5, 3, 3, "C"), hline(27, 5, 2, "c"),
+  rect(0, 4, 2, 2, "R"), rect(0, 8, 2, 2, "R"),
+  rect(10, 7, 12, 8, "M"),
+  rect(11, 8, 10, 7, "o"), rect(12, 9, 8, 5, "y"),
+  // Espejado también tiene que leerse como un rayo, no como una letra.
+  grid(13, 9, `
+    ...k..
+    ..kk..
+    .kkkk.
+    ..kk..
+    ..k...`))
+
 // --- Recargas y mejoras: cápsulas de 12×12 con su símbolo ----------------
 
 sprite("_cap", { mx: true }, `
@@ -305,7 +325,8 @@ scene("lineup", { w: 196, h: 92, bg: "k" },
     stamp("dragon_1", 4, 24), stamp("dragon_2", 22, 24), stamp("dragon_3", 40, 24),
     stamp("pod", 64, 24), stamp("rock_1", 84, 24), stamp("rock_2", 102, 24),
     stamp("pick_life", 124, 26), stamp("pick_energy", 138, 26), stamp("pick_core", 152, 26),
-    stamp("pick_shield", 166, 26), stamp("pick_double", 180, 26), stamp("pick_speed", 124, 42)),
+    stamp("pick_shield", 166, 26), stamp("pick_double", 180, 26), stamp("pick_speed", 124, 42),
+    stamp("freighter", 4, 46)),
   layer("players",
     stamp("halcon_1", 4, 70), stamp("halcon_2", 22, 70), stamp("halcon_3", 40, 70),
     stamp("aguja_1", 64, 70), stamp("aguja_2", 82, 70), stamp("aguja_3", 100, 70),
@@ -314,5 +335,5 @@ scene("lineup", { w: 196, h: 92, bg: "k" },
 sheet("ships", [
   "halcon_*", "aguja_*", "bastion_*",
   "terran_*", "insect_*", "crystal_*", "dragon_*", "shard",
-  "pod", "rock_*", "pick_*",
+  "pod", "rock_*", "freighter", "pick_*",
 ], { pad: 1 })

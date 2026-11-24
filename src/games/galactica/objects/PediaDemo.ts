@@ -5,6 +5,7 @@ import type { ShipId } from '../constants/ships';
 import { EVOLUTION_CORES, FIELD_H, FIELD_W, STEP } from '../constants/tuning';
 import { Battle, newRun } from '../state/Battle';
 import { drawProjectiles, drawWarnings, Effects, spriteViews, type Offset } from './battleRenderer';
+import { FREIGHTER_COLORS } from './labels';
 import { SpriteLayer } from './SpriteLayer';
 import { Starfield } from './Starfield';
 
@@ -39,7 +40,10 @@ export class PediaDemo {
 	time = 0;
 	/** Hacia dónde va la nave: por defecto barre la pantalla de lado a lado. */
 	target: (() => number) | null = null;
+	/** A qué altura va: por defecto no avanza ni retrocede. */
+	targetY: (() => number) | null = null;
 	fire = false;
+	shield = false;
 
 	private readonly scene: Phaser.Scene;
 	private readonly sprites: SpriteLayer;
@@ -77,7 +81,9 @@ export class PediaDemo {
 		this.time = 0;
 		this.accumulator = 0;
 		this.target = null;
+		this.targetY = null;
 		this.fire = false;
+		this.shield = false;
 		this.memo = {};
 		this.effects = new Effects();
 		this.starfield?.destroy();
@@ -91,7 +97,12 @@ export class PediaDemo {
 		while (this.accumulator >= STEP) {
 			this.script(this);
 			const target = this.target?.() ?? FIELD_W / 2 + Math.sin(this.time * 0.8) * 190;
-			battle.setInput({ move: Math.max(-1, Math.min(1, (target - battle.player.x) / 30)), fire: this.fire });
+			battle.setInput({
+				move: Math.max(-1, Math.min(1, (target - battle.player.x) / 30)),
+				moveY: this.targetY ? Math.max(-1, Math.min(1, (this.targetY() - battle.player.y) / 30)) : 0,
+				fire: this.fire,
+				shield: this.shield,
+			});
 			battle.hp = 100;
 			battle.energy = 100;
 			battle.step(STEP);
@@ -114,7 +125,8 @@ export class PediaDemo {
 			if (event.type === 'kill') {
 				const colors = event.family === 'rock'
 					? [0xb0a090, 0x7a6c5e]
-					: event.family === 'pod' ? [0xa4b0cc, 0xef5466, 0xffd860] : FAMILY_COLORS[event.family];
+					: event.family === 'pod' ? [0xa4b0cc, 0xef5466, 0xffd860]
+					: event.family === 'freighter' ? FREIGHTER_COLORS : FAMILY_COLORS[event.family];
 				this.effects.burst(event.x, event.y, colors, event.big ? 22 : 12, event.big ? 220 : 160);
 			} else if (event.type === 'hit') {
 				this.effects.burst(event.x, event.y, [0xffffff, 0xffe28a], 3, 90);
@@ -123,6 +135,10 @@ export class PediaDemo {
 				this.effects.burst(event.x, event.y, [0xff5466, 0xff8a3a, 0xffd860], 24, 240);
 			} else if (event.type === 'playerHit') {
 				this.effects.burst(this.battle.player.x, this.battle.player.y, [0xef5466, 0xffffff], 8, 140);
+			} else if (event.type === 'deflect') {
+				this.effects.burst(event.x, event.y, [0xa4b0cc, 0x5a6482], 3, 120);
+			} else if (event.type === 'stormBlock') {
+				this.effects.ring(event.x, event.y, 56, 0x7fe0ff, 0.45);
 			} else if (event.type === 'pickup') {
 				this.effects.ring(event.x, event.y, 30, 0x7fe0ff, 0.35);
 			} else if (event.type === 'bossDown') {

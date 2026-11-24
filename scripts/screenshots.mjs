@@ -829,7 +829,19 @@ const FLOWS = {
 		await arcade.press('ArrowRight');
 		await arcade.page.waitForTimeout(3500);
 		await arcade.shot('galactopedia-eventos-pod');
-		await arcade.press('ArrowDown', 5);
+		await arcade.press('ArrowDown', 3);
+		await arcade.page.waitForTimeout(3800);
+		await arcade.shot('galactopedia-tramo-travesia');
+		await arcade.press('ArrowDown');
+		await arcade.page.waitForTimeout(5000);
+		await arcade.shot('galactopedia-tramo-convoy');
+		await arcade.press('ArrowDown');
+		await arcade.page.waitForTimeout(2300);
+		await arcade.shot('galactopedia-tramo-tormenta');
+		await arcade.press('ArrowDown');
+		await arcade.page.waitForTimeout(5000);
+		await arcade.shot('galactopedia-tramo-triple');
+		await arcade.press('ArrowDown', 3);
 		await arcade.page.waitForTimeout(6000);
 		await arcade.shot('galactopedia-jefe-cristal');
 		await arcade.press('Escape');
@@ -855,8 +867,32 @@ const FLOWS = {
 		await arcade.page.waitForTimeout(5000);
 		await arcade.shot('galactica-formacion');
 
+		// Adelante, escudo y atrás con el teclado de verdad, sin soltar el disparo.
+		const expect = async (expression, what) => {
+			if (!(await battle(expression))) throw new Error(`Galáctica: ${what}`);
+		};
+		await battle('(battle.player.invulnerable = 999, battle.player.shield = 8, battle.energy = 100, true)');
+		await arcade.page.keyboard.down('ArrowUp');
+		await arcade.page.waitForTimeout(1400);
+		await expect('battle.player.y === 288', 'la nave no llegó a la mitad de la pantalla');
+		await arcade.page.keyboard.up('ArrowUp');
+		await arcade.page.keyboard.down('x');
+		await arcade.page.waitForTimeout(700);
+		await expect('battle.player.shielding && battle.player.shield < 8', 'X no prendió el escudo');
+		await arcade.shot('galactica-adelante-con-escudo');
+		await arcade.page.keyboard.up('x');
+		await arcade.page.waitForTimeout(300);
+		await expect('!battle.player.shielding', 'soltar X no apagó el escudo');
+		await arcade.page.keyboard.down('ArrowDown');
+		await arcade.page.waitForTimeout(1400);
+		await expect('battle.player.y === 532', 'la nave no volvió a la línea de salida');
+		await arcade.page.keyboard.up('ArrowDown');
+		// Avisos largos y desfasados: el destello parpadea y alguno tiene que salir en la foto.
+		await battle(`(battle.enemies.filter((e) => e.state === 'formation' && e.spec.shot).forEach((e, i) => { e.aim = 1.5 + i * 0.07; }), true)`);
+		await arcade.shot('galactica-disparo-formacion');
+
 		// Los eventos se provocan en vez de esperarlos: lo que importa es cómo se ven.
-		await battle(`(battle.player.shield = 99, battle.startEvent('comets'), battle.startEvent('pod'), true)`);
+		await battle(`(battle.player.invulnerable = 999, battle.startEvent('comets'), battle.startEvent('pod'), true)`);
 		await arcade.page.waitForTimeout(700);
 		await arcade.shot('galactica-aviso-cometas');
 		await arcade.page.waitForTimeout(900);
@@ -901,6 +937,110 @@ const FLOWS = {
 		await arcade.page.waitForTimeout(4500);
 		await arcade.shot('galactica-zona-2');
 
+		// Los cuatro tramos, entrando por donde entran en la partida: al caer la segunda oleada.
+		for (const [zone, id] of [[1, 'crossing'], [2, 'convoy'], [3, 'storm'], [4, 'combined']]) {
+			await arcade.page.evaluate(`window.arcade.scene.getScene('galactica:game').scene.start('galactica:game', { zone: ${zone}, shipId: 'halcon', score: 0, hp: 100, cores: 0 })`);
+			await arcade.page.waitForTimeout(800);
+			await arcade.waitForScene('galactica:game');
+			await battle(`(battle.enemies = [], battle.randomEvents = false, battle.wave = 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, true)`);
+			await arcade.page.waitForTimeout(700);
+			await expect(`battle.passage && battle.passage.id === '${id}'`, `no empezó el tramo ${id}`);
+			await arcade.shot(`galactica-tramo-${id}-cartel`);
+
+			if (id === 'crossing') {
+				await arcade.page.waitForTimeout(2600);
+				await arcade.shot('galactica-tramo-filas');
+				await battle('(battle.player.invulnerable = 999, true)');
+				await arcade.page.waitForFunction(`window.arcade.scene.getScene('galactica:game').battle.rocks.some((rock) => rock.vy === 0)`);
+				await arcade.page.waitForTimeout(250);
+				await arcade.shot('galactica-tramo-muro-aviso');
+				await arcade.page.waitForTimeout(1900);
+				await arcade.shot('galactica-tramo-muro');
+			}
+
+			if (id === 'convoy') {
+				// En una ventana ancha se ve más allá de los 800 de la escena: un carguero
+				// que entra de costado no tiene que asomarse afuera del campo.
+				await arcade.resize(1280, 600);
+				await battle('(battle.spawnFreighter(1), battle.spawnFreighter(-1), true)');
+				await arcade.page.waitForTimeout(80);
+				const stray = await arcade.page.evaluate(() => new Promise((done) => {
+					const game = window.arcade;
+					const camera = game.scene.getScene('galactica:game').cameras.main;
+					game.renderer.snapshot((image) => {
+						const canvas = document.createElement('canvas');
+						canvas.width = image.width;
+						canvas.height = image.height;
+						const context = canvas.getContext('2d');
+						context.drawImage(image, 0, 0);
+						const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+						// Píxeles que no son el fondo (#05060d) entre dos x de la escena.
+						const count = (from, to) => {
+							let found = 0;
+							const start = Math.max(0, Math.round((from - camera.scrollX) * camera.zoom));
+							const end = Math.min(canvas.width, Math.round((to - camera.scrollX) * camera.zoom));
+							for (let y = 0; y < canvas.height; y += 1) for (let x = start; x < end; x += 1) {
+								const at = (y * canvas.width + x) * 4;
+								if (Math.abs(data[at] - 5) + Math.abs(data[at + 1] - 6) + Math.abs(data[at + 2] - 13) > 12) found += 1;
+							}
+							return found;
+						};
+						done({ left: count(camera.scrollX, -2), right: count(802, camera.scrollX + canvas.width / camera.zoom), margin: -camera.scrollX });
+					});
+				}));
+				await arcade.shot('galactica-tramo-convoy-ancho');
+				if (stray.margin < 100 || stray.left || stray.right) {
+					throw new Error(`Galáctica: se ve el convoy afuera del campo ${JSON.stringify(stray)}`);
+				}
+				await arcade.resize(800, 600);
+
+				// Se lo sigue corriendo la nave, pero los disparos son los del teclado.
+				await battle('(battle.player.invulnerable = 999, true)');
+				await arcade.page.keyboard.down('Space');
+				for (let frame = 0; frame < 300 && !(await battle('battle.stats.kills > 0 && battle.pickups.some((p) => p.amount)')); frame += 1) {
+					await battle(`(() => {
+						const freighter = battle.freighters[0];
+						if (freighter) battle.player.x = freighter.x + freighter.vx * ((battle.player.y - 20 - freighter.y - 21) / battle.ship.bulletSpeed);
+						return true;
+					})()`);
+					if (frame === 45) await arcade.shot('galactica-tramo-convoy');
+					await arcade.page.waitForTimeout(30);
+				}
+				await arcade.page.keyboard.up('Space');
+				await expect('battle.pickups.some((pickup) => pickup.amount)', 'la bodega no soltó energía');
+				await arcade.shot('galactica-tramo-convoy-roto');
+			}
+
+			if (id === 'storm') {
+				await arcade.page.waitForFunction(`window.arcade.scene.getScene('galactica:game').battle.strikes.some((strike) => strike.timer < 0.9)`);
+				await arcade.shot('galactica-tramo-franjas');
+				await battle('(battle.energy = 50, true)');
+				await arcade.page.waitForFunction(`window.arcade.scene.getScene('galactica:game').battle.strikes.some((strike) => strike.timer < 0.2)`);
+				await arcade.page.keyboard.down('x');
+				await arcade.page.waitForTimeout(260);
+				await arcade.shot('galactica-tramo-descarga-bloqueada');
+				await arcade.page.waitForTimeout(250);
+				await arcade.page.keyboard.up('x');
+				await expect('battle.energy > 51 && battle.hp === 100', 'bloquear con X no devolvió energía');
+				await battle('(battle.player.invulnerable = 999, true)');
+				await arcade.page.waitForFunction(`window.arcade.scene.getScene('galactica:game').battle.strikes.some((strike) => strike.axis === 'y' && strike.timer < 0.5)`);
+				await arcade.shot('galactica-tramo-franja-horizontal');
+			}
+
+			if (id === 'combined') {
+				await battle('(battle.player.invulnerable = 999, true)');
+				await arcade.page.waitForTimeout(4400);
+				await arcade.shot('galactica-tramo-triple-franjas');
+				await arcade.page.waitForTimeout(2300);
+				await arcade.shot('galactica-tramo-triple');
+				await arcade.page.waitForFunction(
+					`window.arcade.scene.getScene('galactica:game').battle.wave === 2`, undefined, { timeout: 40000 },
+				);
+				await arcade.page.waitForTimeout(400);
+				await arcade.shot('galactica-tramo-tercera-oleada');
+			}
+		}
+
 		// Las zonas 3 y 4, con su jefe, empezando directamente desde el estado.
 		for (const zone of [3, 4]) {
 			await arcade.page.evaluate(`window.arcade.scene.getScene('galactica:game').scene.start('galactica:game', { zone: ${zone}, shipId: 'bastion', score: 0, hp: 100, cores: 8 })`);
@@ -908,12 +1048,12 @@ const FLOWS = {
 			await arcade.waitForScene('galactica:game');
 			await arcade.page.waitForTimeout(5000);
 			await arcade.shot(`galactica-zona-${zone}`);
-			await battle(`(battle.player.shield = 99, battle.enemies = [], battle.wave = battle.waveCount - 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, true)`);
+			await battle(`(battle.player.invulnerable = 999, battle.enemies = [], battle.wave = battle.waveCount - 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, true)`);
 			await arcade.page.waitForTimeout(7000);
 			await arcade.shot(`galactica-zona-${zone}-jefe`);
 		}
 
-		await battle(`(battle.player.invulnerable = 0, battle.player.shield = 0, battle.damagePlayer('ram', 500), true)`);
+		await battle(`(battle.player.invulnerable = 0, battle.player.shielding = false, battle.damagePlayer('ram', 500), true)`);
 		await arcade.page.waitForTimeout(1500);
 		await arcade.shot('galactica-game-over');
 		await arcade.waitForScene('galactica:result');
@@ -938,6 +1078,18 @@ const FLOWS = {
 		await arcade.waitForScene('galactica:game');
 		await arcade.page.waitForTimeout(3000);
 		await arcade.shot('galactica-partida-en');
+		await battle(`(battle.enemies = [], battle.wave = 1, battle.phase = 'interlude', battle.phaseTimer = 0.05, battle.pendingPassage = 'storm', true)`);
+		await arcade.page.waitForTimeout(700);
+		await arcade.shot('galactica-tramo-en');
+		await arcade.press('Escape');
+		await arcade.waitForScene('galactica:title');
+		await arcade.press('g');
+		await arcade.waitForScene('galactica:pedia');
+		// La página y la fila se recuerdan sólo hasta recargar: se llega desde la primera.
+		await arcade.press('ArrowRight', 4);
+		await arcade.press('ArrowDown', 6);
+		await arcade.page.waitForTimeout(1500);
+		await arcade.shot('galactopedia-tramo-en');
 		await arcade.page.evaluate(() => localStorage.setItem('arcade.locale', 'es'));
 
 		await arcade.press('Escape');

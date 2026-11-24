@@ -4,8 +4,9 @@ import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { SHOTS, type Maneuver, type ShotKind } from '../constants/attacks';
 import { BOSSES, ENEMIES, FAMILIES, FAMILY_FRAME, SHARD, type EnemySpec, type Family, type Rank } from '../constants/families';
+import { FREIGHTER, PASSAGE_IDS, PASSAGE_SECONDS, STORM, type PassageId } from '../constants/passages';
 import { SHIP_IDS, SHIPS, shipFrame } from '../constants/ships';
-import { DAMAGE, EVOLUTION_CORES, FIELD_W } from '../constants/tuning';
+import { DAMAGE, EVOLUTION_CORES, FIELD_W, PLAYER_RADIUS, PLAYER_Y, SHIELD_CHARGE } from '../constants/tuning';
 import { ZONES, type EventKind } from '../constants/zones';
 import { addShip, BOSSES_ATLAS, loadGalacticaArt, sharpenGalacticaArt, SHIPS_ATLAS } from '../objects/art';
 import {
@@ -15,6 +16,7 @@ import {
 	FAMILY_LABELS,
 	FAMILY_TEXTS,
 	MANEUVER_LABELS,
+	PASSAGE_LABELS,
 	PICKUP_LABELS,
 	RANK_LABELS,
 	SHIP_LABELS,
@@ -24,6 +26,7 @@ import {
 import { PediaDemo, type DemoScript, type DemoSetup } from '../objects/PediaDemo';
 import { PICKUP_KINDS, type Enemy } from '../state/Battle';
 import { readHangar } from '../state/hangar';
+import { hatchLead, nextGap } from '../state/Passage';
 import { GALACTICA_SCENES } from '../sceneKeys';
 
 type Page = 'basics' | 'ships' | 'enemies' | 'attacks' | 'events';
@@ -32,7 +35,7 @@ const PAGES: Page[] = ['basics', 'ships', 'enemies', 'attacks', 'events'];
 /** Una fila de la lista: lo que se ve en ella, el ejemplo vivo y lo que se lee al lado. */
 type Entry = {
 	name: string;
-	icon?: { atlas: string; frame: string };
+	icon?: { atlas: string; frame: string; scale?: number };
 	/** Título de grupo que se escribe arriba de la fila cuando cambia. */
 	group?: string;
 	demo: DemoSetup;
@@ -150,6 +153,31 @@ function repeatEvent(kind: EventKind): DemoScript {
 			battle.startEvent(kind);
 			memo.next = Infinity;
 		}
+	};
+}
+
+/** Un tramo entero que se repite, con una nave que hace lo que pide cada uno. */
+function repeatPassage(id: PassageId): DemoScript {
+	return (demo) => {
+		const battle = demo.battle;
+		const { player, ship } = battle;
+		if (!battle.passage) {
+			battle.startPassage(id);
+		}
+		player.shield = SHIELD_CHARGE;
+		const gap = nextGap(battle.rocks, player);
+		const freighter = battle.freighters.find((one) => one.x > 20 && one.x < FIELD_W - 20);
+		const lead = freighter && hatchLead(freighter, player, ship.bulletSpeed);
+		// El hueco manda: a la bodega le apunta cuando no tiene una fila encima.
+		const x = gap?.axis === 'x' ? gap.at : lead ?? FIELD_W / 2;
+		const y = gap?.axis === 'y' ? gap.at : PLAYER_Y;
+		demo.target = () => x;
+		demo.targetY = () => y;
+		demo.fire = lead !== undefined && Math.abs(lead - player.x) < FREIGHTER.hatch;
+		demo.shield = battle.strikes.some((strike) => {
+			const at = strike.axis === 'x' ? player.x : player.y;
+			return strike.timer < 0.12 && at > strike.from - PLAYER_RADIUS && at < strike.to + PLAYER_RADIUS;
+		});
 	};
 }
 
@@ -391,7 +419,7 @@ export class GalacticaPediaScene extends Phaser.Scene {
 				.on('pointerdown', () => this.select(index));
 			const middle = y + (rowHeight - 3) / 2;
 			if (entry.icon) {
-				this.add.image(LIST.x + 22, middle, entry.icon.atlas, entry.icon.frame).setScale(entry.icon.atlas === BOSSES_ATLAS ? 1 : 2);
+				this.add.image(LIST.x + 22, middle, entry.icon.atlas, entry.icon.frame).setScale(entry.icon.scale ?? (entry.icon.atlas === BOSSES_ATLAS ? 1 : 2));
 			}
 			const label = this.add.text(LIST.x + (entry.icon ? 46 : 12), middle, entry.name, {
 				...TEXT.mono,
@@ -561,7 +589,46 @@ export class GalacticaPediaScene extends Phaser.Scene {
 				text: `${i18n.t(BOSS_LABELS[family].text)}\n\n${i18n.t('galactica.pedia.enraged')}`,
 			};
 		});
-		return [...events, ...bosses];
+		const passages: Entry[] = PASSAGE_IDS.map((id) => {
+			const zone = ZONES.findIndex((def) => def.passage === id) + 1;
+			const facts: Array<[string, string]> = [
+				[i18n.t('galactica.pedia.zone'), String(zone)],
+				[i18n.t('galactica.pedia.duration'), `${PASSAGE_SECONDS} s`],
+			];
+			const damage: string[] = [];
+			const energy: string[] = [];
+			if (id === 'crossing' || id === 'combined') {
+				damage.push(`${i18n.t('galactica.damage.rock')} ${DAMAGE.rock} %`);
+			}
+			if (id === 'convoy' || id === 'combined') {
+				energy.push(`${i18n.t('galactica.pedia.hatch')} +${FREIGHTER.energy} %`);
+			}
+			if (id === 'storm' || id === 'combined') {
+				damage.push(`${i18n.t('galactica.damage.storm')} ${DAMAGE.storm} %`);
+				energy.push(`${i18n.t('galactica.pedia.block')} +${STORM.gain} %`);
+			}
+			if (damage.length) {
+				facts.push([i18n.t('galactica.pedia.damage'), damage.join('\n')]);
+			}
+			if (energy.length) {
+				facts.push([i18n.t('galactica.game.energy'), energy.join('\n')]);
+			}
+			const icons: Record<PassageId, Entry['icon']> = {
+				crossing: { atlas: SHIPS_ATLAS, frame: 'rock_2' },
+				convoy: { atlas: SHIPS_ATLAS, frame: 'freighter', scale: 1 },
+				storm: { atlas: SHIPS_ATLAS, frame: 'pick_shield' },
+				combined: undefined,
+			};
+			return {
+				name: i18n.t(PASSAGE_LABELS[id].name),
+				icon: icons[id],
+				group: i18n.t('galactica.pedia.passages'),
+				demo: { zone, script: repeatPassage(id) },
+				facts,
+				text: `${i18n.t(PASSAGE_LABELS[id].text)}\n\n${i18n.t('galactica.pedia.passageNote')}`,
+			};
+		});
+		return [...events, ...passages, ...bosses];
 	}
 
 	/** El primer enemigo que cumple algo: el que protagoniza el ejemplo del ataque. */

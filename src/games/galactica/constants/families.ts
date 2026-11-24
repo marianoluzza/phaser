@@ -47,24 +47,24 @@ export const FAMILY_COLORS: Record<Family, number[]> = {
  */
 export const ENEMIES: Record<Family, Record<Rank, EnemySpec>> = {
 	terran: {
-		1: { hp: 1, points: 50, shot: 'single', volleys: 1, maneuvers: [['swoop', 1]], speed: 1, drop: 0.02 },
-		2: { hp: 2, points: 80, shot: 'double', volleys: 1, maneuvers: [['swoop', 1]], speed: 1, drop: 0.05 },
-		3: { hp: 3, points: 150, shot: 'fan3', volleys: 2, maneuvers: [['swoop', 3], ['diveReturn', 1]], speed: 0.95, drop: 0.3 },
+		1: { hp: 1, points: 50, shot: 'single', volleys: 1, maneuvers: [['swoop', 1]], speed: 1, drop: 0.03 },
+		2: { hp: 2, points: 80, shot: 'double', volleys: 1, maneuvers: [['swoop', 1]], speed: 1, drop: 0.08 },
+		3: { hp: 3, points: 150, shot: 'fan3', volleys: 2, maneuvers: [['swoop', 3], ['diveReturn', 1]], speed: 0.95, drop: 0.4 },
 	},
 	insect: {
-		1: { hp: 1, points: 50, shot: null, volleys: 0, maneuvers: [['diveReturn', 3], ['swoop', 1]], speed: 1.2, drop: 0.02 },
-		2: { hp: 1, points: 90, shot: 'single', volleys: 2, maneuvers: [['swoop', 2], ['dive', 1]], speed: 1.15, drop: 0.05 },
-		3: { hp: 2, points: 160, shot: 'single', volleys: 1, maneuvers: [['planted', 3], ['swoop', 1]], speed: 1.1, drop: 0.3 },
+		1: { hp: 1, points: 50, shot: null, volleys: 0, maneuvers: [['diveReturn', 3], ['swoop', 1]], speed: 1.2, drop: 0.03 },
+		2: { hp: 1, points: 90, shot: 'single', volleys: 2, maneuvers: [['swoop', 2], ['dive', 1]], speed: 1.15, drop: 0.08 },
+		3: { hp: 2, points: 160, shot: 'single', volleys: 1, maneuvers: [['planted', 3], ['swoop', 1]], speed: 1.1, drop: 0.4 },
 	},
 	crystal: {
-		1: { hp: 2, points: 60, shot: 'split', volleys: 1, maneuvers: [['swoop', 1]], speed: 0.9, drop: 0.02 },
-		2: { hp: 2, points: 100, shot: 'fan5', volleys: 1, maneuvers: [['swoop', 1]], speed: 0.9, shards: 2, drop: 0.05 },
-		3: { hp: 4, points: 180, shot: 'helix', volleys: 2, maneuvers: [['swoop', 2], ['planted', 1]], speed: 0.85, drop: 0.3 },
+		1: { hp: 2, points: 60, shot: 'split', volleys: 1, maneuvers: [['swoop', 1]], speed: 0.9, drop: 0.03 },
+		2: { hp: 2, points: 100, shot: 'fan5', volleys: 1, maneuvers: [['swoop', 1]], speed: 0.9, shards: 2, drop: 0.08 },
+		3: { hp: 4, points: 180, shot: 'helix', volleys: 2, maneuvers: [['swoop', 2], ['planted', 1]], speed: 0.85, drop: 0.4 },
 	},
 	mythic: {
-		1: { hp: 2, points: 70, shot: 'helix', volleys: 1, maneuvers: [['swoop', 3], ['diveReturn', 1]], speed: 1.05, drop: 0.03 },
-		2: { hp: 3, points: 120, shot: 'double', volleys: 2, maneuvers: [['swoop', 2], ['diveReturn', 1]], speed: 1.05, drop: 0.06 },
-		3: { hp: 4, points: 220, shot: 'fan5', volleys: 2, maneuvers: [['swoop', 1], ['planted', 1]], speed: 1, drop: 0.3 },
+		1: { hp: 2, points: 70, shot: 'helix', volleys: 1, maneuvers: [['swoop', 3], ['diveReturn', 1]], speed: 1.05, drop: 0.045 },
+		2: { hp: 3, points: 120, shot: 'double', volleys: 2, maneuvers: [['swoop', 2], ['diveReturn', 1]], speed: 1.05, drop: 0.09 },
+		3: { hp: 4, points: 220, shot: 'fan5', volleys: 2, maneuvers: [['swoop', 1], ['planted', 1]], speed: 1, drop: 0.4 },
 	},
 };
 

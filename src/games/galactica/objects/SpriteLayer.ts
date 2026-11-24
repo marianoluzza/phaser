@@ -12,6 +12,7 @@ export type SpriteView = {
 	/** Pinta la nave entera de un color: el destello de un impacto. */
 	tint?: number;
 	scale?: number;
+	flipX?: boolean;
 };
 
 /**
@@ -50,7 +51,8 @@ export class SpriteLayer {
 				.setPosition(this.offset.x + view.x, this.offset.y + view.y)
 				.setRotation(view.angle ?? 0)
 				.setAlpha(view.alpha ?? 1)
-				.setScale(view.scale ?? PIXEL);
+				.setScale(view.scale ?? PIXEL)
+				.setFlipX(view.flipX ?? false);
 			if (view.tint === undefined) {
 				image.clearTint();
 			} else {

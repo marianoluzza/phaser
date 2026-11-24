@@ -26,21 +26,25 @@ El plan completo está implementado:
 - Entradas en curva, formación que se balancea y respira, y los seis ataques
   del [catálogo](#catálogo-de-ataques), incluidos los dos kamikazes.
 - **Eventos:** pods, asteroides y lluvia de cometas.
+- **Tramos** sin formación entre la segunda oleada y la tercera: Travesía,
+  Convoy, Tormenta iónica y, en la zona 4, los tres juntos.
 - **Vida y energía** en porcentaje, con recargas; **evolución** mk1 → mk3 por
-  núcleos y tres **mejoras** temporales.
+  núcleos, **escudo** a demanda y dos **mejoras** temporales.
 - **Resultado** de cada zona con tiempo, derribos, daño por fuente, bonus,
   récord y naves desbloqueadas.
 - Estado en `state/`, sin Phaser adentro, y un **simulador**
   (`npm run sim:galactica`) que juega campañas enteras.
 - Arte en pxl (`art/galactica/`) y un script que arma las hojas (`npm run art`).
 - Recorrido de capturas: `npm run shots -- galactica`.
+- Tests de las reglas de combate y de los tramos: `npm run test:galactica`.
 
 ## Controles
 
 | Tecla | Acción |
 | --- | --- |
-| ← → o A D | Mover |
+| Flechas o W A S D | Mover, también adelante y atrás |
 | Espacio, Z o J (mantenidas) | Disparar |
+| X o K (mantenidas) | Escudo, si hay carga y energía |
 | P | Pausa |
 | Esc | Volver al título |
 
@@ -56,8 +60,23 @@ reintenta), M vuelve al título y Esc al arcade.
 - **La energía es el reloj de la zona.** Baja sola: llena dura entre 120 y
   135 s según la zona. Cuando llega a cero no se pierde en el acto: empieza a
   drenar la vida (2,5 % por segundo). Es presión, no un game over seco.
+- **Disparar cuesta energía.** Mientras el cañón recarga, la energía baja un
+  75 % más rápido. Tener el gatillo apretado la vacía en 69 a 77 s; un tiro
+  suelto cuesta sólo su recarga. Se cobra por tiempo para que las tres naves
+  paguen igual. Sin energía se sigue disparando: si no, no habría cómo salir.
+- **El escudo es una reserva.** La cápsula suma 8 s de carga, hasta 24, y no
+  prende nada. Se prende manteniendo la tecla: gasta su carga y, además, hace
+  bajar la energía un 50 % más rápido. Sin energía no prende. La carga se
+  arrastra de zona en zona.
+- **La nave se mueve en la mitad de abajo.** De la línea de salida hasta el
+  centro de la pantalla, siempre debajo de la última fila de la formación. La
+  picada, el rizo y el plantado buscan la altura de la nave.
+- **A quemarropa no tiran desde la formación.** Con la nave a menos de 80 px
+  no habría cómo esquivar: acercarse se paga con el riesgo de los choques.
 - **Tanto la vida como la energía se recargan.** Pods, comandantes, asteroides
   y jefes sueltan cápsulas. Es la recompensa por arriesgarse a ir a buscarlas.
+  Se toman apenas el dibujo de la cápsula toca el de la nave (42 px entre
+  centros): con 24 una que pasaba pegada se perdía.
 - **Power-ups y desbloqueos.** Dentro de la partida la nave evoluciona y junta
   mejoras temporales; fuera de ella, el hangar conserva las naves conseguidas.
 - **La partida sigue de zona en zona.** Se arrastran el puntaje, los núcleos, la
@@ -85,6 +104,7 @@ de Phaser.
 | Doce enemigos (cuatro familias, tres rangos) y la esquirla | Chispas y ondas de las explosiones |
 | Pod, dos asteroides, seis cápsulas | Fondo de estrellas en tres capas y nebulosa |
 | Cuatro jefes de 32×32 | HUD, barras y avisos de peligro |
+| Carguero de 32×16 | Franjas y descargas de la tormenta |
 
 - **Celda fija de 16×16.** Todas las naves comparten la dimensión máxima; las
   variantes se dibujan adentro. Las cápsulas miden 12×12 y los jefes 2×2 celdas.
@@ -106,7 +126,8 @@ de Phaser.
 
 ## Zonas y familias
 
-Una zona es un nivel: tres oleadas y un jefe. La familia de la zona define qué
+Una zona es un nivel: dos oleadas, un [tramo](#tramos), la tercera oleada y
+un jefe. La familia de la zona define qué
 naves aparecen y cómo atacan.
 
 | Zona | Familia | Carácter |
@@ -159,6 +180,9 @@ jefe se movía (ver [simulador](#lo-que-enseñó-el-simulador)).
    por peso entre las de su rango. Cuantas menos quedan, más seguido atacan, y
    con menos del 30 % se permite un atacante más: el final de la oleada no
    puede ser un trámite.
+4. **Disparo estacionado.** Cada 3,6 a 5 s según la zona (`stationFireEvery`),
+   una nave de la formación destella 0,4 s y suelta su disparo sin moverse.
+   Sólo las de rangos que disparan, y con la formación ya armada.
 
 Las trayectorias se recorren por distancia, no por el parámetro de la curva
 (`state/paths.ts`): así la velocidad es pareja aunque los puntos estén
@@ -183,9 +207,9 @@ disparo con una maniobra.
 | Rizo | Sale hacia un costado, baja hacia el jugador disparando y vuelve por arriba a su casillero. |
 | Kamikaze en picada | Tiembla, se tira recto adonde estaba el jugador y sigue de largo. |
 | Picada con vuelta | Igual, pero vuelve a la formación. |
-| Kamikaze plantado | Se ubica en la línea del jugador, parpadea cada vez más rápido y explota en área. |
+| Kamikaze plantado | Se ubica donde estaba el jugador, parpadea cada vez más rápido y explota en área. |
 
-El kamikaze plantado se queda justo encima de la línea del jugador: para
+El kamikaze plantado se queda justo encima de donde estaba el jugador: para
 derribarlo hay que ponerse debajo, cerca de la explosión. El radio se ve en
 rojo y late más rápido a medida que se acaba la cuenta.
 
@@ -201,14 +225,51 @@ Aparecen cada 10 a 22 s según la zona, elegidos por peso de su lista.
   pasar, con la misma pendiente; después caen siete cometas que no se pueden
   derribar.
 
+## Tramos
+
+Entre la segunda oleada y la tercera cada zona tiene 25 s sin formación. Cada
+tramo entrena una mecánica y el último las junta.
+
+| Zona | Tramo | Qué pide | Qué paga |
+| --- | --- | --- | --- |
+| 1 | Travesía | Filas que se pasan de costado y muros que se pasan avanzando o retrocediendo. | Nada: es esquive. |
+| 2 | Convoy | Tres cargueros con tres escoltas, una debajo de la bodega. Sólo se rompen por la bodega, adelantando la puntería. | Cápsula de 15 % de energía cada uno. |
+| 3 | Tormenta iónica | Franjas que avisan 1,3 s y descargan. Se sale o se bloquea con el escudo. | 4 % de energía por bloqueo. |
+| 4 | Tramo triple | Los tres a la vez, con menos rocas y descargas. | Lo de los dos anteriores. |
+
+- **El reloj de energía para** desde que cae la segunda oleada hasta que sale
+  la tercera, pausas incluidas: el tramo dura fijo y no se puede apurar.
+  Tampoco drena la vida. Disparar y cubrirse se siguen cobrando.
+- **La tormenta asegura 8 s de escudo** (no los suma a lo que sobre). Alcanza
+  para las diez descargas si se prende cuando caen, no para dejarlo prendido.
+- **Siempre hay salida.** Los huecos dejan 35 px para cada lado, de las
+  columnas cae una sí y una no y de las tres franjas horizontales nunca las
+  tres. El test busca un camino para la nave más lenta, desde las cuatro
+  esquinas y en 200 semillas. No cuenta los disparos de las escoltas.
+- **Lo que viene se marca en el borde:** rojo las rocas, verde el hueco.
+- **El tramo espera** a que se vayan las rocas y los cometas de la oleada, que
+  podrían tapar un hueco.
+- **El casco frena todo,** también los disparos que atraviesan. Las escoltas
+  disparan cada 1 a 1,6 s, sólo si su destello se ve en pantalla. La de abajo
+  tapa la bodega: primero hay que voltearla.
+- **La Travesía** trae doce líneas: filas a 180 px/s y muros a 212.
+- **Lo que entra de costado no se asoma** en una ventana más ancha que 4:3: los
+  paños que tapan el campo siguen 1000 unidades afuera de la escena.
+
+Los tramos son partituras (`constants/passages.ts`): en qué segundo sale cada
+cosa. `state/Passage.ts` les da forma y `Battle` las mueve y las choca. Al
+tocar un horario hay que correr `npm run test:galactica`.
+
 ## El jugador
 
 - **Vida (%)** y **energía**, en dos barras siempre visibles. La vida titila
   por debajo del 25 %; la energía, al vaciarse.
 - **Evolución.** La nave sube de etapa con núcleos: mk2 con 3, mk3 con 8. Cada
   etapa cambia la silueta y la salva.
-- **Mejoras temporales:** escudo (bloquea todo, 8 s), doble (duplica cada
-  disparo, 12 s) y turbo (más velocidad y cadencia, 10 s).
+- **Escudo:** bloquea todo mientras se mantiene prendido. Su barra está
+  siempre en el HUD, aunque esté vacía.
+- **Mejoras temporales:** doble (duplica cada disparo, 12 s) y turbo (más
+  velocidad y cadencia, 10 s).
 - **Hangar.** Tres naves, guardadas en `localStorage` como `galactica.hangar`.
 
 | Nave | Carácter | Salvas mk1 → mk3 | Se consigue |
@@ -247,7 +308,7 @@ Tiene cinco páginas:
 | Naves | Las tres naves del hangar, con sus números, cómo se consiguen y la salva de cada etapa. |
 | Enemigos | Los doce rangos y la esquirla: vida, puntos, disparo, maniobras y cuánto sueltan. |
 | Ataques | Los seis disparos y las cuatro maniobras, con su daño y quién los usa. |
-| Eventos y jefes | Pod, asteroides y cometas; los cuatro jefes con su ciclo de movimientos. |
+| Eventos y jefes | Pod, asteroides y cometas; los cuatro tramos; los cuatro jefes con su ciclo de movimientos. |
 
 Las cuatro páginas con lista tienen un **ejemplo vivo** al costado
 (`objects/PediaDemo.ts`): una `Battle` de verdad en modo banco de pruebas
@@ -266,9 +327,9 @@ vida de un jefe o el daño de un abanico, la Galactopedia se actualiza sola.
 
 ## Lo que enseñó el simulador
 
-`npm run sim:galactica` juega campañas enteras con cada nave y un piloto
-automático que esquiva mirando medio segundo adelante. Dos cosas cambiaron por
-lo que midió:
+`npm run sim:galactica` juega campañas enteras con cada nave y dos estilos
+(gatillo fijo y puntería). El piloto esquiva mirando medio segundo adelante y
+prende el escudo si no tiene salida. Cambiaron por lo que midió:
 
 - **Los jefes duraban más de cien segundos.** El disparo tarda 0,6 s en llegar
   y en ese tiempo el jefe se corre unos 40 px: con un círculo de impacto sólo se
@@ -279,9 +340,22 @@ lo que midió:
   a 120–135 s: al piloto le sobra la mitad, y una persona, que tarda más, llega
   más justa.
 
-Lo que todavía dice: el daño viene sobre todo de los **choques** contra naves
-en picada, y casi nada de los disparos. El piloto esquiva mejor que una
-persona, así que el ajuste fino de la dificultad hay que hacerlo jugando.
+- **Disparar un 50 % más caro no premiaba la puntería.** El que apunta derriba
+  más lento, la zona le dura más y terminaba con la misma energía que el que
+  no suelta el gatillo. Con 75 % le sobra más; con 100 % el gatillo fijo pasa
+  demasiado tiempo en cero.
+- **Más cápsulas de energía tapaban ese costo.** Las cápsulas subieron, pero el
+  peso extra en el sorteo fue al escudo y no a la energía.
+
+- **Los tramos le sacaban tiempo a las oleadas.** Con el reloj parado sólo
+  durante el tramo, el gatillo fijo perdía 5 de cada 100 campañas con el Halcón
+  por las pausas. Ahora para también en ellas.
+- **Los premios de los tramos llenaban la barra.** El bloqueo bajó de 6 a 4 %.
+  Jugados perfectos dejan unos 20 a 28 puntos (Convoy y Tormenta); la
+  Travesía le cuesta 15 al que no suelta el gatillo y nada al que sí.
+
+El piloto esquiva mejor que una persona y casi nunca muere, así que el ajuste
+fino de la dificultad hay que hacerlo jugando.
 
 ## Arte con pxl
 
@@ -310,13 +384,15 @@ src/games/galactica/
 ├── audio.ts
 ├── galactica.md
 ├── constants/
-│   ├── tuning.ts         # campo, velocidades, daño, energía, recargas
+│   ├── tuning.ts         # campo, velocidades, daño, energía, escudo, recargas
 │   ├── ships.ts          # el hangar: naves, salvas por etapa, desbloqueo
 │   ├── families.ts       # rangos de cada familia y jefes
 │   ├── attacks.ts        # el catálogo de disparos y maniobras
+│   ├── passages.ts       # los tramos: horarios, rocas, carguero y tormenta
 │   └── zones.ts          # oleadas, trayectorias de entrada, eventos y cielo
 ├── state/                # sin Phaser adentro
 │   ├── Battle.ts         # una zona entera
+│   ├── Passage.ts        # qué sale en un tramo y con qué forma
 │   ├── Formation.ts
 │   ├── paths.ts
 │   ├── hangar.ts         # naves conseguidas y récord
@@ -362,8 +438,8 @@ flowchart LR
 El combate usa Sci-Fi Sounds de Kenney: el láser corto para el disparo propio
 (suena hasta cada 90 ms), impactos metálicos, explosiones de dos tamaños, el
 campo de fuerza para el escudo y una compuerta para las cápsulas. Avisos,
-premios, evolución, fin de zona y fin de partida usan Digital Audio, con tonos
-de arcade. Los menús siguen con los efectos de interfaz del resto del arcade.
+premios, descargas, evolución, fin de zona y fin de partida usan Digital Audio,
+con tonos de arcade. Los menús siguen con los efectos de interfaz del resto del arcade.
 Todo está en `audio.ts`: cambiar un sonido es cambiar una URL del catálogo
 (se copia desde el Jukebox). Hay tres músicas:
 el título (*Lost in Space*), las oleadas (*Retro-Synthwave*) y los jefes

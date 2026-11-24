@@ -4,10 +4,19 @@ import { i18n } from '../../../core/i18n/i18n';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { FAMILY_COLORS } from '../constants/families';
 import { shipFrame } from '../constants/ships';
-import { EVOLUTION_CORES, FIELD_H, FIELD_W, POWER_UP_SECONDS, STEP } from '../constants/tuning';
+import { EVOLUTION_CORES, FIELD_H, FIELD_W, POWER_UP_SECONDS, SHIELD_CAPACITY, STEP } from '../constants/tuning';
 import { loadGalacticaArt, sharpenGalacticaArt, SHIPS_ATLAS } from '../objects/art';
 import { drawProjectiles, drawWarnings, Effects, spriteViews, type Offset } from '../objects/battleRenderer';
-import { BOSS_LABELS, FAMILY_LABELS, PICKUP_COLORS, PICKUP_LABELS, SHIP_LABELS, TEXT } from '../objects/labels';
+import {
+	BOSS_LABELS,
+	FAMILY_LABELS,
+	FREIGHTER_COLORS,
+	PASSAGE_LABELS,
+	PICKUP_COLORS,
+	PICKUP_LABELS,
+	SHIP_LABELS,
+	TEXT,
+} from '../objects/labels';
 import { SpriteLayer } from '../objects/SpriteLayer';
 import { Starfield } from '../objects/Starfield';
 import { Battle, newRun, type BattleEvent, type RunState } from '../state/Battle';
@@ -43,6 +52,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 	private energyText!: Phaser.GameObjects.Text;
 	private stageText!: Phaser.GameObjects.Text;
 	private shipIcon!: Phaser.GameObjects.Image;
+	private shieldText!: Phaser.GameObjects.Text;
 	private powerUpText!: Phaser.GameObjects.Text;
 	private maxStageText!: Phaser.GameObjects.Text;
 	private bossName!: Phaser.GameObjects.Text;
@@ -53,7 +63,10 @@ export class GalacticaGameScene extends Phaser.Scene {
 
 	private leftKeys: Phaser.Input.Keyboard.Key[] = [];
 	private rightKeys: Phaser.Input.Keyboard.Key[] = [];
+	private upKeys: Phaser.Input.Keyboard.Key[] = [];
+	private downKeys: Phaser.Input.Keyboard.Key[] = [];
 	private fireKeys: Phaser.Input.Keyboard.Key[] = [];
+	private shieldKeys: Phaser.Input.Keyboard.Key[] = [];
 	private pauseKey!: Phaser.Input.Keyboard.Key;
 	private escapeKey!: Phaser.Input.Keyboard.Key;
 
@@ -80,6 +93,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 			GALACTICA_AUDIO.gameMusic, GALACTICA_AUDIO.bossMusic, GALACTICA_AUDIO.shoot, GALACTICA_AUDIO.hit,
 			GALACTICA_AUDIO.explosion, GALACTICA_AUDIO.bigExplosion, GALACTICA_AUDIO.blast, GALACTICA_AUDIO.playerHit,
 			GALACTICA_AUDIO.shield, GALACTICA_AUDIO.podOpen, GALACTICA_AUDIO.pickup, GALACTICA_AUDIO.evolve, GALACTICA_AUDIO.warning,
+			GALACTICA_AUDIO.strike, GALACTICA_AUDIO.stormBlock,
 			GALACTICA_AUDIO.zoneClear, GALACTICA_AUDIO.gameOver, GALACTICA_AUDIO.pauseToggle, GALACTICA_AUDIO.confirm,
 		);
 	}
@@ -104,11 +118,14 @@ export class GalacticaGameScene extends Phaser.Scene {
 		this.projectiles = this.add.graphics().setDepth(6);
 		this.effectLayer = this.add.graphics().setDepth(7);
 		this.add.rectangle(VIEW.x, VIEW.y, FIELD_W, FIELD_H).setOrigin(0).setStrokeStyle(2, 0x29416f).setDepth(8);
-		// Lo que se sale del campo queda tapado por el marco del HUD.
-		this.add.rectangle(VIEW.x + FIELD_W + 1, 0, 800 - VIEW.x - FIELD_W, 600, 0x05060d).setOrigin(0).setDepth(9);
-		this.add.rectangle(0, VIEW.y + FIELD_H + 1, 800, 600, 0x05060d).setOrigin(0).setDepth(9);
-		this.add.rectangle(0, 0, 800, VIEW.y - 1, 0x05060d).setOrigin(0).setDepth(9);
-		this.add.rectangle(0, 0, VIEW.x - 1, 600, 0x05060d).setOrigin(0).setDepth(9);
+		// Lo que se sale del campo queda tapado por el marco del HUD. En una ventana
+		// más ancha que 4:3 se ve más allá de los 800 de la escena: los paños siguen
+		// hasta bien afuera, que un carguero o un muro entran desde 220 px del borde.
+		const beyond = 1000;
+		this.add.rectangle(VIEW.x + FIELD_W + 1, -beyond, 800 - VIEW.x - FIELD_W + beyond, 600 + beyond * 2, 0x05060d).setOrigin(0).setDepth(9);
+		this.add.rectangle(-beyond, VIEW.y + FIELD_H + 1, 800 + beyond * 2, 600 + beyond, 0x05060d).setOrigin(0).setDepth(9);
+		this.add.rectangle(-beyond, -beyond, 800 + beyond * 2, VIEW.y - 1 + beyond, 0x05060d).setOrigin(0).setDepth(9);
+		this.add.rectangle(-beyond, -beyond, VIEW.x - 1 + beyond, 600 + beyond * 2, 0x05060d).setOrigin(0).setDepth(9);
 
 		this.createHud();
 		this.createOverlays();
@@ -136,9 +153,13 @@ export class GalacticaGameScene extends Phaser.Scene {
 
 		const left = this.leftKeys.some((key) => key.isDown);
 		const right = this.rightKeys.some((key) => key.isDown);
+		const up = this.upKeys.some((key) => key.isDown);
+		const down = this.downKeys.some((key) => key.isDown);
 		this.battle.setInput({
 			move: (right ? 1 : 0) - (left ? 1 : 0),
+			moveY: (down ? 1 : 0) - (up ? 1 : 0),
 			fire: this.fireKeys.some((key) => key.isDown),
+			shield: this.shieldKeys.some((key) => key.isDown),
 		});
 		this.accumulator += dt;
 		while (this.accumulator >= STEP) {
@@ -159,7 +180,11 @@ export class GalacticaGameScene extends Phaser.Scene {
 		const add = (...keyCodes: number[]) => keyCodes.map((code) => keyboard.addKey(code));
 		this.leftKeys = add(codes.LEFT, codes.A);
 		this.rightKeys = add(codes.RIGHT, codes.D);
+		this.upKeys = add(codes.UP, codes.W);
+		this.downKeys = add(codes.DOWN, codes.S);
 		this.fireKeys = add(codes.SPACE, codes.Z, codes.J);
+		// Shift no: apretado cinco veces, Windows abre el cartel de teclas especiales.
+		this.shieldKeys = add(codes.X, codes.K);
 		this.pauseKey = keyboard.addKey(codes.P);
 		this.escapeKey = keyboard.addKey(codes.ESC);
 	}
@@ -193,14 +218,17 @@ export class GalacticaGameScene extends Phaser.Scene {
 			case 'kill': {
 				const colors = event.family === 'rock'
 					? [0xb0a090, 0x7a6c5e, 0x4a3f38]
-					: event.family === 'pod' ? [0xa4b0cc, 0xef5466, 0xffd860] : FAMILY_COLORS[event.family];
+					: event.family === 'pod' ? [0xa4b0cc, 0xef5466, 0xffd860]
+					: event.family === 'freighter' ? FREIGHTER_COLORS : FAMILY_COLORS[event.family];
 				this.effects.burst(event.x, event.y, colors, event.big ? 26 : 14, event.big ? 240 : 170);
 				if (event.big) {
 					this.effects.ring(event.x, event.y, 44, colors[0]);
 				}
 				this.playSfx(GALACTICA_AUDIO.explosion.cacheKey);
 				if (event.points > 0) {
-					this.popup(event.x, event.y, String(event.points), '#f5f7ff');
+					// El del carguero va arriba: abajo queda la cápsula.
+					const lift = event.family === 'freighter' ? 34 : 0;
+					this.popup(event.x, event.y - lift, String(event.points), '#f5f7ff');
 				}
 				break;
 			}
@@ -208,6 +236,9 @@ export class GalacticaGameScene extends Phaser.Scene {
 				this.effects.burst(this.battle.player.x, this.battle.player.y, [0xef5466, 0xffffff, 0xff8a3a], 12, 160);
 				this.cameras.main.shake(160, 0.006);
 				this.playSfx(GALACTICA_AUDIO.playerHit.cacheKey);
+				break;
+			case 'shieldUp':
+				this.playSfx(GALACTICA_AUDIO.shield.cacheKey);
 				break;
 			case 'shieldBlock':
 				this.effects.ring(event.x, event.y, 34, 0xc49bff, 0.3);
@@ -244,6 +275,25 @@ export class GalacticaGameScene extends Phaser.Scene {
 				if (event.wave > 1) {
 					this.announce(`${i18n.t('galactica.game.wave')} ${event.wave}`, '', '#f5f7ff');
 				}
+				break;
+			case 'passageStart': {
+				const { name, hint } = PASSAGE_LABELS[event.id];
+				// Queda más que los otros carteles: además del nombre, dice qué hay que hacer.
+				this.announce(i18n.t(name), i18n.t(hint), '#7fe0ff', 2100);
+				this.playSfx(GALACTICA_AUDIO.warning.cacheKey);
+				break;
+			}
+			case 'deflect':
+				this.effects.burst(event.x, event.y, [0xa4b0cc, 0x5a6482], 3, 120);
+				this.playSfx(GALACTICA_AUDIO.hit.cacheKey, 120);
+				break;
+			case 'strike':
+				this.playSfx(GALACTICA_AUDIO.strike.cacheKey);
+				break;
+			case 'stormBlock':
+				this.effects.ring(event.x, event.y, 56, 0x7fe0ff, 0.45);
+				this.popup(event.x, event.y - 34, `+${event.amount}% ${i18n.t('galactica.game.energy')}`, PICKUP_COLORS.energy);
+				this.playSfx(GALACTICA_AUDIO.stormBlock.cacheKey);
 				break;
 			case 'bossSpawn':
 				this.announce(i18n.t('galactica.game.bossWarning'), i18n.t(FAMILY_LABELS[family]), '#ff647c');
@@ -321,11 +371,11 @@ export class GalacticaGameScene extends Phaser.Scene {
 	}
 
 	/** Un cartel grande en el centro del campo, que se desvanece solo. */
-	private announce(title: string, subtitle: string, color: string) {
+	private announce(title: string, subtitle: string, color: string, hold = 1300) {
 		this.tweens.killTweensOf([this.banner, this.subBanner]);
 		this.banner.setText(title).setColor(color).setAlpha(1);
 		this.subBanner.setText(subtitle).setAlpha(subtitle ? 1 : 0);
-		this.tweens.add({ targets: [this.banner, this.subBanner], alpha: 0, delay: 1300, duration: 500 });
+		this.tweens.add({ targets: [this.banner, this.subBanner], alpha: 0, delay: hold, duration: 500 });
 	}
 
 	// ------------------------------------------------------------------ dibujo
@@ -376,7 +426,8 @@ export class GalacticaGameScene extends Phaser.Scene {
 		this.maxStageText = text(HUD_X + 6, 390, '', { ...TEXT.mono, color: '#7fe0ff' });
 
 		text(HUD_X + 6, 420, i18n.t('galactica.game.powerUps'), TEXT.label);
-		this.powerUpText = text(HUD_X + 6, 438, '', { ...TEXT.mono, lineSpacing: 10 });
+		this.shieldText = text(HUD_X + 6, 438, i18n.t('galactica.game.shield'), TEXT.mono);
+		this.powerUpText = text(HUD_X + 6, 463, '', { ...TEXT.mono, lineSpacing: 10 });
 
 		text(HUD_X + 92, 562, i18n.t('galactica.game.footer'), { ...TEXT.mono, fontSize: '11px', color: '#64759f' }).setOrigin(0.5);
 
@@ -393,7 +444,9 @@ export class GalacticaGameScene extends Phaser.Scene {
 		this.zoneText.setText(String(battle.zoneNumber));
 		this.phaseText.setText(battle.boss || battle.phase === 'bossIntro'
 			? i18n.t('galactica.game.boss')
-			: `${i18n.t('galactica.game.wave')} ${Math.max(1, battle.wave + 1)} / ${battle.waveCount}`);
+			: battle.passage
+				? i18n.t(PASSAGE_LABELS[battle.passage.id].name)
+				: `${i18n.t('galactica.game.wave')} ${Math.max(1, battle.wave + 1)} / ${battle.waveCount}`);
 		this.scoreText.setText(String(battle.score));
 		this.highScoreText.setText(String(Math.max(this.highScore, battle.score)));
 
@@ -417,15 +470,24 @@ export class GalacticaGameScene extends Phaser.Scene {
 			this.drawCoreRow(g, battle.cores - previous, next - previous, '');
 		}
 
-		const active = (['shield', 'double', 'speed'] as const).filter((kind) => battle.player[kind] > 0);
+		// El escudo es una carga, no un tiempo: se ve siempre, aunque esté vacía.
+		const { shield, shielding } = battle.player;
+		this.shieldText.setColor(shielding ? '#ffffff' : shield > 0 ? PICKUP_COLORS.shield : '#64759f');
+		g.fillStyle(0x1a2440, 1);
+		g.fillRect(HUD_X + 86, 443, 90, 6);
+		g.fillStyle(shielding ? 0xffffff : Phaser.Display.Color.HexStringToColor(PICKUP_COLORS.shield).color, 1);
+		g.fillRect(HUD_X + 86, 443, 90 * (shield / SHIELD_CAPACITY), 6);
+
+		const active = (['double', 'speed'] as const).filter((kind) => battle.player[kind] > 0);
 		this.powerUpText.setText(active.map((kind) => `${i18n.t(PICKUP_LABELS[kind].name)}`).join('\n'));
 		active.forEach((kind, index) => {
 			const color = Phaser.Display.Color.HexStringToColor(PICKUP_COLORS[kind]).color;
 			const fraction = Math.min(1, battle.player[kind] / POWER_UP_SECONDS[kind]);
 			g.fillStyle(0x1a2440, 1);
-			g.fillRect(HUD_X + 86, 443 + index * 25, 90, 6);
+			const y = 468 + index * 25;
+			g.fillRect(HUD_X + 86, y, 90, 6);
 			g.fillStyle(color, 1);
-			g.fillRect(HUD_X + 86, 443 + index * 25, 90 * fraction, 6);
+			g.fillRect(HUD_X + 86, y, 90 * fraction, 6);
 		});
 
 		const boss = battle.boss;

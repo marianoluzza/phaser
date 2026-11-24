@@ -1,8 +1,9 @@
 import type Phaser from 'phaser';
 import { FAMILY_FRAME } from '../constants/families';
 import { shipFrame } from '../constants/ships';
-import { FIELD_H, PLANT_RADIUS, PLAYER_RADIUS } from '../constants/tuning';
-import type { Battle } from '../state/Battle';
+import { STORM } from '../constants/passages';
+import { FIELD_H, FIELD_W, PLANT_RADIUS, PLAYER_RADIUS, ROCK_RADIUS } from '../constants/tuning';
+import type { Battle, Strike } from '../state/Battle';
 import { BOSSES_ATLAS, SHIPS_ATLAS } from './art';
 import type { SpriteView } from './SpriteLayer';
 
@@ -29,6 +30,13 @@ export function spriteViews(battle: Battle, playerVisible: boolean): SpriteView[
 			tint: rock.flash > 0 ? 0xffffff : undefined,
 		});
 	}
+	for (const freighter of battle.freighters) {
+		views.push({
+			id: freighter.id, atlas: SHIPS_ATLAS, frame: 'freighter', x: freighter.x, y: freighter.y,
+			flipX: freighter.vx < 0,
+			tint: freighter.flash > 0 ? 0xffffff : undefined,
+		});
+	}
 	for (const pickup of battle.pickups) {
 		views.push({
 			id: pickup.id, atlas: SHIPS_ATLAS, frame: `pick_${pickup.kind}`,
@@ -41,6 +49,9 @@ export function spriteViews(battle: Battle, playerVisible: boolean): SpriteView[
 			continue;
 		}
 		let tint: number | undefined = enemy.flash > 0 ? 0xffffff : undefined;
+		if (enemy.aim > 0 && Math.floor(enemy.aim * 15) % 2 === 0) {
+			tint = 0xffd860;
+		}
 		if (enemy.state === 'planted') {
 			// El parpadeo se acelera cuando falta poco para la explosión.
 			const rate = enemy.timer < 0.8 ? 14 : 6;
@@ -101,6 +112,21 @@ export function drawWarnings(g: Phaser.GameObjects.Graphics, battle: Battle, vie
 		g.fillRect(view.x + boss.chargeX - 44, view.y + boss.y, 88, FIELD_H - boss.y);
 	}
 
+	drawRockMarks(g, battle, view);
+	for (const strike of battle.strikes) {
+		if (strike.timer <= 0) {
+			continue;
+		}
+		// Se llena a medida que se acerca; el último cuarto de segundo es el momento del escudo.
+		const urgency = 1 - strike.timer / STORM.warning;
+		const now = strike.timer < 0.25;
+		const { x, y, w, h } = bandRect(strike, view);
+		g.fillStyle(0x7fe0ff, now ? 0.28 : 0.07 + urgency * 0.14);
+		g.fillRect(x, y, w, h);
+		g.lineStyle(now ? 3 : 1, now ? 0xffffff : 0x7fe0ff, 0.35 + urgency * 0.5);
+		g.strokeRect(x, y, w, h);
+	}
+
 	for (const warning of battle.cometWarnings) {
 		if (warning.timer <= -warning.delay) {
 			continue;
@@ -157,12 +183,76 @@ export function drawProjectiles(g: Phaser.GameObjects.Graphics, battle: Battle, 
 		g.fillCircle(x, y, 6);
 	}
 
-	if (playerVisible && battle.player.shield > 0) {
+	for (const strike of battle.strikes) {
+		if (strike.timer <= 0) {
+			drawBolts(g, strike, battle.time, view);
+		}
+	}
+
+	if (playerVisible && battle.player.shielding) {
 		const fading = battle.player.shield < 2 && Math.floor(battle.time * 10) % 2 === 0;
 		g.lineStyle(2, 0xc49bff, fading ? 0.3 : 0.85);
 		g.strokeCircle(view.x + battle.player.x, view.y + battle.player.y, PLAYER_RADIUS + 18);
 		g.fillStyle(0xb072e6, 0.12);
 		g.fillCircle(view.x + battle.player.x, view.y + battle.player.y, PLAYER_RADIUS + 18);
+	}
+}
+
+function bandRect(strike: Strike, view: Offset) {
+	const size = strike.to - strike.from;
+	return strike.axis === 'x'
+		? { x: view.x + strike.from, y: view.y, w: size, h: FIELD_H }
+		: { x: view.x, y: view.y + strike.from, w: FIELD_W, h: size };
+}
+
+/** Lo que todavía no asomó se marca en el borde: en rojo las rocas, en verde el hueco. */
+function drawRockMarks(g: Phaser.GameObjects.Graphics, battle: Battle, view: Offset) {
+	for (const rock of battle.rocks) {
+		if (rock.gap === undefined) {
+			continue;
+		}
+		if (rock.vy > 0 && rock.y < -ROCK_RADIUS) {
+			g.fillStyle(0xff5466, 0.75);
+			g.fillRect(view.x + rock.x - 16, view.y + 2, 32, 5);
+			g.fillStyle(0x9be15d, 0.9);
+			g.fillTriangle(
+				view.x + rock.gap - 12, view.y + 3, view.x + rock.gap + 12, view.y + 3, view.x + rock.gap, view.y + 19,
+			);
+		} else if (rock.vy === 0 && (rock.vx > 0 ? rock.x < -ROCK_RADIUS : rock.x > FIELD_W + ROCK_RADIUS)) {
+			const side = rock.vx > 0 ? 1 : -1;
+			const edge = view.x + (side === 1 ? 0 : FIELD_W);
+			g.fillStyle(0xff5466, 0.75);
+			g.fillRect(side === 1 ? edge + 2 : edge - 7, view.y + rock.y - 16, 5, 32);
+			g.fillStyle(0x9be15d, 0.9);
+			const y = view.y + rock.gap;
+			g.fillTriangle(edge + side * 3, y - 12, edge + side * 3, y + 12, edge + side * 19, y);
+		}
+	}
+}
+
+/** La descarga: la franja encendida y tres rayos que cambian unas veinte veces por segundo. */
+function drawBolts(g: Phaser.GameObjects.Graphics, strike: Strike, time: number, view: Offset) {
+	const { x, y, w, h } = bandRect(strike, view);
+	g.fillStyle(0x7fe0ff, 0.35);
+	g.fillRect(x, y, w, h);
+	const along = strike.axis === 'x' ? FIELD_H : FIELD_W;
+	const size = strike.to - strike.from;
+	const frame = Math.floor(time * 20);
+	for (let bolt = 0; bolt < 3; bolt += 1) {
+		const points: Offset[] = [];
+		for (let step = 0; step <= 16; step += 1) {
+			// El azar sale de los números del rayo, no de la partida: dibujar no puede correr su semilla.
+			const jag = Math.sin((step + 1) * 91.7 + bolt * 37.3 + frame * 13.1 + strike.id);
+			const across = strike.from + size * ((bolt + 0.5) / 3 + jag * 0.14);
+			const reach = (along * step) / 16;
+			points.push(strike.axis === 'x'
+				? { x: view.x + across, y: view.y + reach }
+				: { x: view.x + reach, y: view.y + across });
+		}
+		g.lineStyle(bolt === 1 ? 3 : 2, bolt === 1 ? 0xffffff : 0xc4fbff, 1);
+		for (let step = 1; step < points.length; step += 1) {
+			g.lineBetween(points[step - 1].x, points[step - 1].y, points[step].x, points[step].y);
+		}
 	}
 }
 

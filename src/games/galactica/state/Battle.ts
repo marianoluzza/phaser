@@ -9,6 +9,15 @@ import {
 	type ShotKind,
 } from '../constants/attacks';
 import { BOSSES, ENEMIES, SHARD, type BossDef, type BossMove, type EnemySpec, type Family, type Rank } from '../constants/families';
+import {
+	FIELD_ROCKS,
+	FREIGHTER,
+	PASSAGE_BEFORE_WAVE,
+	PASSAGES,
+	STORM,
+	type PassageCue,
+	type PassageId,
+} from '../constants/passages';
 import { SHIPS, type ShipDef, type ShipId } from '../constants/ships';
 import {
 	BOSS_INTRO,
@@ -18,6 +27,7 @@ import {
 	DIVE_SPEED,
 	EMPTY_ENERGY_LIFE_DRAIN,
 	ENEMY_RADIUS,
+	ENERGY_SURCHARGE,
 	ENTRY_SPEED,
 	EVOLUTION_CORES,
 	FIELD_H,
@@ -28,9 +38,10 @@ import {
 	PICKUP_LIFE,
 	PICKUP_RADIUS,
 	PLANT_FUSE,
+	PLANT_GAP,
 	PLANT_RADIUS,
-	PLANT_Y,
 	PLAYER_MARGIN,
+	PLAYER_MIN_Y,
 	PLAYER_RADIUS,
 	PLAYER_Y,
 	POD_RADIUS,
@@ -38,6 +49,10 @@ import {
 	RETURN_SPEED,
 	ROCK_RADIUS,
 	SHARD_RADIUS,
+	SHIELD_CAPACITY,
+	SHIELD_CHARGE,
+	STATION_AIM,
+	STATION_CLEARANCE,
 	SWOOP_SPEED,
 	WAVE_INTERLUDE,
 	ZONE_CLEAR_ENERGY_BONUS,
@@ -47,6 +62,7 @@ import {
 } from '../constants/tuning';
 import { ENTRY_POINTS, ZONES, type EventKind, type ZoneDef } from '../constants/zones';
 import { Formation } from './Formation';
+import { Passage, type Band, type RockLine } from './Passage';
 import { Path, type Point } from './paths';
 
 /** Lo que pasa de una zona a la siguiente. */
@@ -56,7 +72,7 @@ export type RunState = {
 	score: number;
 	hp: number;
 	cores: number;
-	/** Segundos que le quedan a cada mejora: se congelan entre zonas y siguen en la próxima. */
+	/** Segundos que le quedan a cada mejora, y de carga al escudo: siguen en la próxima zona. */
 	powerUps: Record<PowerUpKind, number>;
 };
 
@@ -71,8 +87,8 @@ export const PICKUP_KINDS: PickupKind[] = ['life', 'energy', 'core', 'shield', '
 
 /** Qué suelta cada fuente. Los comandantes premian la evolución; los pods, sobrevivir. */
 const DROP_TABLES: Record<'enemy' | 'pod' | 'rock', Array<[PickupKind, number]>> = {
-	enemy: [['core', 5], ['life', 2], ['energy', 2], ['double', 1], ['shield', 1], ['speed', 1]],
-	pod: [['life', 3], ['energy', 3], ['core', 3], ['shield', 1], ['double', 1], ['speed', 1]],
+	enemy: [['core', 5], ['life', 2], ['energy', 2], ['double', 1], ['shield', 2], ['speed', 1]],
+	pod: [['life', 3], ['energy', 3], ['core', 3], ['shield', 2], ['double', 1], ['speed', 1]],
 	rock: [['energy', 2], ['life', 1]],
 };
 
@@ -87,6 +103,8 @@ export type EnemyState =
 	| 'planting'
 	| 'planted'
 	| 'returning'
+	/** Acompaña a un carguero. */
+	| 'escort'
 	/** Siguió de largo: se borra al terminar el paso. */
 	| 'gone';
 
@@ -113,7 +131,12 @@ export type Enemy = {
 	vx: number;
 	vy: number;
 	flash: number;
+	/** Segundos para que dispare desde su casillero; 0 si no está apuntando. */
+	aim: number;
 	wave: number;
+	/** El carguero al que escolta y su lugar al lado de él. */
+	leader?: number;
+	offset?: { dx: number; dy: number };
 };
 
 export type BossState = 'entering' | 'fighting' | 'charging' | 'rising';
@@ -158,10 +181,34 @@ export type Bullet = {
 export type Shot = { id: number; x: number; y: number; vx: number; vy: number; pierce: boolean; hits: number[] };
 
 export type Pod = { id: number; x: number; y: number; vx: number; hp: number; flash: number };
-export type Rock = { id: number; x: number; y: number; vx: number; vy: number; hp: number; spin: number; angle: number; frame: 1 | 2; flash: number };
+export type Rock = {
+	id: number;
+	x: number;
+	y: number;
+	vx: number;
+	vy: number;
+	hp: number;
+	spin: number;
+	angle: number;
+	frame: 1 | 2;
+	flash: number;
+	/** En las de un tramo, el centro del hueco de su fila (en x) o de su muro (en y). */
+	gap?: number;
+};
+export type Freighter = { id: number; x: number; y: number; vx: number; hp: number; flash: number; fireTimer: number };
+/** Una franja de la tormenta: `timer` baja hasta 0 mientras avisa y sigue en negativo mientras cae. */
+export type Strike = Band & { id: number; timer: number; resolved: boolean };
 export type Comet = { x: number; y: number; vx: number; vy: number };
 export type CometWarning = { x: number; vx: number; timer: number; delay: number };
-export type Pickup = { id: number; x: number; y: number; kind: PickupKind; age: number };
+export type Pickup = {
+	id: number;
+	x: number;
+	y: number;
+	kind: PickupKind;
+	age: number;
+	/** Cuánto carga, si no es lo de siempre. */
+	amount?: number;
+};
 
 export type Player = {
 	x: number;
@@ -169,25 +216,32 @@ export type Player = {
 	vx: number;
 	cooldown: number;
 	invulnerable: number;
+	/** Carga guardada, en segundos; sólo se gasta con el escudo prendido. */
 	shield: number;
+	shielding: boolean;
 	double: number;
 	speed: number;
 };
 
-export type Phase = 'interlude' | 'wave' | 'bossIntro' | 'boss' | 'clear';
+export type Phase = 'interlude' | 'wave' | 'passage' | 'bossIntro' | 'boss' | 'clear';
 
 export type BattleEvent =
 	| { type: 'playerShot' }
 	| { type: 'enemyShot'; x: number; y: number }
 	| { type: 'hit'; x: number; y: number }
-	| { type: 'kill'; x: number; y: number; family: Family | 'rock' | 'pod'; points: number; big: boolean }
+	| { type: 'kill'; x: number; y: number; family: Family | 'rock' | 'pod' | 'freighter'; points: number; big: boolean }
 	| { type: 'playerHit'; source: DamageSource; damage: number }
+	| { type: 'shieldUp' }
 	| { type: 'shieldBlock'; x: number; y: number }
 	| { type: 'pickup'; kind: PickupKind; x: number; y: number }
 	| { type: 'evolve'; stage: number }
 	| { type: 'warning'; kind: 'comets' | 'planted' | 'charge' | 'pod' | 'asteroids'; x: number }
 	| { type: 'blast'; x: number; y: number; radius: number }
 	| { type: 'waveStart'; wave: number }
+	| { type: 'passageStart'; id: PassageId }
+	| { type: 'deflect'; x: number; y: number }
+	| { type: 'strike' }
+	| { type: 'stormBlock'; x: number; y: number; amount: number }
 	| { type: 'bossSpawn' }
 	| { type: 'bossDown'; x: number; y: number; points: number }
 	| { type: 'energyEmpty' }
@@ -204,7 +258,8 @@ export type BattleStats = {
 	bossTime: number;
 };
 
-export type Input = { move: number; fire: boolean };
+/** `move` y `moveY` van de -1 a 1; `moveY` negativo es hacia adelante. */
+export type Input = { move: number; moveY: number; fire: boolean; shield: boolean };
 
 const DEG = Math.PI / 180;
 const CLEAR_DELAY = 2.6;
@@ -239,6 +294,12 @@ export class Battle {
 	comets: Comet[] = [];
 	cometWarnings: CometWarning[] = [];
 	pickups: Pickup[] = [];
+	freighters: Freighter[] = [];
+	strikes: Strike[] = [];
+	/** El tramo en curso. */
+	passage: Passage | null = null;
+	/** El que todavía falta jugar en esta zona. */
+	pendingPassage: PassageId | null;
 
 	phase: Phase = 'interlude';
 	phaseTimer = 1.2;
@@ -252,12 +313,14 @@ export class Battle {
 	/** La Galactopedia los apaga: en sus ejemplos sólo pasa lo que se está mostrando. */
 	randomEvents = true;
 
-	private input: Input = { move: 0, fire: false };
+	private input: Input = { move: 0, moveY: 0, fire: false, shield: false };
 	private nextId = 1;
 	private attackTimer = 0;
+	private stationTimer = 0;
 	private waveSize = 0;
 	private eventTimer: number;
 	private energyWarned = false;
+	private sandboxed = false;
 
 	private readonly random: () => number;
 
@@ -270,12 +333,13 @@ export class Battle {
 		this.hp = run.hp;
 		this.cores = run.cores;
 		this.stage = stageForCores(run.cores);
-		this.player = { x: FIELD_W / 2, y: PLAYER_Y, vx: 0, cooldown: 0, invulnerable: 0, ...run.powerUps };
+		this.player = { x: FIELD_W / 2, y: PLAYER_Y, vx: 0, cooldown: 0, invulnerable: 0, shielding: false, ...run.powerUps };
 		this.eventTimer = this.range(this.zone.eventEvery);
+		this.pendingPassage = this.zone.passage;
 		this.stats = {
 			time: 0,
 			kills: 0,
-			damage: { bolt: 0, helix: 0, fan: 0, blast: 0, ram: 0, comet: 0, rock: 0, empty: 0 },
+			damage: { bolt: 0, helix: 0, fan: 0, blast: 0, ram: 0, comet: 0, rock: 0, storm: 0, empty: 0 },
 			pickups: { life: 0, energy: 0, core: 0, shield: 0, double: 0, speed: 0 },
 			podsOpened: 0,
 			bossTime: 0,
@@ -294,6 +358,7 @@ export class Battle {
 		this.phase = 'bossIntro';
 		this.phaseTimer = Infinity;
 		this.randomEvents = false;
+		this.sandboxed = true;
 		return this;
 	}
 
@@ -320,6 +385,7 @@ export class Battle {
 			vx: 0,
 			vy: 0,
 			flash: 0,
+			aim: 0,
 			wave: this.wave,
 		};
 		this.enemies.push(enemy);
@@ -379,12 +445,23 @@ export class Battle {
 	private updatePlayer(dt: number) {
 		const player = this.player;
 		const speed = this.ship.speed * (player.speed > 0 ? 1.35 : 1);
-		player.vx = Math.max(-1, Math.min(1, this.input.move)) * speed;
+		const { move, moveY } = this.input;
+		// En diagonal no va más rápido que derecho.
+		const pace = speed / Math.max(1, Math.hypot(move, moveY));
+		player.vx = move * pace;
 		player.x = Math.max(PLAYER_MARGIN, Math.min(FIELD_W - PLAYER_MARGIN, player.x + player.vx * dt));
+		player.y = Math.max(PLAYER_MIN_Y, Math.min(PLAYER_Y, player.y + moveY * pace * dt));
 
 		player.cooldown -= dt;
 		player.invulnerable = Math.max(0, player.invulnerable - dt);
-		player.shield = Math.max(0, player.shield - dt);
+		const wasShielding = player.shielding;
+		player.shielding = this.input.shield && player.shield > 0 && this.energy > 0;
+		if (player.shielding) {
+			player.shield = Math.max(0, player.shield - dt);
+			if (!wasShielding) {
+				this.events.push({ type: 'shieldUp' });
+			}
+		}
 		player.double = Math.max(0, player.double - dt);
 		player.speed = Math.max(0, player.speed - dt);
 
@@ -418,9 +495,21 @@ export class Battle {
 		if (this.phase === 'clear') {
 			return;
 		}
-		this.energy = Math.max(0, this.energy - (100 / this.zone.energySeconds) * dt);
+		// El tramo no le saca tiempo a las oleadas: el reloj para de la segunda a la tercera.
+		const timed = this.phase !== 'passage' && !(this.phase === 'interlude' && this.wave + 1 === PASSAGE_BEFORE_WAVE);
+		let rate = timed ? 1 : 0;
+		if (this.player.cooldown > 0) {
+			rate += ENERGY_SURCHARGE.fire;
+		}
+		if (this.player.shielding) {
+			rate += ENERGY_SURCHARGE.shield;
+		}
+		this.energy = Math.max(0, this.energy - (100 / this.zone.energySeconds) * rate * dt);
 		if (this.energy > 0) {
 			this.energyWarned = false;
+			return;
+		}
+		if (!timed) {
 			return;
 		}
 		if (!this.energyWarned) {
@@ -439,7 +528,7 @@ export class Battle {
 			if (this.player.invulnerable > 0) {
 				return;
 			}
-			if (this.player.shield > 0) {
+			if (this.player.shielding) {
 				this.events.push({ type: 'shieldBlock', x: this.player.x, y: this.player.y });
 				return;
 			}
@@ -467,7 +556,11 @@ export class Battle {
 			case 'interlude':
 				this.phaseTimer -= dt;
 				if (this.phaseTimer <= 0) {
-					if (this.wave + 1 < this.zone.waves.length) {
+					if (this.pendingPassage && this.wave + 1 === PASSAGE_BEFORE_WAVE) {
+						if (this.makeRoomForPassage()) {
+							this.startPassage(this.pendingPassage);
+						}
+					} else if (this.wave + 1 < this.zone.waves.length) {
 						this.startWave(this.wave + 1);
 					} else {
 						this.startBoss();
@@ -476,11 +569,15 @@ export class Battle {
 				break;
 			case 'wave':
 				this.directAttacks(dt);
+				this.directStationFire(dt);
 				this.directEvents(dt);
 				if (!this.enemies.some((enemy) => enemy.slot && enemy.wave === this.wave)) {
 					this.phase = 'interlude';
 					this.phaseTimer = WAVE_INTERLUDE;
 				}
+				break;
+			case 'passage':
+				this.directPassage(dt);
 				break;
 			case 'bossIntro':
 				this.phaseTimer -= dt;
@@ -552,6 +649,7 @@ export class Battle {
 						vx: 0,
 						vy: 0,
 						flash: 0,
+						aim: 0,
 						wave: index,
 					});
 					count += 1;
@@ -561,7 +659,159 @@ export class Battle {
 
 		this.waveSize = count;
 		this.attackTimer = 1.5;
+		this.stationTimer = this.zone.stationFireEvery / 2;
 		this.events.push({ type: 'waveStart', wave: index + 1 });
+	}
+
+	// ----------------------------------------------------------------- tramos
+
+	/**
+	 * Lo de la oleada anterior podría tapar un hueco: lo que todavía no asomó no
+	 * llega a salir y lo que está en pantalla se espera.
+	 */
+	private makeRoomForPassage() {
+		this.cometWarnings = [];
+		this.rocks = this.rocks.filter((rock) => rock.y >= -ROCK_RADIUS);
+		return this.rocks.length === 0 && this.comets.length === 0;
+	}
+
+	/** Público para la Galactopedia, las capturas y los tests, que lo muestran a pedido. */
+	startPassage(id: PassageId) {
+		this.pendingPassage = null;
+		this.passage = new Passage(id, this.random);
+		this.phase = 'passage';
+		if (PASSAGES[id].shield) {
+			this.addShield(Math.max(0, SHIELD_CHARGE - this.player.shield));
+		}
+		this.events.push({ type: 'passageStart', id });
+	}
+
+	private directPassage(dt: number) {
+		const passage = this.passage!;
+		for (const cue of passage.advance(dt)) {
+			this.spawnCue(passage, cue);
+		}
+		for (const freighter of this.freighters) {
+			freighter.fireTimer -= dt;
+			if (freighter.fireTimer > 0) {
+				continue;
+			}
+			// Sólo la que se ve entera y se va a seguir viendo cuando termine el aviso.
+			const margin = ENEMY_RADIUS + FREIGHTER.speed * STATION_AIM;
+			const gunners = this.enemies.filter((enemy) => enemy.state === 'escort' && enemy.leader === freighter.id
+				&& enemy.x >= margin && enemy.x <= FIELD_W - margin
+				&& enemy.spec.shot && enemy.aim === 0 && this.canFireFromStation(enemy));
+			if (gunners.length) {
+				gunners[Math.floor(this.random() * gunners.length)].aim = STATION_AIM;
+				freighter.fireTimer = this.range(FREIGHTER.fireEvery);
+			}
+		}
+
+		const busy = this.freighters.length > 0 || this.strikes.length > 0 || this.rocks.some((rock) => rock.gap !== undefined);
+		if (!passage.scheduleDone || busy) {
+			return;
+		}
+		this.passage = null;
+		this.phase = this.sandboxed ? 'bossIntro' : 'interlude';
+		this.phaseTimer = this.sandboxed ? Infinity : WAVE_INTERLUDE;
+	}
+
+	private spawnCue(passage: Passage, cue: PassageCue) {
+		switch (cue.kind) {
+			case 'row':
+				this.spawnRockLine(passage.row(cue.follows ?? false));
+				break;
+			case 'wall':
+				this.spawnRockLine(passage.wall(cue.follows ?? false));
+				break;
+			case 'freighter':
+				this.spawnFreighter(passage.convoySide);
+				break;
+			case 'bandsX':
+				this.spawnStrikes(passage.bandsX(this.player.x));
+				break;
+			case 'bandsY':
+				this.spawnStrikes(passage.bandsY(this.player.y, cue.max));
+				break;
+		}
+	}
+
+	private spawnRockLine({ points, vx, vy, gap }: RockLine) {
+		for (const { x, y } of points) {
+			this.rocks.push({
+				id: this.nextId++,
+				x,
+				y,
+				vx,
+				vy,
+				gap,
+				hp: FIELD_ROCKS.hp,
+				spin: (this.random() - 0.5) * 3,
+				angle: this.random() * Math.PI * 2,
+				frame: this.random() < 0.5 ? 1 : 2,
+				flash: 0,
+			});
+		}
+	}
+
+	private spawnFreighter(side: 1 | -1) {
+		const freighter: Freighter = {
+			id: this.nextId++,
+			x: side === 1 ? -FREIGHTER.startOff : FIELD_W + FREIGHTER.startOff,
+			y: FREIGHTER.y,
+			vx: side * FREIGHTER.speed,
+			hp: FREIGHTER.hp,
+			flash: 0,
+			fireTimer: this.range(FREIGHTER.fireEvery),
+		};
+		this.freighters.push(freighter);
+		const { family } = this.zone;
+		const rank = FREIGHTER.escortRank;
+		const spec = ENEMIES[family][rank];
+		for (const offset of FREIGHTER.escorts) {
+			this.enemies.push({
+				id: this.nextId++,
+				family,
+				rank,
+				spec,
+				hp: spec.hp,
+				x: freighter.x + offset.dx,
+				y: freighter.y + offset.dy,
+				angle: 0,
+				slot: null,
+				state: 'escort',
+				timer: 0,
+				path: null,
+				distance: 0,
+				maneuver: null,
+				volleyMarks: [],
+				vx: 0,
+				vy: 0,
+				flash: 0,
+				aim: 0,
+				wave: this.wave,
+				leader: freighter.id,
+				offset,
+			});
+		}
+	}
+
+	private spawnStrikes(bands: Band[]) {
+		for (const band of bands) {
+			this.strikes.push({ ...band, id: this.nextId++, timer: STORM.warning, resolved: false });
+		}
+	}
+
+	private breakFreighter(freighter: Freighter) {
+		this.score += FREIGHTER.points;
+		this.stats.kills += 1;
+		this.events.push({ type: 'kill', x: freighter.x, y: freighter.y, family: 'freighter', points: FREIGHTER.points, big: true });
+		this.pickups.push({ id: this.nextId++, x: freighter.x, y: freighter.y, kind: 'energy', age: 0, amount: FREIGHTER.energy });
+		for (const enemy of this.enemies) {
+			if (enemy.state === 'escort' && enemy.leader === freighter.id) {
+				this.startManeuver(enemy, 'dive');
+			}
+		}
 	}
 
 	/** Elige quién deja la formación. Cuantas menos naves quedan, más seguido. */
@@ -592,25 +842,54 @@ export class Battle {
 		this.startManeuver(enemy, this.weighted(enemy.spec.maneuvers));
 	}
 
+	/** Cada tanto, una nave estacionada destella y dispara desde su casillero. */
+	private directStationFire(dt: number) {
+		if (!this.formation.settled) {
+			return;
+		}
+		this.stationTimer -= dt;
+		if (this.stationTimer > 0) {
+			return;
+		}
+		const gunners = this.enemies.filter((enemy) =>
+			enemy.state === 'formation' && enemy.spec.shot && enemy.aim === 0 && this.canFireFromStation(enemy));
+		if (gunners.length === 0) {
+			return;
+		}
+		gunners[Math.floor(this.random() * gunners.length)].aim = STATION_AIM;
+		this.stationTimer = this.zone.stationFireEvery * (0.7 + this.random() * 0.6);
+	}
+
+	private canFireFromStation(enemy: Enemy) {
+		return this.player.y - (enemy.y + 14) >= STATION_CLEARANCE;
+	}
+
 	/** Público para la Galactopedia y las capturas, que muestran cada maniobra a pedido. */
 	startManeuver(enemy: Enemy, maneuver: Maneuver) {
 		enemy.maneuver = maneuver;
+		enemy.aim = 0;
 		if (maneuver === 'swoop') {
 			const side = enemy.x < FIELD_W / 2 ? -1 : 1;
 			const target = this.player.x;
+			const middleY = Math.min(FIELD_H * 0.52, (enemy.y + this.player.y) / 2);
+			const passY = Math.max(middleY + 30, this.player.y - 71);
+			// Cuanto más adelante está la nave, antes llega el rizo y antes tiene que disparar.
+			const advance = (PLAYER_Y - this.player.y) / (PLAYER_Y - PLAYER_MIN_Y);
+			const hurry = 1 - 0.4 * advance;
 			const clampX = (x: number) => Math.max(20, Math.min(FIELD_W - 20, x));
 			const controls: Point[] = [
 				{ x: enemy.x, y: enemy.y },
 				{ x: clampX(enemy.x + side * 46), y: enemy.y - 34 },
 				{ x: clampX(enemy.x + side * 74), y: enemy.y + 26 },
-				{ x: clampX((enemy.x + target) / 2), y: FIELD_H * 0.52 },
-				{ x: clampX(target), y: FIELD_H * 0.8 },
+				{ x: clampX((enemy.x + target) / 2), y: middleY },
+				{ x: clampX(target), y: passY },
 				{ x: clampX(target - side * 70), y: FIELD_H + 60 },
 			];
 			enemy.path = new Path(controls);
 			enemy.distance = 0;
 			enemy.state = 'swoop';
-			enemy.volleyMarks = enemy.spec.volleys >= 2 ? [0.42, 0.62] : enemy.spec.volleys === 1 ? [0.5] : [];
+			const marks = enemy.spec.volleys >= 2 ? [0.42, 0.62] : enemy.spec.volleys === 1 ? [0.5] : [];
+			enemy.volleyMarks = marks.map((mark) => mark * hurry);
 			return;
 		}
 		enemy.state = 'telegraph';
@@ -692,6 +971,18 @@ export class Battle {
 				enemy.x = slot.x;
 				enemy.y = slot.y;
 				enemy.angle = turnToward(enemy.angle, 0, dt * 8);
+				this.updateAim(enemy, dt);
+				break;
+			}
+			case 'escort': {
+				const leader = this.freighters.find((freighter) => freighter.id === enemy.leader);
+				if (!leader) {
+					enemy.state = 'gone';
+					break;
+				}
+				enemy.x = leader.x + enemy.offset!.dx;
+				enemy.y = leader.y + enemy.offset!.dy;
+				this.updateAim(enemy, dt);
 				break;
 			}
 			case 'telegraph':
@@ -702,9 +993,13 @@ export class Battle {
 					if (enemy.maneuver === 'planted') {
 						enemy.state = 'planting';
 						enemy.vx = Math.max(40, Math.min(FIELD_W - 40, this.player.x));
+						enemy.vy = this.player.y - PLANT_GAP;
 					} else {
 						const tx = this.player.x - enemy.x;
-						const ty = FIELD_H + 60 - enemy.y;
+						// Apunta al borde de abajo, como siempre; con la nave adelantada, acorta en proporción
+						// para pasarle igual de cerca. Nunca deja de bajar: si no, no saldría de la pantalla.
+						const reach = enemy.y < this.player.y ? (this.player.y - enemy.y) / (PLAYER_Y - enemy.y) : 1;
+						const ty = Math.max((FIELD_H + 60 - enemy.y) * reach, Math.abs(tx) * 0.5, 120);
 						const length = Math.hypot(tx, ty);
 						enemy.vx = (tx / length) * DIVE_SPEED * speedFactor;
 						enemy.vy = (ty / length) * DIVE_SPEED * speedFactor;
@@ -726,7 +1021,7 @@ export class Battle {
 				const progress = enemy.distance / path.length;
 				while (enemy.volleyMarks.length && progress >= enemy.volleyMarks[0]) {
 					enemy.volleyMarks.shift();
-					if (enemy.spec.shot && enemy.y < PLAYER_Y - 60) {
+					if (enemy.spec.shot && enemy.y < this.player.y - 60) {
 						this.fireEnemy(enemy.spec.shot, enemy.x, enemy.y + 14);
 					}
 				}
@@ -736,16 +1031,17 @@ export class Battle {
 				break;
 			}
 			case 'planting': {
-				// En `vx` quedó guardado el x elegido al despegar: va a donde estaba el jugador.
+				// En `vx` y `vy` quedó el lugar elegido al despegar: encima de donde estaba el jugador.
 				const tx = enemy.vx;
+				const ty = enemy.vy;
 				const dx = tx - enemy.x;
-				const dy = PLANT_Y - enemy.y;
+				const dy = ty - enemy.y;
 				const distance = Math.hypot(dx, dy);
 				const speed = 300 * speedFactor * dt;
 				enemy.angle = turnToward(enemy.angle, Math.atan2(dy, dx) - Math.PI / 2, dt * 10);
 				if (distance <= speed) {
 					enemy.x = tx;
-					enemy.y = PLANT_Y;
+					enemy.y = ty;
 					enemy.state = 'planted';
 					enemy.timer = PLANT_FUSE;
 					enemy.angle = 0;
@@ -763,6 +1059,18 @@ export class Battle {
 					enemy.hp = 0;
 				}
 				break;
+		}
+	}
+
+	/** El destello que avisa y, al terminar, el disparo. */
+	private updateAim(enemy: Enemy, dt: number) {
+		if (enemy.aim <= 0) {
+			return;
+		}
+		enemy.aim = Math.max(0, enemy.aim - dt);
+		// Se vuelve a mirar la distancia: la nave pudo acercarse durante el aviso.
+		if (enemy.aim === 0 && this.outcome === 'playing' && enemy.spec.shot && this.canFireFromStation(enemy)) {
+			this.fireEnemy(enemy.spec.shot, enemy.x, enemy.y + 14);
 		}
 	}
 
@@ -851,6 +1159,7 @@ export class Battle {
 				vx: 0,
 				vy: 0,
 				flash: 0,
+				aim: 0,
 				wave: this.wave,
 			});
 		}
@@ -1059,7 +1368,8 @@ export class Battle {
 			this.pods.push({
 				id: this.nextId++,
 				x: fromLeft ? -30 : FIELD_W + 30,
-				y: 170 + this.random() * 110,
+				// Por encima de lo más adelante que llega la nave: al abrirse no le cae encima.
+				y: 170 + this.random() * 85,
 				vx: (fromLeft ? 1 : -1) * (60 + this.random() * 25),
 				hp: 4,
 				flash: 0,
@@ -1111,7 +1421,26 @@ export class Battle {
 			rock.angle += rock.spin * dt;
 			rock.flash = Math.max(0, rock.flash - dt);
 		}
-		this.rocks = this.rocks.filter((rock) => rock.hp > 0 && rock.y < FIELD_H + 40);
+		this.rocks = this.rocks.filter((rock) => rock.hp > 0 && rock.y < FIELD_H + 40
+			// Los muros se van por el costado, del lado hacia el que viajan.
+			&& (rock.gap === undefined || rock.vx === 0 || (rock.vx > 0 ? rock.x < FIELD_W + 40 : rock.x > -40)));
+
+		for (const freighter of this.freighters) {
+			freighter.x += freighter.vx * dt;
+			freighter.flash = Math.max(0, freighter.flash - dt);
+		}
+		this.freighters = this.freighters.filter((freighter) => freighter.hp > 0
+			&& (freighter.vx > 0 ? freighter.x < FIELD_W + FREIGHTER.startOff : freighter.x > -FREIGHTER.startOff));
+
+		let striking = false;
+		for (const strike of this.strikes) {
+			striking ||= strike.timer > 0 && strike.timer <= dt;
+			strike.timer -= dt;
+		}
+		if (striking) {
+			this.events.push({ type: 'strike' });
+		}
+		this.strikes = this.strikes.filter((strike) => strike.timer > -STORM.active);
 
 		for (const warning of this.cometWarnings) {
 			warning.timer -= dt;
@@ -1161,7 +1490,7 @@ export class Battle {
 				this.hp = Math.min(100, this.hp + PICKUP_LIFE);
 				break;
 			case 'energy':
-				this.energy = Math.min(100, this.energy + PICKUP_ENERGY);
+				this.gainEnergy(pickup.amount ?? PICKUP_ENERGY);
 				break;
 			case 'core': {
 				this.cores += 1;
@@ -1172,9 +1501,20 @@ export class Battle {
 				}
 				break;
 			}
+			case 'shield':
+				this.addShield(SHIELD_CHARGE);
+				break;
 			default:
 				this.player[pickup.kind] = POWER_UP_SECONDS[pickup.kind];
 		}
+	}
+
+	private gainEnergy(amount: number) {
+		this.energy = Math.min(100, this.energy + amount);
+	}
+
+	private addShield(seconds: number) {
+		this.player.shield = Math.min(SHIELD_CAPACITY, this.player.shield + seconds);
 	}
 
 	// ---------------------------------------------------------------- choques
@@ -1234,6 +1574,22 @@ export class Battle {
 			}
 		}
 
+		for (const strike of this.strikes) {
+			const at = strike.axis === 'x' ? player.x : player.y;
+			if (strike.resolved || strike.timer > 0 || at <= strike.from - PLAYER_RADIUS || at >= strike.to + PLAYER_RADIUS) {
+				continue;
+			}
+			// El bloqueo se mira antes que el parpadeo: cubrirse paga aunque venga de recibir un golpe.
+			if (player.shielding) {
+				strike.resolved = true;
+				this.gainEnergy(STORM.gain);
+				this.events.push({ type: 'stormBlock', x: player.x, y: player.y, amount: STORM.gain });
+			} else if (player.invulnerable <= 0) {
+				strike.resolved = true;
+				this.damagePlayer('storm', DAMAGE.storm);
+			}
+		}
+
 		for (const pickup of this.pickups) {
 			if (near(player, pickup, PICKUP_RADIUS)) {
 				this.collect(pickup);
@@ -1256,9 +1612,12 @@ export class Battle {
 				rock.flash = 0.08;
 				shot.y = -100;
 				if (rock.hp <= 0) {
-					this.score += 30;
-					this.events.push({ type: 'kill', x: rock.x, y: rock.y, family: 'rock', points: 30, big: false });
-					if (this.random() < 0.15) {
+					const inField = rock.gap !== undefined;
+					const points = inField ? FIELD_ROCKS.points : 30;
+					this.score += points;
+					this.events.push({ type: 'kill', x: rock.x, y: rock.y, family: 'rock', points, big: false });
+					// Las de un tramo no sueltan nada: son cientos, y romperlas ya abre camino.
+					if (!inField && this.random() < 0.2) {
 						this.drop('rock', rock.x, rock.y);
 					}
 				} else {
@@ -1266,6 +1625,28 @@ export class Battle {
 				}
 				return;
 			}
+		}
+
+		for (const freighter of this.freighters) {
+			const dx = shot.x - freighter.x;
+			if (freighter.hp <= 0 || Math.abs(dx) > FREIGHTER.halfWidth || Math.abs(shot.y - freighter.y) > FREIGHTER.halfHeight) {
+				continue;
+			}
+			if (Math.abs(dx) <= FREIGHTER.hatch) {
+				freighter.hp -= 1;
+				freighter.flash = 0.08;
+				if (freighter.hp <= 0) {
+					this.breakFreighter(freighter);
+					this.freighters = this.freighters.filter((other) => other !== freighter);
+				} else {
+					this.events.push({ type: 'hit', x: shot.x, y: shot.y });
+				}
+			} else {
+				this.events.push({ type: 'deflect', x: shot.x, y: shot.y });
+			}
+			// El casco frena también a los que atraviesan.
+			shot.y = -100;
+			return;
 		}
 
 		for (const enemy of this.enemies) {
@@ -1376,7 +1757,7 @@ export class Battle {
 		return options[options.length - 1][0];
 	}
 
-	private range([min, max]: [number, number]) {
+	private range([min, max]: readonly [number, number]) {
 		return min + this.random() * (max - min);
 	}
 }

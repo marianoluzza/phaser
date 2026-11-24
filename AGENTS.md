@@ -29,6 +29,7 @@ npm run shots
 npm run art
 npm run art:socavon
 npm run test:socavon
+npm run test:galactica
 npm run sim:astro
 npm run sim:traffic
 npm run sim:galactica
@@ -47,6 +48,8 @@ npm run preview
   los specs de `arte/spritekiln/`.
 - `npm run test:socavon` prueba las reglas de Socavón y que 500 minas generadas
   se puedan completar.
+- `npm run test:galactica` prueba las reglas de combate de Galáctica:
+  movimiento, energía, escudo, ataques, cápsulas y que los tramos tengan salida.
 - `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
   para medir el balance.
 - `npm run sim:traffic` juega cientos de partidas de Semáforos con jugadores
@@ -266,9 +269,11 @@ src/
     │   │   ├── ships.ts
     │   │   ├── families.ts
     │   │   ├── attacks.ts
+    │   │   ├── passages.ts
     │   │   └── zones.ts
     │   ├── state/
     │   │   ├── Battle.ts
+    │   │   ├── Passage.ts
     │   │   ├── Formation.ts
     │   │   ├── paths.ts
     │   │   ├── hangar.ts

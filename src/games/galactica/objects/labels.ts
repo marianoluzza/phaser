@@ -3,6 +3,7 @@ import type { TranslationKey } from '../../../core/i18n/i18n';
 import type { Maneuver, ShotKind } from '../constants/attacks';
 import type { BossMove, Family, Rank } from '../constants/families';
 import type { ShipId } from '../constants/ships';
+import type { PassageId } from '../constants/passages';
 import type { DamageSource } from '../constants/tuning';
 import type { EventKind } from '../constants/zones';
 import type { PickupKind } from '../state/Battle';
@@ -83,6 +84,14 @@ export const EVENT_LABELS: Record<EventKind, { name: TranslationKey; text: Trans
 	comets: { name: 'galactica.event.comets', text: 'galactica.event.comets.text' },
 };
 
+/** `hint` es lo que hay que hacer, en el cartel con que empieza. */
+export const PASSAGE_LABELS: Record<PassageId, { name: TranslationKey; hint: TranslationKey; text: TranslationKey }> = {
+	crossing: { name: 'galactica.passage.crossing', hint: 'galactica.passage.crossing.hint', text: 'galactica.passage.crossing.text' },
+	convoy: { name: 'galactica.passage.convoy', hint: 'galactica.passage.convoy.hint', text: 'galactica.passage.convoy.text' },
+	storm: { name: 'galactica.passage.storm', hint: 'galactica.passage.storm.hint', text: 'galactica.passage.storm.text' },
+	combined: { name: 'galactica.passage.combined', hint: 'galactica.passage.combined.hint', text: 'galactica.passage.combined.text' },
+};
+
 export const BOSS_LABELS: Record<Family, { name: TranslationKey; text: TranslationKey }> = {
 	terran: { name: 'galactica.boss.terran', text: 'galactica.boss.terran.text' },
 	insect: { name: 'galactica.boss.insect', text: 'galactica.boss.insect.text' },
@@ -106,8 +115,12 @@ export const DAMAGE_LABELS: Record<DamageSource, TranslationKey> = {
 	ram: 'galactica.damage.ram',
 	comet: 'galactica.damage.comet',
 	rock: 'galactica.damage.rock',
+	storm: 'galactica.damage.storm',
 	empty: 'galactica.damage.empty',
 };
+
+/** Chispas de un carguero roto: casco y carga. */
+export const FREIGHTER_COLORS = [0xffd860, 0xff8a3a, 0xa4b0cc, 0x5a6482];
 
 /** Color de cada recarga en el HUD y en los carteles, igual al de su cápsula. */
 export const PICKUP_COLORS: Record<PickupKind, string> = {
