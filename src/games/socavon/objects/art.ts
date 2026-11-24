@@ -7,7 +7,14 @@ import { PIXEL } from './geometry';
  */
 export const MINE_ATLAS = 'socavon:mine';
 
-type Clip = { frames: string[]; durations: number[]; loop: boolean; origin: [number, number] };
+type Clip = {
+	frames: string[];
+	durations: number[];
+	loop: boolean;
+	origin: [number, number];
+	/** Por cuadro, en píxeles del sprite desde el pie; `null` donde no está. */
+	sockets?: Record<string, ([number, number] | null)[]>;
+};
 
 export function loadSocavonArt(scene: Phaser.Scene) {
 	if (!scene.textures.exists(MINE_ATLAS)) {
@@ -34,6 +41,14 @@ function getClip(scene: Phaser.Scene, name: string) {
  */
 export function showClip(image: Phaser.GameObjects.Image, name: string, time = 0) {
 	const clip = getClip(image.scene, name);
+	const index = frameAt(clip, time);
+	if (image.frame.name !== clip.frames[index]) image.setFrame(clip.frames[index]);
+	// El origen se mide sobre el cuadro sin recortar: cambia con cada hoja.
+	image.setOrigin(clip.origin[0], clip.origin[1]);
+	return image;
+}
+
+function frameAt(clip: Clip, time: number) {
 	const total = clip.durations.reduce((sum, duration) => sum + duration, 0);
 	let left = clip.loop ? (time * 1000) % total : Math.min(time * 1000, total - 1);
 	let index = 0;
@@ -41,10 +56,22 @@ export function showClip(image: Phaser.GameObjects.Image, name: string, time = 0
 		left -= clip.durations[index];
 		index += 1;
 	}
-	if (image.frame.name !== clip.frames[index]) image.setFrame(clip.frames[index]);
-	// El origen se mide sobre el cuadro sin recortar: cambia con cada hoja.
-	image.setOrigin(clip.origin[0], clip.origin[1]);
-	return image;
+	return index;
+}
+
+/**
+ * Dónde está un socket del spec (la llama del encendedor) en el cuadro que
+ * muestra la imagen, en coordenadas de la escena; `null` si en ese cuadro no
+ * está. Sigue el espejado y la escala de la imagen.
+ */
+export function clipSocket(image: Phaser.GameObjects.Image, name: string, time: number, socket: string) {
+	const clip = getClip(image.scene, name);
+	const point = clip.sockets?.[socket]?.[frameAt(clip, time)];
+	if (!point) return null;
+	return {
+		x: image.x + point[0] * image.scaleX * (image.flipX ? -1 : 1),
+		y: image.y + point[1] * image.scaleY,
+	};
 }
 
 export function addClip(scene: Phaser.Scene, x: number, y: number, name: string, scale = PIXEL) {

@@ -145,6 +145,32 @@ tomadas al implementar, no pedidos del usuario.
     atropellan) siguen la misma regla: lo que no se oye no suena. La campana se sigue oyendo en
     toda la mina, porque es la alarma, y los sonidos del minero no cambian.
   - R19.9 La etapa 2 sólo cambia lo que se percibe: reglas, piloto y balance iguales.
+
+  Etapa 3 («hace commit y empezá la etapa 3», 2026-11-23). Parte de la propuesta que Mariano
+  aceptó («¿Vamos con los tres puntos...?»), con sus frases:
+  - R19.10 «Oscuro en serio. [...] Sin linterna ves solo un halo de una celda alrededor tuyo, las
+    lámparas y los faroles de los serenos»: también en la propia galería se ve en vivo sólo lo
+    iluminado y a la vista: el halo (una celda a cada lado), el haz de la linterna (cinco celdas
+    hacia adelante; en la escalera y colgado, la ventana de la otra galería), las lámparas
+    prendidas (su radio) y el encendedor de cada sereno (una celda). Lo demás es recuerdo o
+    negro, como las otras galerías. Una lámpara prendida se ve desde lejos si nada la tapa.
+  - R19.11 «A tientas vas más lento [...] al 60 % caminando y trepando»: sin la linterna y fuera
+    del radio de una lámpara prendida, caminar y trepar van al 60 %. El encendedor del sereno no
+    alumbra al minero.
+  - R19.12 «Prender la linterna se nota. Un sereno que está en tu galería y mirando para tu lado
+    ve el destello aunque estés lejos, y va a mirar ahí aunque la apagues enseguida»: con la
+    linterna prendida, un sereno de la misma galería que mira hacia el minero, sin muro en el
+    medio y a cualquier distancia, va a investigar adonde está. Si está más cerca que su vista,
+    lo ve como siempre. No cambia a quien ya persigue o está aturdido.
+  - R19.13 «Cada sereno sería un puntito de luz que se mueve en la oscuridad: lo ves venir antes
+    de que te vea»: el encendedor se dibuja como una llamita cuando el sereno no está bajo una
+    lámpara. No cambia lo que el sereno ve: «son del lugar y saben donde están». Prender lámparas
+    sigue igual (las apagadas hace más de 10 s, al pasar).
+    Corrección de Mariano, textual: «se ve biuen el fósforo pero debería sostenerlo con la mano,
+    hay que pedir el sprite o podes subir el brazo y bajar la llama?»: con el encendedor el
+    sereno lleva la mano de adelante en alto con el encendedor en el puño, y la llama se dibuja
+    sobre el puño en cada cuadro.
+  - R19.14 Medir con el piloto cuánto dura cada mina antes y después.
 - R20 Correcciones de la etapa 1. Mensajes de Mariano, textuales:
   > El muro tiene que restringir la vista igual que le restringe al guardia. Las escaleras que
   > duran más de un piso no permiten bajar en los intermedios. A veces cuando volves a un piso, el
@@ -184,7 +210,13 @@ tomadas al implementar, no pedidos del usuario.
 - [x] T13 R19 etapa 1: pisos negros, memoria que se apaga y vista desde la escalera.
 - [x] T13b R20: muros que tapan, escaleras de varios pisos, recuerdo que se limpia, pozos.
 - [x] T14 R19 etapa 2: oído.
-- [ ] T15 R19 etapa 3: oscuridad en el propio piso, a tientas, linterna que se nota, encendedor.
+- [x] T15 R19 etapa 3: oscuridad en el propio piso, a tientas, linterna que se nota, encendedor.
+  - [x] T15a R19.10 qué se ve con luz, con tests.
+  - [x] T15b R19.11 a tientas, con tests.
+  - [x] T15c R19.12 el destello, con tests.
+  - [x] T15d R19.13 encendedor y vista; recorrido de Chrome y capturas.
+  - [x] T15e R19.14 medición con el piloto antes y después.
+  - [x] T15f R19.13 corrección: el encendedor en la mano (clips `_lit` del sereno).
 
 ## Registro de correcciones y evidencia
 
@@ -261,6 +293,28 @@ tomadas al implementar, no pedidos del usuario.
   - la primera onda (30 × 10 px, trazo de 2) casi no se veía en la captura: se agrandó;
   - no hay pasos en la biblioteca de audio: se usa `tick_004` de Interface Sounds, más grave
     (`rate` 0,7). Falta escucharlo.
+- R19 etapa 3 (2026-11-23):
+  - 12 tests (R19.10 a R19.12), 10 vistos fallar contra un esqueleto vacío; los de bajo una
+    lámpara y de espaldas, apagada o tras un muro pasan desde antes y cuidan que no se vaya a
+    tientas ni se vea el destello de más. 101 tests y 500 minas generadas completables;
+  - el R20.4 del recorrido de Chrome dejó de pasar, y era correcto: el sereno se fue a oscuras y
+    el lugar donde estaba ya no se ve, así que el recuerdo lo guarda. El chequeo ahora alumbra
+    ese lugar con la linterna;
+  - recorrido de Chrome: con las lámparas de la galería apagadas y sin linterna se ve el halo y al
+    sereno con su llamita, y entre los dos no; con la linterna se ve hacia adelante;
+  - R19.14, el piloto en 303 minas (3 a mano y 300 generadas): con linterna, igual que antes
+    (media 97,5 s, máximo 180,9 s); sin linterna, de 97,5 a 136,9 s de media y de 180,9 a
+    258,5 s de máximo. Ninguna quedó sin completar. El piloto juega con serenos y vagonetas
+    quietos: el destello y la dificultad no los mide.
 - Pendiente: balance jugado por una persona (el piloto no mide dificultad), sonido escuchado por
   una persona, controles táctiles, commit y deploy (no pedidos).
-
+- T15f, el encendedor en la mano: el spec del sereno suma el encendedor (sigue al puño pero
+  queda derecho), el socket `flame` y ocho clips `_lit` (quieto, caminando, corriendo y en la
+  escalera, con y sin llave) con la mano de adelante en alto. El empaquetador guarda los sockets
+  por cuadro y la llama se dibuja ahí (`clipSocket` en `objects/art.ts`). Evidencia:
+  - spritekiln sin errores de QA; las advertencias del bigote tapado en la escalera ya estaban
+    en `climb`;
+  - recorrido de Chrome: a oscuras el sereno muestra un cuadro `_lit` y la llama queda adelante
+    y a la altura del pecho (entre 35 y 60 px sobre el pie); bajo una lámpara vuelve al clip
+    común y sin llama. Captura 22 revisada: la llama sale del puño;
+  - `tsc`, `npm run build` y `npm run test:socavon` en verde.

@@ -22,6 +22,10 @@ export function updateGuard(mine: Mine, guard: Guard, dt: number) {
 		}
 	} else {
 		guard.noticed = Math.max(0, guard.noticed - dt);
+		// De lejos no lo distingue, pero el destello lo manda a mirar.
+		if ((guard.mode === 'patrol' || guard.mode === 'search') && seesFlash(mine, guard)) {
+			investigateAt(mine, guard, { x: Math.round(mine.player.x), y: Math.round(mine.player.y) });
+		}
 	}
 
 	if (guard.mode === 'chase') chase(mine, guard, seen, dt);
@@ -40,13 +44,29 @@ export function investigateAt(mine: Mine, guard: Guard, node: Node) {
 	setGoal(mine, guard, node);
 }
 
-/** Hasta dónde alcanzaría a ver al minero según la luz que tiene encima. */
-export function sightRange(mine: Mine) {
+/** Si el minero tiene luz encima: su linterna o una lámpara prendida cerca. */
+export function playerLit(mine: Pick<Mine, 'player' | 'lamps'>) {
 	const { player } = mine;
-	const lit = player.headlamp || mine.lamps.some((lamp) => (
+	return player.headlamp || mine.lamps.some((lamp) => (
 		lamp.lit && Math.abs(lamp.y - player.y) < REACH.sameFloor && Math.abs(lamp.x - player.x) <= LAMP_RADIUS
 	));
-	return lit ? GUARD.sightLit : GUARD.sightDark;
+}
+
+/** Hasta dónde alcanzaría a ver al minero según la luz que tiene encima. */
+export function sightRange(mine: Mine) {
+	return playerLit(mine) ? GUARD.sightLit : GUARD.sightDark;
+}
+
+/**
+ * La linterna se ve de cualquier punta de la galería: alcanza con que el
+ * sereno mire para ese lado y no haya un muro en el medio.
+ */
+export function seesFlash(mine: Mine, guard: Guard) {
+	const { player } = mine;
+	if (!player.headlamp || player.hidden || player.invincible > 0 || guard.ignoreFor > 0) return false;
+	if (!Number.isInteger(guard.y) || Math.abs(player.y - guard.y) > REACH.sameFloor) return false;
+	if ((player.x - guard.x) * guard.facing <= 0) return false;
+	return mine.clearBetween(guard.x, player.x, guard.y);
 }
 
 /** El único que puede con quien va en la vagoneta. */

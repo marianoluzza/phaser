@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { Mine } from '../state/Mine';
-import { centerX, feetY } from './geometry';
+import { centerX, feetY, LIGHTER_HAND, LIGHTER_HEIGHT } from './geometry';
 
 const AMBIENT = 0.36;
 /** Cortes de luz: en escalones, como la sombra toon de los sprites. */
@@ -22,7 +22,8 @@ export function collectLights(mine: Mine) {
 		? { x: centerX(player.x) + player.facing * 44, y: feetY(player.y) - 56, radius: 220, power: 0.95 }
 		: { x: centerX(player.x), y: feetY(player.y) - 48, radius: 90, power: 0.3 });
 	for (const guard of mine.guards) {
-		lights.push({ x: centerX(guard.x) + guard.facing * 30, y: feetY(guard.y) - 56, radius: 110, power: 0.6 });
+		// El encendedor alumbra poco: al sereno y la celda de al lado.
+		lights.push({ x: centerX(guard.x) + guard.facing * LIGHTER_HAND, y: feetY(guard.y) - LIGHTER_HEIGHT, radius: 80, power: 0.55 });
 	}
 	return lights;
 }

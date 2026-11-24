@@ -31,6 +31,14 @@ personajes, las minas y las reglas de sigilo son de Socavón.
   tirado al lado se levanta antes y, cargado, Espacio suelta la bolsa.
 - **Luz.** Con linterna o bajo una lámpara, un sereno ve a 8 celdas; a oscuras, a 2,2. Su haz
   dibuja ese alcance real. Al pasar vuelven a prender las lámparas apagadas hace más de 10 segundos.
+- **A tientas.** Sin linterna y lejos de una lámpara prendida, se camina y se trepa al 60 %.
+  Colgado de las argollas, no: ningún pozo deja de cruzarse.
+- **Destello.** La linterna se ve de punta a punta de la galería: un sereno que mira para tu lado,
+  sin muro en el medio, va a mirar adonde estás, aunque la apagues enseguida. Si está más cerca
+  que su vista, directamente te ve.
+- **Encendedor.** Lejos de una lámpara prendida, cada sereno lo lleva en alto en la mano de
+  adelante: alumbra una celda a su alrededor y, a oscuras, se ve la llamita. A él no le cambia
+  nada; conoce la mina.
 - **Ruido.** El pico, la carretilla y las caídas se oyen en la galería y, atenuados, en las vecinas.
 - **Manijas.** Cruzan pozos con las manos libres. Los serenos no pueden seguirte. Gastan la misma
   barra que el agarre: agotada, se cae a la galería de abajo o, si no hay, al fondo y se pierde una
@@ -56,10 +64,13 @@ personajes, las minas y las reglas de sigilo son de Socavón.
   4 segundos, mientras parpadean, la vagoneta no los vuelve a tirar.
 - **Entrada.** La patrulla no pasa por la galería de arriba: es el respiro al llegar y al revivir.
   Un ruido o una persecución sí pueden llevar a un sereno hasta ahí.
-- **Lo que se ve.** Sólo la galería en la que estás, hasta la roca o un muro sin romper, como el
-  sereno. Al empezar a trepar o a caer, y colgado de las argollas, se ve también la galería de
-  abajo o de arriba, dos celdas a cada lado; en el medio de la escalera, las dos galerías enteras.
-  Se puede dar la vuelta a mitad de escalera: asomarse es gratis.
+- **Lo que se ve.** Lo que está a la vista y además iluminado. A la vista está la galería en la
+  que estás, hasta la roca o un muro sin romper, como para el sereno. Al empezar a trepar o a
+  caer, y colgado de las argollas, también la de abajo o la de arriba, dos celdas a cada lado; en
+  el medio de la escalera, las dos enteras. Iluminado está el halo del minero (una celda a cada
+  lado), el haz de la linterna (cinco celdas hacia adelante y, en la escalera o colgado, la otra
+  punta), las lámparas prendidas y los encendedores. Una lámpara prendida se ve desde lejos. Se
+  puede dar la vuelta a mitad de escalera: asomarse es gratis.
 - **Lo que se recuerda.** Lo que se dejó de ver queda fijo, como se lo vio, en gris azulado, y se
   apaga a negro en 12 segundos. Un sereno que se fue sigue en el recuerdo hasta que se vuelve a
   mirar ahí; una lámpara que se prende no cambia en el recuerdo. Lo nunca visto es negro.
@@ -88,7 +99,8 @@ flowchart LR
 `Mine.step(dt, input)` avanza el estado y devuelve eventos. La escena los convierte en sonidos y
 efectos.
 
-Qué se ve en vivo es una regla sin Phaser (`state/vision.ts`, con tests). La vista guarda cuándo
+Qué se ve en vivo es una regla sin Phaser (`state/vision.ts`, con tests): lo que está a la vista
+(`liveSpans`) cortado por lo iluminado (`lightSpans`). La vista guarda cuándo
 se vio por última vez cada tile (`objects/sight.ts`) y con eso tiñe: en vivo, la luz; si no, el
 recuerdo o negro. Serenos y vagonetas tienen dos sprites, el real, que sólo se muestra en vivo, y
 una copia fija del último cuadro visto, para que el recuerdo no se mueva aunque ellos sí. El tinte
@@ -168,6 +180,9 @@ flowchart LR
   y el script sólo tolera ese error, en ese asset.
 - Una animación nueva es un bloque en su spec. Después de `npm run art:socavon` se usa como
   `asset/animacion` con `showClip`.
+- Un efecto que sale de un sprite va en un socket del spec. El atlas guarda su punto por cuadro y
+  `clipSocket` lo da en coordenadas de la escena, espejado. Así la llama del encendedor sale del
+  puño del sereno en los clips `_lit`.
 - Colgado sobre un riel entran justo el minero horizontal y la vagoneta: 20 px y 28 de los 48 del
   túnel. Un test lo mide contra el atlas (`GRIP_LIFT` y `CART_LIFT` en `objects/geometry.ts`).
 - La luz es un tinte por pieza (`objects/lighting.ts`), no una máscara.

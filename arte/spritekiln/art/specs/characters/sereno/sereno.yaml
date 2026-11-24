@@ -39,12 +39,15 @@ materials:
 
 channels:
   nokey: 0
+  lighter: 0
 
 bones:
   torso_rot: {parent: root, pos: "[0, 0.70 + bob, 0]", rot: "[lean, twist, roll]"}
   headbase: {parent: pelvis, pos: [0, 0.56, 0.12], inherit_rot: false, inherit_scale: false, rot: "[lean*0.5, twist, roll]"}
   head: {parent: headbase, rot: "[head_pitch, head_yaw, 0]", scale: 1.85}
   shoulder_L: {parent: pelvis, pos: [0.30, 0.44, 0]}
+  # El encendedor sigue al puño pero queda derecho, como se lo sostiene.
+  fist_up: {parent: wrist_L, inherit_rot: false}
 
 ik:
   arm_L: {lengths: [0.27, 0.27]}
@@ -141,6 +144,16 @@ parts:
       - torus: {c: [0.38, -0.02, -0.14], R: 0.085, r: 0.035, rot: [0, 0, 1.5708]}
       - box: {c: [0.38, -0.22, -0.17], half: [0.04, 0.12, 0.035]}
       - box: {c: [0.38, -0.28, -0.10], half: [0.04, 0.03, 0.06]}
+  lighter:
+    material: grey
+    space: fist_up
+    when: "lighter > 0.5"
+    priority: 3
+    prims:
+      - box: {c: [0, 0.09, 0.03], half: [0.035, 0.06, 0.03], round: 0.01}
+
+sockets:
+  flame: {bone: fist_up, offset: [0, 0.22, 0.03], when: "lighter > 0.5"}
 
 animations:
   idle:
@@ -194,3 +207,37 @@ animations:
     frames: 4
     ms: 180
     channels: {<<: *stunned, nokey: 1}
+  # A oscuras lleva el encendedor en alto con la mano de adelante; el juego dibuja
+  # la llama en el socket `flame`.
+  idle_lit:
+    frames: 4
+    ms: 260
+    channels: &idle_lit {<<: *idle, lighter: 1, hand_L: [0.26, 0.36, 0.38]}
+  idle_lit_empty:
+    frames: 4
+    ms: 260
+    channels: {<<: *idle_lit, nokey: 1}
+  walk_lit:
+    frames: 6
+    ms: 140
+    channels: &walk_lit {<<: *walk, lighter: 1, hand_L: [0.26, 0.36, 0.40]}
+  walk_lit_empty:
+    frames: 6
+    ms: 140
+    channels: {<<: *walk_lit, nokey: 1}
+  run_lit:
+    frames: 6
+    ms: 80
+    channels: &run_lit {<<: *run, lighter: 1, hand_L: [0.26, 0.40, 0.46]}
+  run_lit_empty:
+    frames: 6
+    ms: 80
+    channels: {<<: *run_lit, nokey: 1}
+  climb_lit:
+    frames: 4
+    ms: 160
+    channels: &climb_lit {<<: *climb, lighter: 1, hand_L: [0.24, 0.42, 0.40]}
+  climb_lit_empty:
+    frames: 4
+    ms: 160
+    channels: {<<: *climb_lit, nokey: 1}

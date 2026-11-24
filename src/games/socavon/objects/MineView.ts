@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { CART, GRIP, GUARD, PICK_HITS } from '../constants/tuning';
+import { CART, GRIP, GUARD, LAMP_RADIUS, PICK_HITS } from '../constants/tuning';
 import { sightRange } from '../state/guardBrain';
 import { railRange } from '../state/level';
 import type { Guard, Item, Mine, MineEvent } from '../state/Mine';
 import { heard, type Heard } from '../state/hearing';
-import { liveSpans } from '../state/vision';
-import { addClip, showClip } from './art';
+import { seenSpans } from '../state/vision';
+import { addClip, clipSocket, showClip } from './art';
 import { CART_LIFT, centerX, feetY, GALLERY, GRIP_LIFT, mineSize, TILE } from './geometry';
 import { brightnessAt, collectLights, tintFor } from './lighting';
 import { memoryTint, multiply, Sight } from './sight';
@@ -27,6 +27,8 @@ type GuardSprites = Remembered & {
 	body: Phaser.GameObjects.Image;
 	mark: Phaser.GameObjects.Text;
 	key: Phaser.GameObjects.Image;
+	/** Dónde tiene la llama en este cuadro, si lleva el encendedor prendido. */
+	flame: { x: number; y: number } | null;
 };
 type Shaft = { x: number; bottom: number };
 
@@ -70,6 +72,7 @@ export class MineView {
 	private readonly player: Phaser.GameObjects.Image;
 	private readonly arms: Phaser.GameObjects.Graphics;
 	private readonly effects: Phaser.GameObjects.Container;
+	private readonly flames: Phaser.GameObjects.Graphics;
 	private time = 0;
 	/** Avanza sólo si se mueve: quieto en la escalera, el sprite se queda quieto. */
 	private stride = 0;
@@ -107,7 +110,8 @@ export class MineView {
 
 		this.arms = scene.add.graphics();
 		this.effects = scene.add.container(0, 0);
-		this.root.add([this.arms, this.effects]);
+		this.flames = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
+		this.root.add([this.arms, this.flames, this.effects]);
 	}
 
 	private put(x: number, y: number, clip: string) {
@@ -245,7 +249,7 @@ export class MineView {
 			strokeThickness: 5,
 		}).setOrigin(0.5, 1);
 		this.root.add(mark);
-		return { body, real: body, ghost, wasLive: false, remembered: false, key, mark };
+		return { body, real: body, ghost, wasLive: false, remembered: false, key, mark, flame: null };
 	}
 
 	/** Devuelve los pasos que sonaron en este cuadro, para que la escena los haga oír. */
@@ -255,7 +259,7 @@ export class MineView {
 		const alarm = mine.alarm > 0 ? (Math.sin(this.time * 9) + 1) / 2 : 0;
 		const lights = collectLights(mine);
 		const { sight } = this;
-		sight.update(liveSpans(mine), this.time);
+		sight.update(seenSpans(mine), this.time);
 		// En vivo, la luz; si no, el recuerdo que se apaga, o negro si nunca se vio.
 		const shade = (x: number, y: number, floor?: number) => {
 			const age = sight.ageAt(x, y);
@@ -279,6 +283,7 @@ export class MineView {
 			if (!watching[index]) sprites.key.setVisible(false);
 			this.remember(sprites, watching[index]);
 		});
+		this.drawLighters(watching);
 		this.updatePlayer(dt);
 		this.drawArms();
 
@@ -429,6 +434,28 @@ export class MineView {
 		}
 	}
 
+	/** A oscuras el sereno lleva el encendedor; bajo una lámpara prendida, no. */
+	private carriesLighter(guard: Guard) {
+		if (guard.mode === 'stunned') return false;
+		return !this.mine.lamps.some((lamp) => (
+			lamp.lit && lamp.y === Math.round(guard.y) && Math.abs(lamp.x - guard.x) <= LAMP_RADIUS
+		));
+	}
+
+	/** La llamita, donde el sprite tiene la mano en alto (el socket `flame`). */
+	private drawLighters(watching: boolean[]) {
+		const { flames } = this;
+		flames.clear();
+		this.guards.forEach((sprites, index) => {
+			if (!watching[index] || !sprites.flame) return;
+			const flicker = Math.sin(this.time * 17 + index * 3) * 1.5;
+			const { x, y } = sprites.flame;
+			flames.fillStyle(0xf39c12, 0.12).fillCircle(x, y, 26 + flicker);
+			flames.fillStyle(0xf39c12, 0.22).fillCircle(x, y, 11 + flicker / 2);
+			flames.fillStyle(0xffe08a, 0.9).fillEllipse(x, y - 2, 4, 8 + flicker);
+		});
+	}
+
 	private updateGuard(guard: Guard, sprites: GuardSprites) {
 		let clip = 'idle';
 		if (guard.mode === 'stunned') clip = 'stunned';
@@ -437,11 +464,15 @@ export class MineView {
 
 		const x = centerX(guard.x);
 		const y = feetY(guard.y);
-		showClip(sprites.body, `sereno/${clip}${guard.hasKey ? '' : '_empty'}`, this.time + guard.home.x)
+		const lit = this.carriesLighter(guard);
+		const name = `sereno/${clip}${lit ? '_lit' : ''}${guard.hasKey ? '' : '_empty'}`;
+		const time = this.time + guard.home.x;
+		showClip(sprites.body, name, time)
 			.setPosition(x, y)
 			// Parpadea mientras la vagoneta no lo puede volver a tirar.
 			.setAlpha(guard.shakenFor > 0 && Math.floor(this.time * 10) % 2 === 0 ? 0.4 : 1)
 			.setFlipX(guard.facing < 0);
+		sprites.flame = lit ? clipSocket(sprites.body, name, time, 'flame') : null;
 
 		let mark = '';
 		if (guard.mode === 'chase') mark = '!';

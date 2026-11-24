@@ -19,6 +19,8 @@ export const PLAYER = {
 	landStun: 0.35,
 	deathTime: 1.4,
 	invincible: 2,
+	/** A tientas, sin linterna ni lámpara cerca, camina y trepa a esta fracción. */
+	groping: 0.6,
 };
 
 export const REACH = {
@@ -77,6 +79,12 @@ export const VISION = {
 	middle: 0.3,
 	/** Segundos hasta que el recuerdo de una galería queda negro. */
 	memory: 12,
+	/** Celdas a cada lado que alumbra el propio minero, sin linterna. */
+	halo: 1,
+	/** Celdas hacia adelante que alumbra la linterna. */
+	headlamp: 5,
+	/** Celdas a cada lado que alumbra el encendedor del sereno. */
+	lighter: 1,
 };
 
 /**

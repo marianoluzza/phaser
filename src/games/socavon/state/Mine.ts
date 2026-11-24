@@ -1,7 +1,7 @@
 import {
 	ALARM_TIME, BARROW_CAPACITY, BELL_RING, CART, GRIP, GUARD, NOISE, PICK_COOLDOWN, PICK_HITS, PLAYER, REACH, SCORE,
 } from '../constants/tuning';
-import { canSee, investigateAt, isWitness, updateGuard } from './guardBrain';
+import { canSee, investigateAt, isWitness, playerLit, updateGuard } from './guardBrain';
 import { footing, railRange, type Level, type Node } from './level';
 import { hashText, seededRandom } from './rng';
 import type { Run } from './run';
@@ -604,7 +604,7 @@ export class Mine {
 	private climb(dt: number, direction: number) {
 		const { player } = this;
 		if (direction === 0) return;
-		const speed = player.hands ? PLAYER.climbLoaded : PLAYER.climb;
+		const speed = (player.hands ? PLAYER.climbLoaded : PLAYER.climb) * this.groping();
 		const top = player.ladderTop;
 		player.y = Math.min(top + 1, Math.max(top, player.y + Math.sign(direction) * speed * dt));
 		player.climbTo = direction > 0 ? top + 1 : top;
@@ -613,6 +613,11 @@ export class Mine {
 			player.state = 'walk';
 			player.climbTo = null;
 		}
+	}
+
+	/** A oscuras se va a tientas, más lento. */
+	private groping() {
+		return playerLit(this) ? 1 : PLAYER.groping;
 	}
 
 	private tryHide() {
@@ -638,6 +643,8 @@ export class Mine {
 		else if (player.hands === 'bag') speed = PLAYER.withBag;
 		else if (player.hands === 'pick') speed = PLAYER.withPick;
 		else if (player.hands === 'barrow') speed = PLAYER.withBarrow;
+		// Colgado no: ningún pozo deja de cruzarse con media barra.
+		if (player.state !== 'hang') speed *= this.groping();
 
 		let x = player.x + direction * speed * dt;
 		const ahead = Math.round(x + direction * PLAYER.radius);

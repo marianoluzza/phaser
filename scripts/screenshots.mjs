@@ -305,6 +305,8 @@ const FLOWS = {
 		await put(7, 1);
 		await page.evaluate(() => {
 			const { mine } = window.arcade.scene.getScene('socavon:game');
+			// R19.10: el lugar donde estaba tiene que verse, con la linterna hacia ahí.
+			Object.assign(mine.player, { facing: -1, headlamp: true });
 			Object.assign(mine.guards[0], { x: 3, y: 0.6, mode: 'patrol', moving: false, waitFor: 999, route: [], goal: null });
 		});
 		await page.waitForTimeout(250);
@@ -351,6 +353,51 @@ const FLOWS = {
 		await page.waitForTimeout(700);
 		const still = await hearing();
 		if (still.echoes !== 0 || still.steps !== stopped.steps) fail('el sereno quieto se oye', { stopped, still });
+
+		// R19.10 y R19.13: con las lámparas de la galería apagadas se ve el halo y el encendedor del sereno.
+		await put(5, 1);
+		const lamps = (lit) => page.evaluate((on) => {
+			const { mine } = window.arcade.scene.getScene('socavon:game');
+			for (const lamp of mine.lamps) if (lamp.y === 1) lamp.lit = on;
+		}, lit);
+		const headlamp = (on) => page.evaluate((value) => {
+			Object.assign(window.arcade.scene.getScene('socavon:game').mine.player, { headlamp: value, facing: 1 });
+		}, on);
+		const ageOf = (x) => page.evaluate((cx) => window.arcade.scene.getScene('socavon:game').view.sight.ageAt(cx * 48 + 24, 4 * 48 + 24), x);
+		await lamps(false);
+		await headlamp(false);
+		await walker({ x: 9, y: 1, moving: false, facing: -1 });
+		await page.waitForTimeout(250);
+		const lighterOf = () => page.evaluate(() => {
+			const { view } = window.arcade.scene.getScene('socavon:game');
+			const { body, flame } = view.guards[0];
+			return {
+				guard: body.visible,
+				frame: body.frame.name,
+				drawn: view.flames.commandBuffer.length > 0,
+				// La llama, relativa al pie del sereno: adelante y a la altura del pecho.
+				flame: flame && { dx: Math.round(flame.x - body.x), dy: Math.round(flame.y - body.y) },
+			};
+		});
+		const lighterShown = await lighterOf();
+		const inHand = lighterShown.flame && lighterShown.flame.dx < -10 && lighterShown.flame.dy < -35 && lighterShown.flame.dy > -60;
+		if (!lighterShown.guard || !lighterShown.drawn || !lighterShown.frame.includes('_lit') || !inHand) {
+			fail('a oscuras no se ve al sereno con el encendedor en la mano', lighterShown);
+		}
+		const halo = await ageOf(6);
+		const gap = await ageOf(7);
+		if (halo !== 0 || gap === 0) fail('sin linterna se ve más que el halo y el encendedor', { halo, gap });
+		await arcade.shot('socavon-a-oscuras');
+		await headlamp(true);
+		await page.waitForTimeout(250);
+		const beam = await ageOf(7);
+		if (beam !== 0) fail('la linterna no alumbra hacia adelante', beam);
+		await arcade.shot('socavon-linterna');
+		await lamps(true);
+		await page.waitForTimeout(250);
+		const underLamp = await lighterOf();
+		if (underLamp.frame.includes('_lit') || underLamp.flame) fail('bajo la lámpara el sereno sigue con el encendedor', underLamp);
+		await walker({ x: 3, y: 0, moving: false });
 
 		// R16: colgarse, que pase la vagoneta, caerle adentro y bajarse, con el teclado.
 		await put(13, 2);

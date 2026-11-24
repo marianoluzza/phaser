@@ -6,7 +6,8 @@ Lo llama `build-socavon-art.mjs` con el Python del venv de spritekiln, que ya tr
 
 Recorta cada cuadro y repite su borde un píxel, para que los tiles no muestren
 costuras con el zoom de la cámara. En `meta.clips` deja, por animación, sus
-cuadros, duraciones y origen (el pie del sprite).
+cuadros, duraciones, origen (el pie del sprite) y sockets: por cuadro, `[x, y]` en píxeles
+del sprite desde el pie, o `null` donde el socket no está.
 """
 
 import json
@@ -56,6 +57,12 @@ def collect(specs, assets):
                 'loop': clip['loop'],
                 'origin': [round(pivot['x'] / size, 5), round(pivot['y'] / size, 5)],
             }
+            sockets = {
+                socket: [point and point[:2] for point in points]
+                for socket, points in side.get('sockets', {}).items()
+            }
+            if sockets:
+                clips[f'{name}/{anim}']['sockets'] = sockets
     return sprites, clips
 
 

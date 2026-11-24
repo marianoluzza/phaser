@@ -26,3 +26,11 @@ export function feetY(y: number) {
 export function mineSize(width: number, height: number) {
 	return { width: width * TILE, height: height * GALLERY + TILE };
 }
+
+/**
+ * Dónde alumbra el encendedor del sereno, para la luz, que no lee el atlas: el
+ * promedio del socket `flame` de sus clips `_lit` (la llama se dibuja en el
+ * socket exacto de cada cuadro).
+ */
+export const LIGHTER_HAND = 20;
+export const LIGHTER_HEIGHT = 46;

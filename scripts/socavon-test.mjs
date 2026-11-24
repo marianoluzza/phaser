@@ -408,6 +408,127 @@ try {
 		});
 	}
 
+	{
+		const { seenSpans } = await load('state/vision');
+		const { VISION, PLAYER } = await load('constants/tuning');
+		const seen = (game) => seenSpans(game).map(({ y, from, to }) => `${y}:${from}-${to}`).sort().join(' ');
+		const dark = (...rows) => {
+			const game = mine(...rows);
+			game.player.headlamp = false;
+			return game;
+		};
+		const reach = VISION.headlamp;
+
+		await test('R19.10 sin linterna, en la propia galería se ve sólo el halo', () => {
+			assert.equal(seen(dark('#E..........#')), '0:0-2');
+		});
+
+		await test('R19.10 la linterna alumbra hacia adelante', () => {
+			const game = mine('#E..........#');
+			assert.equal(seen(game), `0:0-${1 + reach}`);
+			Object.assign(game.player, { x: 10, facing: -1 });
+			assert.equal(seen(game), `0:${10 - reach}-11`);
+		});
+
+		await test('R19.10 una lámpara prendida se ve desde lejos; apagada, no', () => {
+			const game = dark('#E......l..#');
+			assert.equal(seen(game), '0:0-2 0:6-10');
+			game.lamps[0].lit = false;
+			assert.equal(seen(game), '0:0-2');
+		});
+
+		await test('R19.10 al sereno se lo ve por su encendedor', () => {
+			const game = dark('#E.....G...#');
+			game.guards[0].x = 7;
+			assert.equal(seen(game), '0:0-2 0:6-8');
+		});
+
+		await test('R19.10 un muro tapa la luz de más allá', () => {
+			assert.equal(seen(dark('#E..%...l..#')), '0:0-2');
+		});
+
+		await test('R19.10 en la escalera, la linterna alumbra la otra punta; sin ella, el halo', () => {
+			const start = (headlamp) => {
+				const game = mine('#E..H.....#', '#.........#');
+				game.player.headlamp = headlamp;
+				walkTo(game, 4);
+				for (let i = 0; i < 60 && game.player.y < 0.05; i += 1) game.step(STEP, { ...STILL, y: 1 });
+				assert.equal(game.player.state, 'climb');
+				return game;
+			};
+			const window = `${4 - VISION.window}-${4 + VISION.window}`;
+			assert.equal(seen(start(true)), `0:${window} 1:${window}`);
+			assert.equal(seen(start(false)), '0:3-5 1:3-5');
+		});
+
+		const walked = (game, seconds) => {
+			const from = game.player.x;
+			play(game, seconds, { x: 1 });
+			return game.player.x - from;
+		};
+
+		await test('R19.11 a tientas se camina al 60 %', () => {
+			const lit = walked(mine('#E............................#'), 1);
+			const groping = walked(dark('#E............................#'), 1);
+			assert.ok(Math.abs(groping / lit - PLAYER.groping) < 0.02, `${groping} contra ${lit}`);
+		});
+
+		await test('R19.11 bajo una lámpara no se va a tientas', () => {
+			const lit = walked(mine('#E.l..........#'), 0.4);
+			const lamp = walked(dark('#E.l..........#'), 0.4);
+			assert.ok(Math.abs(lamp - lit) < 0.01, `${lamp} contra ${lit}`);
+		});
+
+		await test('R19.11 a tientas se trepa al 60 %', () => {
+			const climbed = (game) => {
+				walkTo(game, 4);
+				play(game, 0.5, { y: 1 });
+				return game.player.y;
+			};
+			const lit = climbed(mine('#E..H.....#', '#.........#'));
+			const groping = climbed(dark('#E..H.....#', '#.........#'));
+			assert.ok(Math.abs(groping / lit - PLAYER.groping) < 0.03, `${groping} contra ${lit}`);
+		});
+
+		/** Un sereno lejos, en `x`, mirando para el lado de `facing`. */
+		const flash = (rows, x, facing) => {
+			const game = mine(...rows);
+			const guard = game.guards[0];
+			Object.assign(guard, { x, facing, waitFor: 99, route: [], goal: null, home: { x, y: 0 } });
+			return game;
+		};
+		const far = ['#E..................G..#'];
+
+		await test('R19.12 el sereno que mira para tu lado ve el destello de lejos', () => {
+			const game = flash(far, 20, -1);
+			game.step(STEP, STILL);
+			assert.equal(game.guards[0].mode, 'investigate');
+			assert.ok(game.guards[0].goal && Math.abs(game.guards[0].goal.x - 1) <= 1, `va a ${JSON.stringify(game.guards[0].goal)}`);
+		});
+
+		await test('R19.12 de espaldas, apagada o tras un muro, no', () => {
+			const away = flash(far, 20, 1);
+			away.step(STEP, STILL);
+			assert.equal(away.guards[0].mode, 'patrol', 'de espaldas');
+			const off = flash(far, 20, -1);
+			off.player.headlamp = false;
+			off.step(STEP, STILL);
+			assert.equal(off.guards[0].mode, 'patrol', 'apagada');
+			const wall = flash(['#E....%............G..#'], 19, -1);
+			wall.step(STEP, STILL);
+			assert.equal(wall.guards[0].mode, 'patrol', 'tras un muro');
+		});
+
+		await test('R19.12 prenderla un instante alcanza', () => {
+			const game = flash(far, 20, -1);
+			game.player.headlamp = false;
+			game.step(STEP, { ...STILL, headlamp: true });
+			game.step(STEP, { ...STILL, headlamp: true });
+			assert.equal(game.player.headlamp, false);
+			assert.equal(game.guards[0].mode, 'investigate');
+		});
+	}
+
 	await test('R20.2 en una escalera de varios pisos se baja en el del medio', () => {
 		const game = mine('#E..H.....#', '#...H.....#', '#.........#');
 		walkTo(game, 4);
