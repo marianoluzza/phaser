@@ -29,27 +29,29 @@ Claves de escenas:
 
 ## Controles
 
+Teclado y mando siguen el esquema común del arcade (`core/input/controls.ts`, ver
+`docs/tareas/mando.md`); el mando se prueba con `npm run test:mando -- tetris`.
+
 ### Partida
 
-| Entrada | Acción |
-| --- | --- |
-| Flecha izquierda | Mover una celda a la izquierda |
-| Flecha derecha | Mover una celda a la derecha |
-| Flecha arriba | Rotar 90 grados |
-| Flecha abajo | Caída suave |
-| Espacio | Caída rápida y bloqueo inmediato |
-| P | Pausar o reanudar la partida |
-| Escape | Volver al título de Tetris |
+| Teclado | Mando | Acción |
+| --- | --- | --- |
+| ← → o A D | Cruceta o stick | Mover una celda; mantenido, repite |
+| ↑ o W | Cruceta arriba o B | Rotar 90 grados |
+| ↓ o S | Cruceta abajo | Caída suave |
+| Espacio | A | Caída rápida y bloqueo inmediato |
+| P | Start | Pausar o reanudar la partida |
+| Escape | Select | Volver al título de Tetris |
 
 ### Pantallas
 
-| Pantalla | Entrada | Acción |
-| --- | --- | --- |
-| Título | Enter | Comenzar partida |
-| Título | Escape | Volver al launcher |
-| Game Over | R | Jugar nuevamente |
-| Game Over | M | Volver al título |
-| Game Over | Escape | Volver al launcher |
+| Pantalla | Teclado | Mando | Acción |
+| --- | --- | --- | --- |
+| Título | Enter | A o Start | Comenzar partida |
+| Título | Escape | B o Select | Volver al launcher |
+| Game Over | Enter o R | A o Start | Jugar nuevamente |
+| Game Over | M | Y | Volver al título |
+| Game Over | Escape | B o Select | Volver al launcher |
 
 Todas las acciones principales también tienen botones interactivos para mouse.
 

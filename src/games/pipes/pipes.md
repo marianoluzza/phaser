@@ -20,14 +20,21 @@ recorrido por delante del caudal hasta llegar a la meta del nivel.
 
 ## Controles
 
-| Acción | Mouse | Teclado |
-| --- | --- | --- |
-| Mover el cursor | Mover el puntero sobre la grilla | `←` `↑` `→` `↓` |
-| Colocar la pieza actual | Click en una celda | `Enter` o `Space` |
-| Largar o acelerar el agua | — | `F` |
-| Reiniciar el nivel | Botón `R REINICIAR NIVEL` | `R` |
-| Volver al menú del juego | Botón `ESC MENÚ` | `Esc` |
-| Abrir la configuración | Botón `C CONFIGURACIÓN` del título | `C` |
+| Acción | Mouse | Teclado | Mando |
+| --- | --- | --- | --- |
+| Mover el cursor | Mover el puntero sobre la grilla | `←` `↑` `→` `↓` o WASD | Cruceta o stick |
+| Colocar la pieza actual | Click en una celda | `Enter` o `Space` | A |
+| Largar o acelerar el agua | — | `F` | B |
+| Reiniciar el nivel | Botón `R / Y REINICIAR` | `R` | Y |
+| Volver al menú del juego | Botón `ESC / SELECT MENÚ` | `Esc` | Select |
+| Abrir la configuración | Botón `C / Y CONFIGURACIÓN` del título | `C` | Y |
+
+En el título, Enter o A juega y Esc o B vuelve al arcade. Al terminar el nivel,
+Enter o A sigue (o empieza de nuevo si se derramó, y ahí también vale `R`), M o
+Y va al título y Esc o B al arcade. En la configuración, las flechas o el mando
+desplazan la lista y Esc o B vuelve; los valores se cambian con el mouse.
+Es el esquema común del arcade (`core/input/controls.ts`); el mando se prueba
+con `npm run test:mando -- pipes` y el teclado con `npm run shots -- pipes`.
 
 ## Reglas
 

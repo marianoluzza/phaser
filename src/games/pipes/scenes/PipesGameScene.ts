@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { BOARD_COLUMNS, BOARD_ROWS, PipeBoard } from '../objects/PipeBoard';
 import { PipeQueue } from '../objects/PipeQueue';
@@ -64,11 +65,11 @@ export class PipesGameScene extends Phaser.Scene {
 	private timerValue!: Phaser.GameObjects.Text;
 	private timerBar!: Phaser.GameObjects.Rectangle;
 
-	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private fastForwardKey!: Phaser.Input.Keyboard.Key;
-	private restartKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	/**
+	 * Colocar con Enter, Espacio o A (Start no: en una partida, Start es
+	 * pausa); F o B largan o aceleran el agua; R o Y reinician el nivel.
+	 */
+	private controls!: Controls<'place' | 'fastForward' | 'restart'>;
 
 	private readonly timerBarWidth = 170;
 
@@ -125,17 +126,17 @@ export class PipesGameScene extends Phaser.Scene {
 	}
 
 	update(_time: number, delta: number) {
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('menu')) {
 			this.returnToTitle();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+		if (this.controls.justDown('restart')) {
 			this.restartGame();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.fastForwardKey)) {
+		if (this.controls.justDown('fastForward')) {
 			this.toggleFastForward();
 		}
 
@@ -165,17 +166,12 @@ export class PipesGameScene extends Phaser.Scene {
 	}
 
 	private readCursorKeys() {
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.moveCursor(-1, 0);
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.moveCursor(1, 0);
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.moveCursor(0, -1);
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.moveCursor(0, 1);
-
-		if (
-			Phaser.Input.Keyboard.JustDown(this.cursors.space) ||
-			Phaser.Input.Keyboard.JustDown(this.enterKey)
-		) {
-			this.placeCurrentPiece();
-		}
+		const { controls } = this;
+		if (controls.justDown('left')) this.moveCursor(-1, 0);
+		if (controls.justDown('right')) this.moveCursor(1, 0);
+		if (controls.justDown('up')) this.moveCursor(0, -1);
+		if (controls.justDown('down')) this.moveCursor(0, 1);
+		if (controls.justDown('place')) this.placeCurrentPiece();
 	}
 
 	private updateCountdown(delta: number) {
@@ -296,12 +292,11 @@ export class PipesGameScene extends Phaser.Scene {
 	}
 
 	private configureInput() {
-		const keyboard = this.input.keyboard!;
-		this.cursors = keyboard.createCursorKeys();
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.fastForwardKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-		this.restartKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, {
+			place: { keys: ['ENTER', 'SPACE'], pad: ['a'] },
+			fastForward: { keys: ['F'], pad: ['b'] },
+			restart: { keys: ['R'], pad: ['y'] },
+		});
 
 		// Un solo listener para toda la grilla: 100 celdas interactivas serían
 		// 100 objetos escuchando lo mismo.

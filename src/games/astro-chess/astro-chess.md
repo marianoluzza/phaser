@@ -67,23 +67,47 @@ Algunas decisiones de implementación:
 - **La ronda se resuelve entera y se muestra de a poco.** El estado cambia en el
   acto; la escena reproduce la bitácora línea por línea, con trazos, números que
   suben y el plano que destella. Las barras parten de cómo estaban antes de la
-  ronda y cada paso aplica lo que dice su línea. Enter la saltea.
+  ronda y cada paso aplica lo que dice su línea. Enter o Start la saltean.
 - **Tres formas de repartir, una sola regla.** Click y click, arrastrar y
-  soltar, o flechas y espacio terminan en el mismo `activate` de `CrewBoard`.
+  soltar, o flechas y espacio (cruceta y A en el mando) terminan en el mismo
+  `activate` de `CrewBoard`.
   Los clicks se resuelven por geometría, no con eventos por objeto, para que el
   arrastre y el teclado compartan la misma noción de "qué hay acá".
 - **Reintentar conserva el reparto.** La pantalla de puestos recibe el
   `ShipLayout` con el que empezó el combate: corregir una decisión es mucho más
   rápido que rehacer todas.
 - **Avisos antes del combate.** Sin nadie en la armería la derrota es segura, así
-  que el primer Enter avisa y el segundo confirma. La falta de puente o de
+  que el primer Enter (o Start) avisa y el segundo confirma. La falta de puente o de
   escudos se avisa sin bloquear.
+
+### Controles
+
+Teclado y mando siguen el esquema común del arcade (`core/input/controls.ts`).
+Las escenas pasan sus `Controls` a `CrewBoard.handleControls` en cada frame; la
+ayuda no, porque ahí el plano es un ejemplo y las flechas pasan página.
+
+| Acción | Teclado | Mando |
+| --- | --- | --- |
+| Mover el foco por el plano | Flechas o WASD | Cruceta o stick |
+| Levantar o dejar una pieza | Espacio | A |
+| Soltar la pieza en la mano | Esc | B |
+| Ir al combate / resolver la ronda / saltear la cuenta | Enter | Start |
+| Recorrer la bitácora | RePág / AvPág | L1 / R1 |
+| Abandonar el combate | Esc (con la mano vacía) | Select |
+| Volver desde los puestos | Esc (con la mano vacía) | B o Select |
+| Cartel final: reintentar / título | Enter / Esc | A o Start / B o Select |
+| Título: jugar / ayuda / arcade | Enter / H / Esc | A o Start / Y / B |
+| Ayuda: página / elegir / volver | ← → / ↑ ↓ / Esc | Cruceta o stick / B |
+
+A es la acción del tablero, así que lo que en otras pantallas confirma con A
+acá se hace con Start. En el combate B sólo suelta la pieza: salir es Select,
+como en el resto de las partidas del arcade.
 
 ## Ayuda
 
 El título presentaba las piezas una por una, pero no tenía lugar para el resto:
 qué hace cada sala, cómo es una ronda o qué responder a cada anuncio. La ayuda
-(`astro:help`, tecla H desde el título) lo reparte en cuatro páginas.
+(`astro:help`, tecla H o botón Y desde el título) lo reparte en cuatro páginas.
 
 | Página | Qué muestra |
 | --- | --- |

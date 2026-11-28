@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import {
 	AUDIO_CATALOG_CACHE_KEY,
@@ -35,11 +36,12 @@ export class JukeboxScene extends Phaser.Scene {
 	private musicVolumeText!: Phaser.GameObjects.Text;
 	private sfxVolumeText!: Phaser.GameObjects.Text;
 
-	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private tabKey!: Phaser.Input.Keyboard.Key;
-	private stopKey!: Phaser.Input.Keyboard.Key;
+	/**
+	 * Esquema común: direcciones para elegir y paginar, A oye, B sale. Copiar
+	 * queda en Ctrl+C: el navegador sólo escribe el portapapeles tras un gesto
+	 * de teclado, mouse o toque, y un botón del mando no lo es.
+	 */
+	private controls!: Controls<'switchKind' | 'stop'>;
 
 	constructor() {
 		super(JUKEBOX_SCENES.MAIN);
@@ -67,7 +69,7 @@ export class JukeboxScene extends Phaser.Scene {
 		this.drawPanels();
 		this.createActionButtons();
 		this.createVolumeControls();
-		this.configureKeyboard();
+		this.configureControls();
 		this.renderList();
 		document.addEventListener('copy', this.handleDocumentCopy);
 		window.addEventListener('keydown', this.handleWindowKeyDown);
@@ -81,39 +83,39 @@ export class JukeboxScene extends Phaser.Scene {
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		const { controls } = this;
+		if (controls.justDown('back')) {
 			this.scene.start(CORE_SCENES.LAUNCHER);
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.tabKey)) {
+		if (controls.justDown('switchKind')) {
 			this.switchKind(this.activeKind === 'music' ? 'sfx' : 'music');
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.up!)) {
+		if (controls.justDown('up')) {
 			this.moveSelection(-1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.down!)) {
+		if (controls.justDown('down')) {
 			this.moveSelection(1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.left!)) {
+		if (controls.justDown('left')) {
 			this.changePage(-1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.cursors.right!)) {
+		if (controls.justDown('right')) {
 			this.changePage(1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (controls.justDown('confirm')) {
 			this.playSelectedAsset();
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.stopKey)) {
+		if (controls.justDown('stop')) {
 			this.stopMusic();
 		}
-
 	}
 
 	private drawBackground() {
@@ -261,10 +263,11 @@ export class JukeboxScene extends Phaser.Scene {
 		this.createVolumeButtons(500, 540, 'sfx');
 		this.refreshVolumeTexts();
 
-		this.add.text(40, 575, i18n.t('jukebox.footer'), {
+		this.add.text(40, 566, i18n.t('jukebox.footer'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '11px',
 			color: '#7783a3',
+			lineSpacing: 3,
 		});
 	}
 
@@ -299,13 +302,12 @@ export class JukeboxScene extends Phaser.Scene {
 		return button;
 	}
 
-	private configureKeyboard() {
-		const keyboard = this.input.keyboard!;
-		this.cursors = keyboard.createCursorKeys();
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.tabKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB);
-		this.stopKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+	private configureControls() {
+		this.controls = new Controls(this, {
+			// Las pestañas van en los gatillos, como en los menús de consola.
+			switchKind: { keys: ['TAB'], pad: ['l1', 'r1'] },
+			stop: { keys: ['SPACE'], pad: ['x'] },
+		});
 	}
 
 	/** El evento copy es el estándar del navegador detrás de Ctrl/Cmd+C. */

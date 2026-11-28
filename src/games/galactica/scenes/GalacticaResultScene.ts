@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { shipFrame, type ShipId } from '../constants/ships';
@@ -33,9 +34,7 @@ const ROW_DELAY = 220;
 /** Balance de la zona: tiempo, derribos, daño por fuente, puntaje y naves nuevas. */
 export class GalacticaResultScene extends Phaser.Scene {
 	private result!: GalacticaResult;
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private menuKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'title'>;
 	private starfield!: Starfield;
 
 	constructor() {
@@ -72,23 +71,20 @@ export class GalacticaResultScene extends Phaser.Scene {
 		}
 		this.createButtons();
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, { title: { keys: ['M'], pad: ['y'] } });
 	}
 
 	update(time: number) {
 		this.starfield.draw(time / 1000);
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.continueRun();
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+		if (this.controls.justDown('title')) {
 			this.goTo(GALACTICA_SCENES.TITLE);
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goTo(CORE_SCENES.LAUNCHER);
 		}
 	}

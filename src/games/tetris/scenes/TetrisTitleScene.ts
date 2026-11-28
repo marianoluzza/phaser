@@ -1,14 +1,14 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadTetrisAudio, TETRIS_AUDIO } from '../audio';
 import { TETRIS_SCENES } from '../sceneKeys';
 
 /** Pantalla de inicio propia de Tetris. */
 export class TetrisTitleScene extends Phaser.Scene {
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls;
 
 	constructor() {
 		super(TETRIS_SCENES.TITLE);
@@ -29,18 +29,16 @@ export class TetrisTitleScene extends Phaser.Scene {
 		// La música pertenece a esta pantalla: al salir no debe seguir en el arcade.
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this);
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.startGame();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goToLauncher();
 		}
 	}
@@ -111,7 +109,8 @@ export class TetrisTitleScene extends Phaser.Scene {
 			letterSpacing: 3,
 		}).setOrigin(0.5);
 
-		this.add.text(400, 325, i18n.t('tetris.title.controls'), {
+		// Centrado en 342: tres renglones caben entre «Cómo jugar» y el botón.
+		this.add.text(400, 342, i18n.t('tetris.title.controls'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '16px',
 			color: '#d9e2ff',

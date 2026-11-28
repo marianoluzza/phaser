@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { GAME_WIDTH, useFullWidth } from '../../../core/renderScale';
 import { loadSocavonAudio, SOCAVON_AUDIO, type SocavonAudioAsset } from '../audio';
 import { loadSocavonArt, sharpenSocavonArt } from '../objects/art';
@@ -67,7 +68,7 @@ const MINE_NAMES: Record<'entrance' | 'rails' | 'deep', TranslationKey> = {
 };
 
 /**
- * Traduce teclas a entradas, avanza `Mine` con paso fijo y dibuja. Las reglas
+ * Traduce teclas y mando a entradas, avanza `Mine` con paso fijo y dibuja. Las reglas
  * están todas en `state/`.
  */
 export class SocavonGameScene extends Phaser.Scene {
@@ -81,10 +82,7 @@ export class SocavonGameScene extends Phaser.Scene {
 	private follow = { x: 0, y: 0 };
 	private pressed = { use: false, lamp: false, headlamp: false };
 
-	private keys!: Record<
-		'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'use' | 'lamp' | 'headlamp' | 'pause' | 'escape' | 'enter',
-		Phaser.Input.Keyboard.Key
-	>;
+	private controls!: Controls<'lamp' | 'headlamp'>;
 
 	constructor() {
 		super(SOCAVON_SCENES.GAME);
@@ -127,43 +125,29 @@ export class SocavonGameScene extends Phaser.Scene {
 	}
 
 	private createKeys() {
-		const keyboard = this.input.keyboard!;
-		const { KeyCodes } = Phaser.Input.Keyboard;
-		this.keys = {
-			up: keyboard.addKey(KeyCodes.UP),
-			down: keyboard.addKey(KeyCodes.DOWN),
-			left: keyboard.addKey(KeyCodes.LEFT),
-			right: keyboard.addKey(KeyCodes.RIGHT),
-			w: keyboard.addKey(KeyCodes.W),
-			a: keyboard.addKey(KeyCodes.A),
-			s: keyboard.addKey(KeyCodes.S),
-			d: keyboard.addKey(KeyCodes.D),
-			use: keyboard.addKey(KeyCodes.SPACE),
-			lamp: keyboard.addKey(KeyCodes.Z),
-			headlamp: keyboard.addKey(KeyCodes.X),
-			pause: keyboard.addKey(KeyCodes.P),
-			escape: keyboard.addKey(KeyCodes.ESC),
-			enter: keyboard.addKey(KeyCodes.ENTER),
-		};
+		this.controls = new Controls(this, {
+			lamp: { keys: ['Z'], pad: ['b'] },
+			headlamp: { keys: ['X'], pad: ['x'] },
+		});
 	}
 
 	update(_time: number, delta: number) {
-		const { JustDown } = Phaser.Input.Keyboard;
-		if (JustDown(this.keys.escape)) {
+		const { controls } = this;
+		if (controls.justDown('menu')) {
 			this.leave();
 			return;
 		}
 		if (this.mine.status === 'cleared') {
-			if (JustDown(this.keys.enter)) this.nextMine();
+			if (controls.justDown('confirm')) this.nextMine();
 			return;
 		}
-		if (JustDown(this.keys.pause)) this.togglePause();
+		if (controls.justDown('pause')) this.togglePause();
 		if (this.paused) return;
 
 		// Una pulsación espera al próximo paso: un frame puede no tener ninguno.
-		if (JustDown(this.keys.use)) this.pressed.use = true;
-		if (JustDown(this.keys.lamp)) this.pressed.lamp = true;
-		if (JustDown(this.keys.headlamp)) this.pressed.headlamp = true;
+		if (controls.justDown('action')) this.pressed.use = true;
+		if (controls.justDown('lamp')) this.pressed.lamp = true;
+		if (controls.justDown('headlamp')) this.pressed.headlamp = true;
 
 		const dt = Math.min(delta / 1000, MAX_FRAME);
 		const events: MineEvent[] = [];
@@ -185,12 +169,7 @@ export class SocavonGameScene extends Phaser.Scene {
 	}
 
 	private readInput(): MineInput {
-		const { keys } = this;
-		return {
-			x: Number(keys.right.isDown || keys.d.isDown) - Number(keys.left.isDown || keys.a.isDown),
-			y: Number(keys.down.isDown || keys.s.isDown) - Number(keys.up.isDown || keys.w.isDown),
-			...this.pressed,
-		};
+		return { ...this.controls.direction(), ...this.pressed };
 	}
 
 	private react(event: MineEvent) {

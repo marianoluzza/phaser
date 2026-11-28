@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
 import { ENEMY_INTENTS, RAIDER, type EnemyIntent } from '../constants/enemies';
 import { aptitude, PIECES, PIECE_TYPES, type PieceType } from '../constants/pieces';
@@ -161,6 +162,7 @@ export class AstroChessHelpScene extends Phaser.Scene {
 	private choiceLayer!: Phaser.GameObjects.Container;
 	private choiceGraphics!: Phaser.GameObjects.Graphics;
 	private exampleTimer: Phaser.Time.TimerEvent | null = null;
+	private controls!: Controls;
 
 	constructor() {
 		super(ASTRO_SCENES.HELP);
@@ -196,12 +198,18 @@ export class AstroChessHelpScene extends Phaser.Scene {
 			if (!this.flipping) audioManager.stopMusic();
 		});
 
-		const keyboard = this.input.keyboard!;
-		keyboard.on('keydown-LEFT', () => this.turnPage(-1));
-		keyboard.on('keydown-RIGHT', () => this.turnPage(1));
-		keyboard.on('keydown-UP', () => this.moveChoice(-1));
-		keyboard.on('keydown-DOWN', () => this.moveChoice(1));
-		keyboard.on('keydown-ESC', () => this.back());
+		this.controls = new Controls(this);
+	}
+
+	update() {
+		if (this.controls.justDown('back')) {
+			this.back();
+			return;
+		}
+		if (this.controls.justDown('left')) this.turnPage(-1);
+		else if (this.controls.justDown('right')) this.turnPage(1);
+		else if (this.controls.justDown('up')) this.moveChoice(-1);
+		else if (this.controls.justDown('down')) this.moveChoice(1);
 	}
 
 	// ── Marco ────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { SHIP_IDS, SHIPS, shipFrame, type ShipId } from '../constants/ships';
@@ -52,11 +53,7 @@ export class GalacticaTitleScene extends Phaser.Scene {
 	private footText!: Phaser.GameObjects.Text;
 	private launchLabel!: Phaser.GameObjects.Text;
 
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private leftKey!: Phaser.Input.Keyboard.Key;
-	private rightKey!: Phaser.Input.Keyboard.Key;
-	private pediaKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'pedia'>;
 
 	constructor() {
 		super(GALACTICA_SCENES.TITLE);
@@ -85,12 +82,7 @@ export class GalacticaTitleScene extends Phaser.Scene {
 		audioManager.playMusic(this, GALACTICA_AUDIO.titleMusic.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.leftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-		this.rightKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-		this.pediaKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
+		this.controls = new Controls(this, { pedia: { keys: ['G'], pad: ['y'] } });
 	}
 
 	update(time: number, delta: number) {
@@ -105,15 +97,16 @@ export class GalacticaTitleScene extends Phaser.Scene {
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		const { controls } = this;
+		if (controls.justDown('confirm')) {
 			this.launch();
-		} else if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		} else if (controls.justDown('back')) {
 			this.goTo(CORE_SCENES.LAUNCHER);
-		} else if (Phaser.Input.Keyboard.JustDown(this.pediaKey)) {
+		} else if (controls.justDown('pedia')) {
 			this.goTo(GALACTICA_SCENES.PEDIA);
-		} else if (Phaser.Input.Keyboard.JustDown(this.leftKey)) {
+		} else if (controls.justDown('left')) {
 			this.changeShip(-1);
-		} else if (Phaser.Input.Keyboard.JustDown(this.rightKey)) {
+		} else if (controls.justDown('right')) {
 			this.changeShip(1);
 		}
 	}

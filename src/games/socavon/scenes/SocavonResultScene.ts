@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadSocavonAudio, SOCAVON_AUDIO } from '../audio';
 import { addClip, loadSocavonArt, sharpenSocavonArt, showClip } from '../objects/art';
@@ -12,9 +13,7 @@ import { newRun, readHighScore, submitHighScore, type Run } from '../state/run';
 export class SocavonResultScene extends Phaser.Scene {
 	private run: Run = newRun();
 
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private menuKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'title'>;
 
 	constructor() {
 		super(SOCAVON_SCENES.RESULT);
@@ -59,16 +58,14 @@ export class SocavonResultScene extends Phaser.Scene {
 		addButton(this, 320, 522, 148, i18n.t('socavon.result.menu'), () => this.scene.start(SOCAVON_SCENES.TITLE));
 		addButton(this, 480, 522, 148, i18n.t('socavon.title.back'), () => this.scene.start(CORE_SCENES.LAUNCHER));
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, { title: { keys: ['M'], pad: ['y'] } });
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) this.retry();
-		else if (Phaser.Input.Keyboard.JustDown(this.menuKey)) this.scene.start(SOCAVON_SCENES.TITLE);
-		else if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) this.scene.start(CORE_SCENES.LAUNCHER);
+		const { controls } = this;
+		if (controls.justDown('confirm')) this.retry();
+		else if (controls.justDown('title')) this.scene.start(SOCAVON_SCENES.TITLE);
+		else if (controls.justDown('back')) this.scene.start(CORE_SCENES.LAUNCHER);
 	}
 
 	private retry() {

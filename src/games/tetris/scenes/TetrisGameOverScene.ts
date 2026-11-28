@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadTetrisAudio, TETRIS_AUDIO } from '../audio';
 import { TETRIS_SCENES } from '../sceneKeys';
@@ -15,9 +16,7 @@ export type TetrisResult = {
 /** Pantalla final de Tetris, separada de la lógica de la partida. */
 export class TetrisGameOverScene extends Phaser.Scene {
 	private result: TetrisResult = { score: 0, lines: 0, level: 1 };
-	private retryKey!: Phaser.Input.Keyboard.Key;
-	private menuKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'retry' | 'title'>;
 
 	constructor() {
 		super(TETRIS_SCENES.GAME_OVER);
@@ -43,24 +42,25 @@ export class TetrisGameOverScene extends Phaser.Scene {
 		this.createButtons();
 		audioManager.playSfx(this, TETRIS_AUDIO.gameOver.cacheKey);
 
-		const keyboard = this.input.keyboard!;
-		this.retryKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-		this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		// R se conserva; Enter y A confirman como en el resto del arcade.
+		this.controls = new Controls(this, {
+			retry: { keys: ['R'], pad: [] },
+			title: { keys: ['M'], pad: ['y'] },
+		});
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.retryKey)) {
+		if (this.controls.justDown('confirm') || this.controls.justDown('retry')) {
 			this.startGame();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+		if (this.controls.justDown('title')) {
 			this.goToTitle();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goToLauncher();
 		}
 	}

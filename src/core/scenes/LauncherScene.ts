@@ -3,6 +3,7 @@ import { audioManager } from '../audio/AudioManager';
 import { CORE_AUDIO, loadCoreAudio } from '../audio/coreAudio';
 import { GAME_CATALOG, type GameDefinition } from '../gameCatalog';
 import { i18n, type Locale } from '../i18n/i18n';
+import { Controls } from '../input/controls';
 import { GAME_WIDTH, useFullWidth } from '../renderScale';
 import { CORE_SCENES } from '../sceneKeys';
 
@@ -48,9 +49,7 @@ export class LauncherScene extends Phaser.Scene {
 	/** Primera ranura de `CAROUSEL_SLOTS` que queda fuera de la pantalla. */
 	private hiddenSlot = 0;
 
-	private leftKey!: Phaser.Input.Keyboard.Key;
-	private rightKey!: Phaser.Input.Keyboard.Key;
-	private enterKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls;
 	private gameCards: Phaser.GameObjects.Container[] = [];
 	private cardSurfaces: Phaser.GameObjects.Rectangle[] = [];
 	private cardVeils: Phaser.GameObjects.Rectangle[] = [];
@@ -88,7 +87,7 @@ export class LauncherScene extends Phaser.Scene {
 		this.createGameCards();
 		this.createPageDots();
 		this.drawFooter();
-		this.configureKeyboard();
+		this.controls = new Controls(this);
 		this.configureWheel();
 		this.refreshSelection();
 		audioManager.continueMusic(this, CORE_AUDIO.launcherMusic.cacheKey);
@@ -106,17 +105,17 @@ export class LauncherScene extends Phaser.Scene {
 		return hidden === -1 ? CAROUSEL_SLOTS.length - 1 : hidden;
 	}
 
-	/** `update` corre una vez por frame y acá se consulta el teclado. */
+	/** `update` corre una vez por frame y acá se consultan el teclado y el mando. */
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.leftKey)) {
+		if (this.controls.justDown('left')) {
 			this.moveSelection(-1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.rightKey)) {
+		if (this.controls.justDown('right')) {
 			this.moveSelection(1);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.launchGame(GAME_CATALOG[this.selectedGameIndex]);
 		}
 	}
@@ -641,13 +640,6 @@ export class LauncherScene extends Phaser.Scene {
 			fontSize: '16px',
 			color: '#d9e2ff',
 		});
-	}
-
-	private configureKeyboard() {
-		const keyboard = this.input.keyboard!;
-		this.leftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-		this.rightKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 	}
 
 	private configureWheel() {

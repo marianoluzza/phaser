@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { FIRST_LEVEL } from '../constants/levels';
@@ -47,9 +48,7 @@ export class PipesRoundEndScene extends Phaser.Scene {
 		loosePenalty: 0,
 	};
 
-	private continueKey!: Phaser.Input.Keyboard.Key;
-	private menuKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'restart' | 'title'>;
 
 	constructor() {
 		super(PIPES_SCENES.ROUND_END);
@@ -82,27 +81,25 @@ export class PipesRoundEndScene extends Phaser.Scene {
 		this.drawResult();
 		this.createButtons();
 
-		const keyboard = this.input.keyboard!;
-		// La tecla de continuar cambia de nombre según el final, no de función.
-		this.continueKey = keyboard.addKey(
-			this.result.cleared ? Phaser.Input.Keyboard.KeyCodes.ENTER : Phaser.Input.Keyboard.KeyCodes.R
-		);
-		this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		// Enter o A siguen en los dos finales; perdido, R también empieza de nuevo.
+		this.controls = new Controls(this, {
+			restart: { keys: this.result.cleared ? [] : ['R'], pad: [] },
+			title: { keys: ['M'], pad: ['y'] },
+		});
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.continueKey)) {
+		if (this.controls.justDown('confirm') || this.controls.justDown('restart')) {
 			this.continuePlaying();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+		if (this.controls.justDown('title')) {
 			this.goToTitle();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goToLauncher();
 		}
 	}

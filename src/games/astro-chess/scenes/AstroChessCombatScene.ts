@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { LAYOUT_EVENT } from '../../../core/renderScale';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
 import { RAIDER } from '../constants/enemies';
@@ -108,8 +109,11 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	private revealed = 0;
 	private timers: Phaser.Time.TimerEvent[] = [];
 
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	/**
+	 * A levanta y deja piezas: la ronda se resuelve con Start (o Enter), B
+	 * suelta la pieza sin salir y Select abandona, como Esc.
+	 */
+	private controls!: Controls<'resolve' | 'drop' | 'logUp' | 'logDown'>;
 
 	constructor() {
 		super(ASTRO_SCENES.COMBAT);
@@ -189,21 +193,39 @@ export class AstroChessCombatScene extends Phaser.Scene {
 		this.events.on(LAYOUT_EVENT, this.clipLog, this);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(LAYOUT_EVENT, this.clipLog, this));
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, {
+			resolve: { keys: ['ENTER'], pad: ['start'] },
+			drop: { keys: [], pad: ['b'] },
+			logUp: { keys: ['PAGE_UP'], pad: ['l1'] },
+			logDown: { keys: ['PAGE_DOWN'], pad: ['r1'] },
+		});
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-			if (this.overlay) this.restart();
-			else this.resolveRound();
+		// El cartel del final es un menú: A, Start o Enter reintentan; B, Select o Esc van al título.
+		if (this.overlay) {
+			if (this.controls.justDown('confirm')) this.restart();
+			else if (this.controls.justDown('back')) this.leave();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey) && !this.board.cancelSelection()) {
-			this.leave();
+		if (this.controls.justDown('resolve')) {
+			this.resolveRound();
+			return;
 		}
+
+		if (this.controls.justDown('menu') && !this.board.cancelSelection()) {
+			this.leave();
+			return;
+		}
+
+		if (this.controls.justDown('drop')) this.board.cancelSelection();
+
+		const page = LOG_VIEW.height * 0.8;
+		if (this.controls.justDown('logDown')) this.scrollLog(this.logScroll + page);
+		if (this.controls.justDown('logUp')) this.scrollLog(this.logScroll - page);
+
+		this.board.handleControls(this.controls);
 	}
 
 	private drawFrames() {
@@ -312,7 +334,7 @@ export class AstroChessCombatScene extends Phaser.Scene {
 	}
 
 	/**
-	 * Rueda, arrastre o RePág/AvPág.
+	 * Rueda o arrastre; RePág/AvPág y L1/R1 van por `update`.
 	 *
 	 * El arrastre es para pantallas táctiles, donde no hay rueda. La bitácora no
 	 * toca el plano de la nave, así que no compite con el reparto de piezas.
@@ -337,9 +359,6 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			this.logDrag = null;
 		});
 
-		const page = LOG_VIEW.height * 0.8;
-		this.input.keyboard?.on('keydown-PAGE_DOWN', () => this.scrollLog(this.logScroll + page));
-		this.input.keyboard?.on('keydown-PAGE_UP', () => this.scrollLog(this.logScroll - page));
 	}
 
 	private scrollLog(to: number) {
@@ -399,7 +418,7 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			color: '#7384aa',
 		}).setOrigin(0, 0.5);
 
-		addButton(this, 709, 580, 150, 28, i18n.t('astro.combat.leave'), () => this.leave(), 'secondary');
+		addButton(this, 689, 580, 190, 28, i18n.t('astro.combat.leave'), () => this.leave(), 'secondary');
 	}
 
 	/** Redibuja todo desde el estado real. Durante la cuenta de una ronda, manda la cuenta. */
@@ -956,8 +975,8 @@ export class AstroChessCombatScene extends Phaser.Scene {
 			}).setOrigin(0.5)
 		);
 
-		const retry = addButton(this, 300, 394, 300, 38, i18n.t('astro.combat.retry'), () => this.restart());
-		const title = addButton(this, 556, 394, 170, 38, i18n.t('astro.combat.toTitle'), () => this.leave(), 'secondary');
+		const retry = addButton(this, 290, 394, 340, 38, i18n.t('astro.combat.retry'), () => this.restart());
+		const title = addButton(this, 580, 394, 190, 38, i18n.t('astro.combat.toTitle'), () => this.leave(), 'secondary');
 		panel.add([retry.background, retry.label, title.background, title.label]);
 
 		panel.setAlpha(0);

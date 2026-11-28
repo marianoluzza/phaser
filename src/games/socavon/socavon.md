@@ -8,14 +8,19 @@ personajes, las minas y las reglas de sigilo son de Socavón.
 
 ## Controles
 
-| Tecla | Qué hace |
-|---|---|
-| ← → / A D | Caminar, cruzar por las manijas, salir del nicho |
-| ↑ ↓ / W S | Escalera. ↑ bajo un agarre cuelga y en un nicho esconde; ↓ colgado suelta |
-| Espacio | La acción del momento, que se lee abajo de la pantalla |
-| Z | Apagar o prender la lámpara de al lado |
-| X | Linterna del casco |
-| P / Esc | Pausa / menú |
+| Tecla | Mando | Qué hace |
+|---|---|---|
+| ← → / A D | Cruceta o stick | Caminar, cruzar por las manijas, salir del nicho |
+| ↑ ↓ / W S | Cruceta o stick | Escalera. ↑ bajo un agarre cuelga y en un nicho esconde; ↓ colgado suelta |
+| Espacio | A | La acción del momento, que se lee abajo de la pantalla |
+| Z | B | Apagar o prender la lámpara de al lado |
+| X | X | Linterna del casco |
+| P / Esc | Start / Select | Pausa / menú |
+
+En el título, Enter o A baja a la mina, ← → cambia el modo, N o Y pide otra semilla y Esc o B
+vuelve al arcade. En el resultado, Enter o A juega otra vez, M o Y va al menú y Esc o B al arcade.
+Es el esquema común del arcade (`core/input/controls.ts`, ver
+[docs/tareas/mando.md](../../../docs/tareas/mando.md)); se prueba con `npm run test:mando`.
 
 ## Reglas
 

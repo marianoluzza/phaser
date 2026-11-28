@@ -40,17 +40,23 @@ El plan completo está implementado:
 
 ## Controles
 
-| Tecla | Acción |
-| --- | --- |
-| Flechas o W A S D | Mover, también adelante y atrás |
-| Espacio, Z o J (mantenidas) | Disparar |
-| X o K (mantenidas) | Escudo, si hay carga y energía |
-| P | Pausa |
-| Esc | Volver al título |
+| Tecla | Mando | Acción |
+| --- | --- | --- |
+| Flechas o W A S D | Cruceta o stick | Mover, también adelante y atrás; en diagonal, los dos ejes |
+| Espacio, Z o J (mantenidas) | A (mantenido) | Disparar |
+| X o K (mantenidas) | X (mantenido) | Escudo, si hay carga y energía |
+| P | Start | Pausa |
+| Esc | Select | Volver al título |
 
-En el título, ← → eligen nave, Enter despega y G abre la Galactopedia, donde
-← → cambian de página, ↑ ↓ eligen y Esc vuelve. En el resultado, Enter sigue (o
-reintenta), M vuelve al título y Esc al arcade.
+En el título, ← → eligen nave, Enter (o A) despega y G (o Y) abre la
+Galactopedia, donde ← → cambian de página, ↑ ↓ eligen y Esc (o B) vuelve. En el
+resultado, Enter (o A) sigue o reintenta, M (o Y) vuelve al título y Esc (o B)
+al arcade.
+
+Teclado y mando pasan por `Controls` (`core/input/controls.ts`), con el esquema
+común del arcade. El escudo va en la X del mando y no en B: es la misma letra
+que en el teclado, así el «ESCUDO X» del panel vale para los dos. B no hace
+nada en la partida.
 
 ## Decisiones tomadas
 
@@ -412,7 +418,7 @@ src/games/galactica/
 ```
 
 Como en Tanques, la partida avanza a pasos fijos de 1/60 s. La escena traduce
-el teclado a `Battle.setInput`, dibuja lo que hay en sus listas y suena lo que
+el teclado y el mando a `Battle.setInput`, dibuja lo que hay en sus listas y suena lo que
 encuentra en `battle.events`, que vacía después de leer.
 
 ## Flujo entre escenas

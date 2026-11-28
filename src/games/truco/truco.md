@@ -26,20 +26,26 @@ multijugador.
 
 ## Controles
 
-Cartas y cantos comparten un solo foco, que mueven tanto el mouse como el
-teclado: pasar el puntero sobre una carta jugable o un botón le da el foco, y
+Cartas y cantos comparten un solo foco, que mueven el mouse, el teclado y el
+mando: pasar el puntero sobre una carta jugable o un botón le da el foco, y
 lo conserva aunque el puntero se vaya. La carta con foco se levanta; el botón
 se agranda y brilla.
 
-| Tecla | Acción |
-| --- | --- |
-| Flechas | Mueven el foco al elemento habilitado más cercano en esa dirección. |
-| `A` `S` `D` | Llevan el foco a la primera, segunda o tercera carta. |
-| `Enter` / `Espacio` | Juegan la carta o activan el botón con foco. |
-| `Q` / `N` | Quiero / No quiero (`Y` / `N` en inglés). |
-| `E` `R` `F` | Envido, Real Envido y Falta Envido. |
-| `T` | Truco, Retruco o Vale 4: el canto siguiente. |
-| `B` | Son buenas, al declarar el envido después de la IA (`G` en inglés). |
+| Tecla | Mando | Acción |
+| --- | --- | --- |
+| Flechas | Cruceta o stick | Mueven el foco al elemento habilitado más cercano en esa dirección. |
+| `A` `S` `D` | | Llevan el foco a la primera, segunda o tercera carta. |
+| `Enter` / `Espacio` | A o Start | Juegan la carta o activan el botón con foco. |
+| `Esc` | Select | Vuelve al arcade; con el cuadro del tanto abierto, lo cierra. |
+| `Q` / `N` | | Quiero / No quiero (`Y` / `N` en inglés). |
+| `E` `R` `F` | | Envido, Real Envido y Falta Envido. |
+| `T` | | Truco, Retruco o Vale 4: el canto siguiente. |
+| `B` | B | Son buenas, al declarar el envido después de la IA (`G` en inglés). |
+
+WASD no mueve el foco, a diferencia del resto del arcade: A, S y D eligen
+carta. Las escenas del Truco crean sus `Controls` con `TRUCO_CONTROLS`
+(`input.ts`), que saca esas teclas del esquema común. El mando se prueba con
+`npm run test:mando -- truco`.
 
 Las flechas no distinguen cartas de botones (`objects/focusNavigator.ts`).
 Como la grilla de cantos queda a la izquierda de la mano, `←` desde la primera
@@ -54,7 +60,10 @@ cartas jugables, da la vuelta y entra por la izquierda. Así un `Enter` apurado
 no acepta nada. Al terminar la mano el foco va a **Siguiente**, y al terminar
 la partida, a **Repetir**. Mientras se declaran los tantos de envido, el
 teclado es del cuadro de puntos: dígitos, `Backspace` para borrar y
-`Enter` para declarar.
+`Enter` para declarar. Con el mando (o las flechas), ↑ y ↓ recorren los tantos
+posibles sin flor, de 0 a 7 y de 20 a 33: vacío, ↑ arranca en 20 y ↓ en 7, y en
+los extremos da la vuelta. A declara y B aprieta el botón de abajo del cuadro,
+que es **Atrás** o **Son buenas** según quién declara primero.
 
 Los cantos están todos a la vista en una grilla fija debajo del registro
 (`objects/actionButton.ts`), sin submenús. Los botones nunca cambian de lugar,

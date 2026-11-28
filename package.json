@@ -11,6 +11,7 @@
     "art:socavon": "node scripts/build-socavon-art.mjs",
     "test:socavon": "node scripts/socavon-test.mjs",
     "test:galactica": "node scripts/galactica-test.mjs",
+    "test:mando": "node scripts/mando-test.mjs",
     "sim:astro": "node scripts/astro-sim.mjs",
     "sim:traffic": "node scripts/traffic-sim.mjs",
     "sim:galactica": "node scripts/galactica-sim.mjs",

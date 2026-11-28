@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadTrafficAudio, TRAFFIC_AUDIO } from '../audio';
 import { CENTRO } from '../constants/layouts';
@@ -20,9 +21,7 @@ export type TrafficResult = {
 /** Fin de partida: puntaje, cómo se perdieron las vidas y reinicio inmediato. */
 export class TrafficGameOverScene extends Phaser.Scene {
 	private result!: TrafficResult;
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private menuKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'title'>;
 
 	constructor() {
 		super(TRAFFIC_SCENES.OVER);
@@ -92,22 +91,19 @@ export class TrafficGameOverScene extends Phaser.Scene {
 
 		audioManager.playSfx(this, TRAFFIC_AUDIO.gameOver.cacheKey);
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.menuKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, { title: { keys: ['M'], pad: ['y'] } });
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.goTo(TRAFFIC_SCENES.GAME);
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+		if (this.controls.justDown('title')) {
 			this.goTo(TRAFFIC_SCENES.TITLE);
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goTo(CORE_SCENES.LAUNCHER);
 		}
 	}

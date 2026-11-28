@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { FAMILY_COLORS } from '../constants/families';
 import { shipFrame } from '../constants/ships';
@@ -61,14 +62,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 	private pauseOverlay!: Phaser.GameObjects.Container;
 	private gameOverText!: Phaser.GameObjects.Text;
 
-	private leftKeys: Phaser.Input.Keyboard.Key[] = [];
-	private rightKeys: Phaser.Input.Keyboard.Key[] = [];
-	private upKeys: Phaser.Input.Keyboard.Key[] = [];
-	private downKeys: Phaser.Input.Keyboard.Key[] = [];
-	private fireKeys: Phaser.Input.Keyboard.Key[] = [];
-	private shieldKeys: Phaser.Input.Keyboard.Key[] = [];
-	private pauseKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'fire' | 'shield'>;
 
 	private accumulator = 0;
 	private paused = false;
@@ -129,7 +123,7 @@ export class GalacticaGameScene extends Phaser.Scene {
 
 		this.createHud();
 		this.createOverlays();
-		this.configureKeyboard();
+		this.configureControls();
 		this.announce(`${i18n.t('galactica.game.zone')} ${this.battle.zoneNumber}`, i18n.t(FAMILY_LABELS[this.battle.zone.family]), '#f5f7ff');
 		this.render();
 
@@ -140,26 +134,24 @@ export class GalacticaGameScene extends Phaser.Scene {
 	update(_time: number, delta: number) {
 		const dt = Math.min(delta, 100) / 1000;
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		const { controls } = this;
+		if (controls.justDown('menu')) {
 			this.goToTitle();
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.pauseKey) && this.battle.outcome === 'playing') {
+		if (controls.justDown('pause') && this.battle.outcome === 'playing') {
 			this.togglePause();
 		}
 		if (this.paused) {
 			return;
 		}
 
-		const left = this.leftKeys.some((key) => key.isDown);
-		const right = this.rightKeys.some((key) => key.isDown);
-		const up = this.upKeys.some((key) => key.isDown);
-		const down = this.downKeys.some((key) => key.isDown);
+		const { x, y } = controls.direction();
 		this.battle.setInput({
-			move: (right ? 1 : 0) - (left ? 1 : 0),
-			moveY: (down ? 1 : 0) - (up ? 1 : 0),
-			fire: this.fireKeys.some((key) => key.isDown),
-			shield: this.shieldKeys.some((key) => key.isDown),
+			move: x,
+			moveY: y,
+			fire: controls.isDown('fire'),
+			shield: controls.isDown('shield'),
 		});
 		this.accumulator += dt;
 		while (this.accumulator >= STEP) {
@@ -174,19 +166,17 @@ export class GalacticaGameScene extends Phaser.Scene {
 
 	// ---------------------------------------------------------------- entrada
 
-	private configureKeyboard() {
-		const keyboard = this.input.keyboard!;
-		const codes = Phaser.Input.Keyboard.KeyCodes;
-		const add = (...keyCodes: number[]) => keyCodes.map((code) => keyboard.addKey(code));
-		this.leftKeys = add(codes.LEFT, codes.A);
-		this.rightKeys = add(codes.RIGHT, codes.D);
-		this.upKeys = add(codes.UP, codes.W);
-		this.downKeys = add(codes.DOWN, codes.S);
-		this.fireKeys = add(codes.SPACE, codes.Z, codes.J);
-		// Shift no: apretado cinco veces, Windows abre el cartel de teclas especiales.
-		this.shieldKeys = add(codes.X, codes.K);
-		this.pauseKey = keyboard.addKey(codes.P);
-		this.escapeKey = keyboard.addKey(codes.ESC);
+	/**
+	 * Esquema común: direcciones para volar, P o Start pausa, Esc o Select al
+	 * título. Se dispara con A y se escuda con X mientras se mantengan: X es la
+	 * misma letra que en el teclado, así el «ESCUDO X» del panel vale para los dos.
+	 */
+	private configureControls() {
+		this.controls = new Controls(this, {
+			fire: { keys: ['SPACE', 'Z', 'J'], pad: ['a'] },
+			// Shift no: apretado cinco veces, Windows abre el cartel de teclas especiales.
+			shield: { keys: ['X', 'K'], pad: ['x'] },
+		});
 	}
 
 	private togglePause() {
@@ -429,7 +419,8 @@ export class GalacticaGameScene extends Phaser.Scene {
 		this.shieldText = text(HUD_X + 6, 438, i18n.t('galactica.game.shield'), TEXT.mono);
 		this.powerUpText = text(HUD_X + 6, 463, '', { ...TEXT.mono, lineSpacing: 10 });
 
-		text(HUD_X + 92, 562, i18n.t('galactica.game.footer'), { ...TEXT.mono, fontSize: '11px', color: '#64759f' }).setOrigin(0.5);
+		// Dos renglones: con las teclas del mando, uno solo se salía del panel.
+		text(HUD_X + 92, 556, i18n.t('galactica.game.footer'), { ...TEXT.mono, fontSize: '11px', color: '#64759f', align: 'center', lineSpacing: 4 }).setOrigin(0.5);
 
 		this.bossName = this.add.text(VIEW.x + FIELD_W / 2, VIEW.y + 8, '', { ...TEXT.label, color: '#ff9aa8' })
 			.setOrigin(0.5, 0)

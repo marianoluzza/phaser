@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { loadTetrisAudio, TETRIS_AUDIO } from '../audio';
 import { Piece } from '../objects/Piece';
 import type { PieceType } from '../constants/tetrominoes';
@@ -45,10 +46,8 @@ export class TetrisGameScene extends Phaser.Scene {
 	private readonly offsetX = 280;
 	private readonly offsetY = 40;
 
-	private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-	private spaceKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private pauseKey!: Phaser.Input.Keyboard.Key;
+	/** ↑ rota, y en el mando también B; la acción (Espacio o A) es la caída rápida. */
+	private controls!: Controls<'rotate'>;
 	private paused = false;
 	private pauseOverlay!: Phaser.GameObjects.Container;
 	private pauseButtonLabel!: Phaser.GameObjects.Text;
@@ -111,12 +110,7 @@ export class TetrisGameScene extends Phaser.Scene {
 			fontSize: '24px',
 			color: '#8fa0c7',
 		});
-		this.cursors = this.input.keyboard!.createCursorKeys();
-		this.spaceKey = this.input.keyboard!.addKey(
-			Phaser.Input.Keyboard.KeyCodes.SPACE
-		);
-		this.escapeKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.pauseKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+		this.controls = new Controls(this, { rotate: { keys: [], pad: ['b'] } });
 
 		this.nextPiece = this.createRandomPiece();
 		this.spawnPiece();
@@ -124,13 +118,13 @@ export class TetrisGameScene extends Phaser.Scene {
 
 	/** Phaser llama a `update` en cada frame mientras esta escena está activa. */
 	update(_time: number, delta: number) {
-		if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+		if (this.controls.justDown('pause')) {
 			this.togglePause();
 			return;
 		}
 
 		// La partida vuelve a la pantalla de inicio propia de Tetris.
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('menu')) {
 			this.returnToTitle();
 			return;
 		}
@@ -238,8 +232,8 @@ export class TetrisGameScene extends Phaser.Scene {
 	}
 
 	private handleHorizontalInput(delta: number) {
-		const leftDown = this.cursors.left!.isDown;
-		const rightDown = this.cursors.right!.isDown;
+		const leftDown = this.controls.isDown('left');
+		const rightDown = this.controls.isDown('right');
 
 		let direction: -1 | 0 | 1 = 0;
 
@@ -282,7 +276,7 @@ export class TetrisGameScene extends Phaser.Scene {
 	}
 
 	private handleRotationInput() {
-		if (!Phaser.Input.Keyboard.JustDown(this.cursors.up!)) {
+		if (!this.controls.justDown('up') && !this.controls.justDown('rotate')) {
 			return;
 		}
 
@@ -298,7 +292,7 @@ export class TetrisGameScene extends Phaser.Scene {
 	}
 
 	private handleHardDropInput() {
-		if (!Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+		if (!this.controls.justDown('action')) {
 			return;
 		}
 
@@ -315,7 +309,7 @@ export class TetrisGameScene extends Phaser.Scene {
 	}
 
 	private handleSoftDrop(delta: number) {
-		if (!this.cursors.down!.isDown) {
+		if (!this.controls.isDown('down')) {
 			this.softDropTimer = 0;
 			return;
 		}

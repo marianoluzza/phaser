@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import type { TranslationKey } from '../../../core/i18n/translations';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { TRUCO_AI_PROFILES } from '../ai/aiCatalog';
 import { getTrucoAiChoice, setTrucoAiChoice, TRUCO_AI_CHOICES } from '../ai/aiSelection';
 import type { TrucoAiChoice } from '../ai/aiSelection';
+import { TRUCO_CONTROLS } from '../input';
 import { TRUCO_SCENES } from '../sceneKeys';
 
 const RANDOM_LABELS: { nameKey: TranslationKey; descriptionKey: TranslationKey } = {
@@ -14,10 +16,7 @@ const RANDOM_LABELS: { nameKey: TranslationKey; descriptionKey: TranslationKey }
 
 /** Pantalla de inicio del Truco: reglas y elección del rival. */
 export class TrucoTitleScene extends Phaser.Scene {
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private leftKey!: Phaser.Input.Keyboard.Key;
-	private rightKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls;
 	private choiceIndex = 0;
 	private choiceName!: Phaser.GameObjects.Text;
 	private choiceDescription!: Phaser.GameObjects.Text;
@@ -44,18 +43,15 @@ export class TrucoTitleScene extends Phaser.Scene {
 		this.createButton(400, 465, i18n.t('truco.title.play'), () => this.startMatch());
 		this.createButton(400, 530, i18n.t('truco.title.backToArcade'), () => this.scene.start(CORE_SCENES.LAUNCHER));
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.leftKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-		this.rightKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+		this.controls = new Controls(this, {}, TRUCO_CONTROLS);
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.leftKey)) this.moveChoice(-1);
-		if (Phaser.Input.Keyboard.JustDown(this.rightKey)) this.moveChoice(1);
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) this.startMatch();
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) this.scene.start(CORE_SCENES.LAUNCHER);
+		const { controls } = this;
+		if (controls.justDown('left')) this.moveChoice(-1);
+		if (controls.justDown('right')) this.moveChoice(1);
+		if (controls.justDown('confirm')) this.startMatch();
+		else if (controls.justDown('back')) this.scene.start(CORE_SCENES.LAUNCHER);
 	}
 
 	private createOpponentSelector() {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { Controls } from '../../../core/input/controls';
 import { i18n } from '../../../core/i18n/i18n';
 import { PIECES } from '../constants/pieces';
 import { ROOM_IDS, ROOMS, type RoomId } from '../constants/rooms';
@@ -60,9 +61,12 @@ export type CrewBoardOptions = {
  * distintas restricciones. La escena pone el marco; esto pone la nave.
  *
  * Se reparte de tres maneras que terminan en el mismo lugar: click y click,
- * arrastrar y soltar, o flechas y espacio. Todas llaman a `activate`, así que
+ * arrastrar y soltar, o flechas (o cruceta) y espacio (o A). Todas llaman a `activate`, así que
  * las reglas de quién puede moverse se escriben una sola vez.
  */
+/** Lo que el tablero usa del esquema común: las direcciones y la acción. */
+export type BoardControls = Pick<Controls, 'justDown'>;
+
 export class CrewBoard {
 	selectedMemberId: string | null = null;
 
@@ -78,7 +82,7 @@ export class CrewBoard {
 	private enabled = true;
 	private pointer = { x: 0, y: 0 };
 	private dragStart: { x: number; y: number } | null = null;
-	/** El foco del teclado sólo se dibuja si el jugador está usando el teclado. */
+	/** El foco sólo se dibuja si el jugador está usando el teclado o el mando. */
 	private keyboardMode = false;
 	private focus: Target | null = null;
 	private hoveredRoom: RoomId | null = null;
@@ -117,7 +121,6 @@ export class CrewBoard {
 
 		this.createCursorZones();
 		this.bindPointer();
-		this.bindKeyboard();
 		this.refresh();
 	}
 
@@ -281,22 +284,21 @@ export class CrewBoard {
 		});
 	}
 
-	private bindKeyboard() {
-		const keyboard = this.scene.input.keyboard;
-		if (!keyboard) return;
-
-		keyboard.addCapture('LEFT,RIGHT,UP,DOWN,SPACE');
-		keyboard.on('keydown-LEFT', () => this.moveFocus(-1, 0));
-		keyboard.on('keydown-RIGHT', () => this.moveFocus(1, 0));
-		keyboard.on('keydown-UP', () => this.moveFocus(0, -1));
-		keyboard.on('keydown-DOWN', () => this.moveFocus(0, 1));
-		keyboard.on('keydown-SPACE', () => {
-			if (!this.enabled) return;
-
+	/**
+	 * Teclado y mando, con el esquema común: las direcciones mueven el foco y
+	 * la acción (Espacio o A) levanta o deja. La escena lo llama en cada frame;
+	 * la ayuda no, porque ahí el plano es un ejemplo y las flechas pasan página.
+	 */
+	handleControls(controls: BoardControls) {
+		if (controls.justDown('left')) this.moveFocus(-1, 0);
+		if (controls.justDown('right')) this.moveFocus(1, 0);
+		if (controls.justDown('up')) this.moveFocus(0, -1);
+		if (controls.justDown('down')) this.moveFocus(0, 1);
+		if (controls.justDown('action') && this.enabled) {
 			this.keyboardMode = true;
 			this.focus ??= this.defaultFocus();
 			this.activate(this.focus);
-		});
+		}
 	}
 
 	/**

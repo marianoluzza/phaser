@@ -550,6 +550,184 @@ const FLOWS = {
 		await arcade.waitForScene('core:launcher');
 	},
 
+	/**
+	 * Tetris con el teclado: título, mover, rotar, caer, pausa y las tres
+	 * salidas del final. El mando lo prueba `npm run test:mando`.
+	 */
+	tetris: async (arcade) => {
+		const { page } = arcade;
+		const piece = () => page.evaluate(() => {
+			const { currentPiece } = window.arcade.scene.getScene('tetris:game');
+			return { x: currentPiece.x, shape: JSON.stringify(currentPiece.shape), ref: currentPiece };
+		});
+		const expect = (what, ok) => {
+			if (!ok) throw new Error(`Tetris: ${what}`);
+		};
+		const gameOver = async () => {
+			await page.evaluate(() => window.arcade.scene.getScene('tetris:game')
+				.scene.start('tetris:game-over', { score: 1200, lines: 9, level: 2 }));
+			await arcade.waitForScene('tetris:game-over');
+		};
+
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tetris:title');
+		await arcade.shot('tetris-titulo');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tetris:game');
+		await page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('tetris:game');
+			scene.currentPiece = new scene.currentPiece.constructor('T');
+			scene.renderPiece();
+		});
+		const start = await piece();
+		await arcade.press('ArrowRight');
+		expect('→ no movió la pieza', (await piece()).x === start.x + 1);
+		await arcade.press('ArrowUp');
+		expect('↑ no rotó la pieza', (await piece()).shape !== start.shape);
+		await page.evaluate(() => { window.__piece = window.arcade.scene.getScene('tetris:game').currentPiece; });
+		await arcade.press('Space');
+		expect('Espacio no dejó caer la pieza', await page.evaluate(
+			() => window.arcade.scene.getScene('tetris:game').currentPiece !== window.__piece
+		));
+		await arcade.shot('tetris-partida');
+		await arcade.press('p');
+		await arcade.shot('tetris-pausa');
+		await arcade.press('p');
+		await arcade.press('Escape');
+		await arcade.waitForScene('tetris:title');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('tetris:game');
+		await gameOver();
+		await arcade.shot('tetris-fin');
+		await arcade.press('r');
+		await arcade.waitForScene('tetris:game');
+		await gameOver();
+		await arcade.press('m');
+		await arcade.waitForScene('tetris:title');
+		await arcade.press('Enter');
+		await arcade.waitForScene('tetris:game');
+		await gameOver();
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
+
+	/**
+	 * Jukebox con el teclado: elegir, página, pestaña, oír, parar y salir. Oír y
+	 * parar se espían para no descargar audio. El mando lo prueba `npm run test:mando`.
+	 */
+	jukebox: async (arcade) => {
+		const { page } = arcade;
+		const jukebox = (expression) => page.evaluate(`window.arcade.scene.getScene('jukebox:main').${expression}`);
+		const expect = (what, ok) => {
+			if (!ok) throw new Error(`Jukebox: ${what}`);
+		};
+
+		await arcade.waitForScene('core:launcher');
+		// El Jukebox es la última ficha: una a la izquierda de la primera.
+		await arcade.press('ArrowLeft');
+		await arcade.press('Enter');
+		await arcade.waitForScene('jukebox:main');
+		await page.evaluate(() => {
+			const scene = window.arcade.scene.getScene('jukebox:main');
+			scene.calls = [];
+			scene.playSelectedAsset = () => scene.calls.push('play');
+			scene.stopMusic = () => scene.calls.push('stop');
+		});
+		await arcade.shot('jukebox');
+
+		await arcade.press('ArrowDown', 2);
+		await arcade.press('ArrowUp');
+		expect('↓ ↓ ↑ no dejó la segunda fila', (await jukebox('selectedIndex')) === 1);
+		await arcade.press('ArrowRight');
+		expect('→ no pasó de página', (await jukebox('currentPage')) === 1);
+		await arcade.press('ArrowLeft');
+		expect('← no volvió de página', (await jukebox('currentPage')) === 0);
+		await arcade.press('Tab');
+		expect('Tab no pasó a efectos', (await jukebox('activeKind')) === 'sfx');
+		await arcade.press('Tab');
+		expect('Tab no volvió a música', (await jukebox('activeKind')) === 'music');
+		await arcade.press('Enter');
+		await arcade.press('Space');
+		expect('Enter y Espacio no oyeron y pararon', (await jukebox("calls.join(',')")) === 'play,stop');
+
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
+
+	/**
+	 * Pipes con el teclado: configuración, cursor, colocar, reiniciar, largar el
+	 * agua y las salidas del fin de nivel. El mando lo prueba `npm run test:mando`.
+	 */
+	pipes: async (arcade) => {
+		const { page } = arcade;
+		const game = (expression) => page.evaluate(`window.arcade.scene.getScene('pipes:game').${expression}`);
+		const expect = (what, ok) => {
+			if (!ok) throw new Error(`Pipes: ${what}`);
+		};
+		const roundEnd = async (cleared) => {
+			await page.evaluate((cleared) => window.arcade.scene.getScenes(true)[0].scene.start('pipes:round-end', {
+				level: 3, score: 900, segments: 12, goal: 10, cleared,
+			}), cleared);
+			await arcade.waitForScene('pipes:round-end');
+		};
+
+		await arcade.waitForScene('core:launcher');
+		await arcade.press('ArrowRight', 2);
+		await arcade.press('Enter');
+		await arcade.waitForScene('pipes:title');
+		await arcade.shot('pipes-titulo');
+		await arcade.press('c');
+		await arcade.waitForScene('pipes:config');
+		await page.keyboard.down('ArrowDown');
+		await page.waitForTimeout(400);
+		await page.keyboard.up('ArrowDown');
+		expect('↓ no desplazó la configuración', await page.evaluate(() => window.arcade.scene.getScene('pipes:config').scrollY > 0));
+		await arcade.shot('pipes-configuracion');
+		await arcade.press('Escape');
+		await arcade.waitForScene('pipes:title');
+
+		await arcade.press('Enter');
+		await arcade.waitForScene('pipes:game');
+		const column = await game('cursorColumn');
+		await arcade.press('ArrowRight');
+		expect('→ no movió el cursor', (await game('cursorColumn')) === column + 1);
+		await arcade.press('Space');
+		await arcade.press('ArrowDown');
+		await arcade.press('Enter');
+		expect('Espacio y Enter no colocaron dos piezas', (await game('board.placedCount')) === 2);
+		await arcade.shot('pipes-partida');
+		await arcade.press('r');
+		await page.waitForTimeout(300);
+		expect('R no reinició el nivel', (await game('board.placedCount')) === 0);
+		await arcade.press('f');
+		expect('F no largó el agua', (await game('countdownRemaining')) === 0);
+
+		await roundEnd(true);
+		await arcade.shot('pipes-nivel-superado');
+		await arcade.press('Enter');
+		await arcade.waitForScene('pipes:game');
+		expect('Enter no pasó de nivel', (await game('setup.level')) === 4);
+		await roundEnd(false);
+		await arcade.shot('pipes-agua-derramada');
+		await arcade.press('r');
+		await arcade.waitForScene('pipes:game');
+		expect('R no empezó de nuevo', (await game('setup.level')) === 1);
+		await roundEnd(false);
+		await arcade.press('m');
+		await arcade.waitForScene('pipes:title');
+		await arcade.press('Enter');
+		await arcade.waitForScene('pipes:game');
+		await arcade.press('Escape');
+		await arcade.waitForScene('pipes:title');
+		await arcade.press('Enter');
+		await arcade.waitForScene('pipes:game');
+		await roundEnd(true);
+		await arcade.press('Escape');
+		await arcade.waitForScene('core:launcher');
+	},
+
 	launcher: async (arcade) => {
 		await arcade.waitForScene('core:launcher');
 		await arcade.shot('launcher');

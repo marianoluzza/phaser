@@ -25,7 +25,36 @@ const SHOTS_DIR = 'screenshots';
  * mundo en su ancho mínimo; uno más ancho ejercita el ancho elástico de
  * core/renderScale.ts.
  */
-export async function openArcade({ headless = true, shotsDir = SHOTS_DIR, viewport = { width: 800, height: 600 } } = {}) {
+/** Botones del mapeo estándar del navegador, como los nombra `core/input/controls.ts`. */
+const PAD_BUTTONS = {
+	a: 0, b: 1, x: 2, y: 3, l1: 4, r1: 5, l2: 6, r2: 7,
+	select: 8, start: 9, l3: 10, r3: 11, up: 12, down: 13, left: 14, right: 15,
+};
+
+/**
+ * Un mando de mentira: Chrome headless no tiene uno de verdad, así que se
+ * reemplaza `navigator.getGamepads` antes de que cargue el arcade. El estado
+ * vive en `window.__pad` y el driver lo cambia con `padDown`, `padUp`,
+ * `padPress` y `padStick`.
+ */
+function installFakePad() {
+	window.__pad = { buttons: new Array(17).fill(false), axes: [0, 0, 0, 0] };
+	Object.defineProperty(Navigator.prototype, 'getGamepads', {
+		configurable: true,
+		value: () => [{
+			id: 'Mando de prueba (STANDARD GAMEPAD)',
+			index: 0,
+			connected: true,
+			mapping: 'standard',
+			timestamp: performance.now(),
+			axes: [...window.__pad.axes],
+			buttons: window.__pad.buttons.map((pressed) => ({ pressed, touched: pressed, value: pressed ? 1 : 0 })),
+			vibrationActuator: null,
+		}],
+	});
+}
+
+export async function openArcade({ headless = true, shotsDir = SHOTS_DIR, viewport = { width: 800, height: 600 }, gamepad = false } = {}) {
 	rmSync(shotsDir, { recursive: true, force: true });
 	mkdirSync(shotsDir, { recursive: true });
 
@@ -46,8 +75,14 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR, viewpo
 	});
 	page.on('pageerror', (error) => errors.push(error.message));
 
+	if (gamepad) await page.addInitScript(installFakePad);
 	await page.goto(DEV_URL);
 	await waitForScene(page);
+
+	const setButton = (name, pressed) => {
+		if (!(name in PAD_BUTTONS)) throw new Error(`Botón de mando desconocido: ${name}`);
+		return page.evaluate(([index, value]) => { window.__pad.buttons[index] = value; }, [PAD_BUTTONS[name], pressed]);
+	};
 
 	let shotIndex = 0;
 
@@ -68,6 +103,35 @@ export async function openArcade({ headless = true, shotsDir = SHOTS_DIR, viewpo
 				await page.waitForTimeout(220);
 			}
 		},
+
+		/** Aprieta un botón del mando de prueba (`gamepad: true`) y lo deja apretado. */
+		padDown: (name) => setButton(name, true),
+
+		/**
+		 * Suelta un botón y espera unos frames: el mando se lee una vez por
+		 * frame, y soltar y volver a apretar sin que pase ninguno no es una
+		 * pulsación nueva.
+		 */
+		async padUp(name) {
+			await setButton(name, false);
+			await page.waitForTimeout(150);
+		},
+
+		/**
+		 * Aprieta y suelta un botón del mando. Como con las teclas, se mantiene
+		 * 80 ms: el mando se lee una vez por frame y un toque más corto se pierde.
+		 */
+		async padPress(name, times = 1) {
+			for (let i = 0; i < times; i += 1) {
+				await setButton(name, true);
+				await page.waitForTimeout(80);
+				await setButton(name, false);
+				await page.waitForTimeout(220);
+			}
+		},
+
+		/** Inclina el stick izquierdo; `padStick(0, 0)` lo suelta. */
+		padStick: (x, y) => page.evaluate(([ax, ay]) => { window.__pad.axes[0] = ax; window.__pad.axes[1] = ay; }, [x, y]),
 
 		/** Click en coordenadas de la escena, que es la única forma de apuntarle. */
 		async click(x, y) {
@@ -169,7 +233,10 @@ async function waitForScene(page, key, timeout = 15000) {
 		},
 		key,
 		{ timeout }
-	);
+	).catch(async (error) => {
+		const current = await currentSceneKey(page).catch(() => null);
+		throw new Error(`Se esperaba la escena ${key ?? 'cualquiera'} y sigue ${current}: ${error.message}`);
+	});
 
 	// Un frame de más: la escena ya existe, pero puede estar dibujándose.
 	await page.waitForTimeout(400);

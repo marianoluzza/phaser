@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
 import type { TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { getTrucoAiChoice, resolveTrucoAi } from '../ai/aiSelection';
 import type { AiTableView, EnvidoClue, TrucoAiProfile, TrucoBet } from '../ai/types';
@@ -15,6 +16,7 @@ import { TrucoScoreBoard } from '../objects/scoreBoard';
 import { FocusNavigator } from '../objects/focusNavigator';
 import type { Direction } from '../objects/focusNavigator';
 import { TableCards } from '../objects/tableCards';
+import { TRUCO_CONTROLS } from '../input';
 import { TRUCO_SCENES } from '../sceneKeys';
 
 type Player = 'player' | 'ai';
@@ -52,12 +54,16 @@ const ENVIDO_BUTTONS: { call: EnvidoCall; label: TranslationKey; hotkey: Transla
 	{ call: 'faltaEnvido', label: 'truco.envido.faltaCall', hotkey: 'truco.keys.faltaEnvido' },
 ];
 
-const ARROW_DIRECTIONS: Partial<Record<string, Direction>> = {
-	ArrowLeft: 'left',
-	ArrowRight: 'right',
-	ArrowUp: 'up',
-	ArrowDown: 'down',
-};
+const DIRECTIONS: Direction[] = ['left', 'right', 'up', 'down'];
+
+/**
+ * Los tantos que pueden salir sin flor: de 0 a 7 con tres palos distintos y de
+ * 20 a 33 con dos del mismo. Con el mando, ↑ y ↓ recorren sólo éstos.
+ */
+const ENVIDO_VALUES = [
+	...Array.from({ length: 8 }, (_, value) => value),
+	...Array.from({ length: 14 }, (_, value) => 20 + value),
+];
 
 /** Fila de las teclas A/S/D, debajo de la mano. */
 const CARD_KEY_HINT_Y = 584;
@@ -81,7 +87,11 @@ export class TrucoGameScene extends Phaser.Scene {
 	private waitingForNext = false;
 	private scoreBoard!: TrucoScoreBoard;
 	private cantosLog!: CantosLog;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	/**
+	 * Flechas, Enter, Espacio y Esc, y el mando entero. Las letras de las
+	 * cartas y de los cantos, y los dígitos del tanto, llegan por `keydown`.
+	 */
+	private controls!: Controls<'panelButton'>;
 	private tableCards!: TableCards;
 	private actionObjects: Phaser.GameObjects.GameObject[] = [];
 	private envidoResolved = false;
@@ -132,14 +142,17 @@ export class TrucoGameScene extends Phaser.Scene {
 		audioManager.playMusic(this, TRUCO_AUDIO.music.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 		const keyboard = this.input.keyboard!;
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, {
+			panelButton: { keys: [], pad: ['b'] },
+		}, TRUCO_CONTROLS);
 		keyboard.on('keydown', this.handleKeyDown, this);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keyboard.off('keydown', this.handleKeyDown, this));
 	}
 
 	update() {
 		this.updateNextHandProgress();
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		const { controls } = this;
+		if (controls.justDown('menu')) {
 			if (this.declaringEnvido) {
 				this.cancelEnvidoDeclaration();
 				return;
@@ -147,8 +160,45 @@ export class TrucoGameScene extends Phaser.Scene {
 			this.scene.start(CORE_SCENES.LAUNCHER);
 			return;
 		}
-		// Enter queda disponible para no romper el control esperado, aunque los
-		// choques ahora avanzan solos después de mostrar sus cartas.
+		if (this.declaringEnvido) {
+			this.handleEnvidoControls();
+			return;
+		}
+		const direction = DIRECTIONS.find((name) => controls.justDown(name));
+		if (direction) this.focus.move(direction);
+		if (controls.justDown('confirm') || controls.justDown('action')) this.focus.activate();
+	}
+
+	/**
+	 * El tanto sin teclado: ↑ ↓ lo cambian y A lo dice. B aprieta el botón de
+	 * abajo del cuadro, que es «Atrás» o «Son buenas» según quién declara
+	 * primero: nunca están los dos.
+	 */
+	private handleEnvidoControls() {
+		const { controls } = this;
+		if (controls.justDown('up')) this.stepEnvidoPoints(1);
+		else if (controls.justDown('down')) this.stepEnvidoPoints(-1);
+		if (controls.justDown('confirm')) this.submitEnvidoDeclaration();
+		else if (controls.justDown('panelButton')) {
+			if (this.aiDeclaredEnvido !== null) this.concedeEnvido();
+			else this.cancelEnvidoDeclaration();
+		}
+	}
+
+	/** Vacío, ↑ arranca en 20 y ↓ en 7; en los extremos da la vuelta. */
+	private stepEnvidoPoints(step: 1 | -1) {
+		const typed = this.pendingEnvidoPoints === '' ? null : Number(this.pendingEnvidoPoints);
+		let next: number;
+		if (typed === null) {
+			next = step > 0 ? 20 : 7;
+		} else {
+			const ahead = step > 0
+				? ENVIDO_VALUES.filter((value) => value > typed)
+				: ENVIDO_VALUES.filter((value) => value < typed).reverse();
+			next = ahead[0] ?? (step > 0 ? ENVIDO_VALUES[0] : ENVIDO_VALUES[ENVIDO_VALUES.length - 1]);
+		}
+		this.pendingEnvidoPoints = String(next);
+		this.renderActions();
 	}
 
 	private resetMatch() {
@@ -706,15 +756,6 @@ export class TrucoGameScene extends Phaser.Scene {
 			this.handleEnvidoInput(event);
 			return;
 		}
-		const direction = ARROW_DIRECTIONS[event.key];
-		if (direction) {
-			this.focus.move(direction);
-			return;
-		}
-		if (event.key === 'Enter' || event.key === ' ') {
-			this.focus.activate();
-			return;
-		}
 		const key = event.key.toLowerCase();
 		const cardIndex = this.cardKeys.indexOf(key);
 		if (cardIndex !== -1) {
@@ -737,11 +778,6 @@ export class TrucoGameScene extends Phaser.Scene {
 		if (event.key === 'Backspace') {
 			this.pendingEnvidoPoints = this.pendingEnvidoPoints.slice(0, -1);
 			this.renderActions();
-			return;
-		}
-
-		if (event.key === 'Enter') {
-			this.submitEnvidoDeclaration();
 			return;
 		}
 

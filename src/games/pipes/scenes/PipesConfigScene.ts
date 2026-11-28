@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { canvasRect, RENDER_SCALE } from '../../../core/renderScale';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import { PIPE_TYPES, type PipeType } from '../constants/pipeTypes';
@@ -80,9 +81,7 @@ export class PipesConfigScene extends Phaser.Scene {
 	/** Cada fila registra cómo repintar su valor cuando cambia. */
 	private valueUpdaters: Array<() => void> = [];
 
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private upKey!: Phaser.Input.Keyboard.Key;
-	private downKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls;
 
 	constructor() {
 		super(PIPES_SCENES.CONFIG);
@@ -117,14 +116,15 @@ export class PipesConfigScene extends Phaser.Scene {
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goBack();
 			return;
 		}
 
-		// Las flechas mantenidas desplazan la lista de forma continua.
-		if (this.upKey.isDown) this.scrollBy(-KEY_STEP * (this.game.loop.delta / 1000));
-		if (this.downKey.isDown) this.scrollBy(KEY_STEP * (this.game.loop.delta / 1000));
+		// Las flechas o la cruceta mantenidas desplazan la lista de forma continua.
+		// Los valores se cambian con el mouse, también desde el teclado.
+		if (this.controls.isDown('up')) this.scrollBy(-KEY_STEP * (this.game.loop.delta / 1000));
+		if (this.controls.isDown('down')) this.scrollBy(KEY_STEP * (this.game.loop.delta / 1000));
 	}
 
 	// --- Estructura de la pantalla -------------------------------------------
@@ -230,10 +230,7 @@ export class PipesConfigScene extends Phaser.Scene {
 	}
 
 	private configureInput() {
-		const keyboard = this.input.keyboard!;
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.upKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
-		this.downKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+		this.controls = new Controls(this);
 
 		this.input.on(
 			Phaser.Input.Events.POINTER_WHEEL,

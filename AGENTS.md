@@ -30,6 +30,7 @@ npm run art
 npm run art:socavon
 npm run test:socavon
 npm run test:galactica
+npm run test:mando
 npm run sim:astro
 npm run sim:traffic
 npm run sim:galactica
@@ -50,6 +51,8 @@ npm run preview
   se puedan completar.
 - `npm run test:galactica` prueba las reglas de combate de Galáctica:
   movimiento, energía, escudo, ataques, cápsulas y que los tramos tengan salida.
+- `npm run test:mando` juega con un mando de mentira los juegos que ya lo
+  aceptan: menús, partida, pausa y salidas sin tocar el teclado.
 - `npm run sim:astro` juega cientos de combates de Astro Chess sin navegador
   para medir el balance.
 - `npm run sim:traffic` juega cientos de partidas de Semáforos con jugadores
@@ -152,6 +155,8 @@ src/
 │   ├── sceneKeys.ts
 │   ├── audio/
 │   │   └── AudioManager.ts
+│   ├── input/
+│   │   └── controls.ts
 │   ├── i18n/
 │   │   ├── i18n.ts
 │   │   └── translations.ts
@@ -671,6 +676,12 @@ reiniciarse explícitamente desde `create` o desde un método llamado por éste.
 ## Convenciones
 
 - Las claves de escenas usan prefijos: `core:*`, `tetris:*`, etcétera.
+- Las escenas leen teclado y mando con `Controls` de `core/input/controls.ts`,
+  que impone el mismo esquema en todo el arcade: flechas, WASD, cruceta y stick
+  para moverse; Enter o A para confirmar; Esc o B para volver en los menús;
+  Espacio o A como acción, P o Start para pausar y Esc o Select para salir en
+  la partida. Un juego que use alguna de esas teclas para otra cosa la saca
+  con `withoutKeys`, como el Truco con WASD. Ver `docs/tareas/mando.md`.
 - Los assets futuros también deben usar claves con prefijo.
 - Ningún texto visible debe quedar escrito directamente en una escena.
 - Todo idioma debe implementar el conjunto completo de `TranslationKey`.

@@ -37,12 +37,18 @@ stateDiagram-v2
 
 ## Controles
 
-| Entrada | Acción |
-| --- | --- |
-| Click sobre un semáforo | Pasarlo de rojo a verde o al revés |
-| Flechas o WASD | Lo mismo con el semáforo de ese lado de la pantalla (↑ norte, → este, ↓ sur, ← oeste) |
-| Escape | Volver al título |
-| Enter / M / Escape al final | Jugar de nuevo / título / launcher |
+| Entrada | Mando | Acción |
+| --- | --- | --- |
+| Click sobre un semáforo | | Pasarlo de rojo a verde o al revés |
+| Flechas o WASD | Cruceta o stick | Lo mismo con el semáforo de ese lado de la pantalla (↑ norte, → este, ↓ sur, ← oeste) |
+| Escape | Select | Volver al título |
+| Enter / Escape en el título | A o Start / B | Jugar / launcher |
+| Enter / M / Escape al final | A o Start / Y / B | Jugar de nuevo / título / launcher |
+
+Teclado y mando pasan por `Controls` (`core/input/controls.ts`), con el esquema
+común del arcade. El stick cuenta sólo su eje más inclinado: si pasa por la
+diagonal al ir de arriba a la derecha, cambia el semáforo del este y no también
+el del norte. Start no hace nada en la partida, porque no hay pausa.
 
 El GDD pide sólo click. Las flechas se sumaron porque el resto del arcade se
 juega entero con teclado y porque permiten al recorrido de capturas manejar el

@@ -46,15 +46,21 @@ La carga de cada asset sigue siendo responsabilidad de la escena que lo usa.
 
 ## Controles
 
-| Acción | Teclado / interfaz |
-| --- | --- |
-| Elegir asset | Flechas arriba y abajo o clic en una fila |
-| Cambiar página | Flechas izquierda y derecha |
-| Alternar música/efectos | Tab o clic en una pestaña |
-| Reproducir | Enter o botón Oír |
-| Detener | Espacio o botón Parar |
-| Copiar ruta | Ctrl+C / Cmd+C o botón Copiar |
-| Salir al launcher | Escape |
+| Acción | Teclado / interfaz | Mando |
+| --- | --- | --- |
+| Elegir asset | Flechas arriba y abajo (o W y S) o clic en una fila | Cruceta o stick ↑ ↓ |
+| Cambiar página | Flechas izquierda y derecha (o A y D) | Cruceta o stick ← → |
+| Alternar música/efectos | Tab o clic en una pestaña | L1 o R1 |
+| Reproducir | Enter o botón Oír | A o Start |
+| Detener | Espacio o botón Parar | X |
+| Copiar ruta | Ctrl+C / Cmd+C o botón Copiar | — |
+| Salir al launcher | Escape | B o Select |
+
+Teclado y mando pasan por `Controls` (`core/input/controls.ts`), con el esquema
+común del arcade. Copiar no tiene botón en el mando: el navegador sólo deja
+escribir el portapapeles después de un gesto de teclado, mouse o toque, y apretar
+un botón del mando no cuenta como tal. Los volúmenes siguen siendo sólo con el
+mouse, como antes con el teclado.
 
 `Ctrl+C` escucha el evento `copy` del documento para escribir directamente la
 ruta seleccionada en el portapapeles. También existe un fallback sobre

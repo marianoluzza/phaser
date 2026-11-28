@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls, type CommonAction } from '../../../core/input/controls';
 import { loadTrafficAudio, TRAFFIC_AUDIO } from '../audio';
 import { CENTRO, type ArmId } from '../constants/layouts';
 import { END_DELAY, START_LIVES } from '../constants/tuning';
@@ -45,12 +46,15 @@ const VALUE_STYLE = {
 	fontStyle: 'bold',
 };
 
-/** Las flechas cambian el semáforo que está de ese lado de la pantalla. */
-const KEY_ARMS: Array<[ArmId, number[]]> = [
-	['N', [Phaser.Input.Keyboard.KeyCodes.UP, Phaser.Input.Keyboard.KeyCodes.W]],
-	['E', [Phaser.Input.Keyboard.KeyCodes.RIGHT, Phaser.Input.Keyboard.KeyCodes.D]],
-	['S', [Phaser.Input.Keyboard.KeyCodes.DOWN, Phaser.Input.Keyboard.KeyCodes.S]],
-	['W', [Phaser.Input.Keyboard.KeyCodes.LEFT, Phaser.Input.Keyboard.KeyCodes.A]],
+/**
+ * Cada dirección (flechas, WASD, cruceta o stick) cambia el semáforo que está
+ * de ese lado de la pantalla.
+ */
+const DIRECTION_ARMS: Array<[ArmId, CommonAction]> = [
+	['N', 'up'],
+	['E', 'right'],
+	['S', 'down'],
+	['W', 'left'],
 ];
 
 /** La partida: clicks y teclas → `Traffic`, dibujo de su estado y sonido de sus eventos. */
@@ -74,8 +78,8 @@ export class TrafficGameScene extends Phaser.Scene {
 	private highScoreText!: Phaser.GameObjects.Text;
 	private hintText!: Phaser.GameObjects.Text;
 
-	private keys: Array<{ lightId: string; keys: Phaser.Input.Keyboard.Key[] }> = [];
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private directionLights: Array<{ lightId: string; direction: CommonAction }> = [];
+	private controls!: Controls;
 
 	private accumulator = 0;
 	private highScore = 0;
@@ -121,7 +125,7 @@ export class TrafficGameScene extends Phaser.Scene {
 
 		this.createLightZones();
 		this.createHud();
-		this.configureKeyboard();
+		this.configureControls();
 		this.render();
 
 		audioManager.playMusic(this, TRAFFIC_AUDIO.gameMusic.cacheKey);
@@ -131,12 +135,12 @@ export class TrafficGameScene extends Phaser.Scene {
 	update(_time: number, delta: number) {
 		const dt = Math.min(delta, 100) / 1000;
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('menu')) {
 			this.goToTitle();
 			return;
 		}
-		for (const { lightId, keys } of this.keys) {
-			if (keys.some((key) => Phaser.Input.Keyboard.JustDown(key))) {
+		for (const { lightId, direction } of this.directionLights) {
+			if (this.controls.justDown(direction)) {
 				this.traffic.toggle(lightId);
 			}
 		}
@@ -170,13 +174,13 @@ export class TrafficGameScene extends Phaser.Scene {
 		}
 	}
 
-	private configureKeyboard() {
-		const keyboard = this.input.keyboard!;
-		this.keys = KEY_ARMS.flatMap(([arm, codes]) => {
+	/** Sin pausa, como pide el GDD: Start no hace nada en la partida. */
+	private configureControls() {
+		this.directionLights = DIRECTION_ARMS.flatMap(([arm, direction]) => {
 			const anchor = this.anchors.find((candidate) => candidate.arm === arm);
-			return anchor ? [{ lightId: anchor.lightId, keys: codes.map((code) => keyboard.addKey(code)) }] : [];
+			return anchor ? [{ lightId: anchor.lightId, direction }] : [];
 		});
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this);
 	}
 
 	// ----------------------------------------------------------------- eventos

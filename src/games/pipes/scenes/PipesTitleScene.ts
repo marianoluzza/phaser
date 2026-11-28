@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadPipesAudio, PIPES_AUDIO } from '../audio';
 import type { PipeType } from '../constants/pipeTypes';
@@ -9,9 +10,7 @@ import { PIPES_SCENES } from '../sceneKeys';
 
 /** Pantalla de inicio propia de Pipes. */
 export class PipesTitleScene extends Phaser.Scene {
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private configKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'config'>;
 
 	constructor() {
 		super(PIPES_SCENES.TITLE);
@@ -25,31 +24,28 @@ export class PipesTitleScene extends Phaser.Scene {
 		this.cameras.main.setBackgroundColor('#080d1a');
 		this.drawBackground();
 		this.drawLogo();
-		this.drawInstructions();
-		this.createButtons();
+		const instructionsBottom = this.drawInstructions();
+		this.createButtons(instructionsBottom + 14);
 		audioManager.playMusic(this, PIPES_AUDIO.introMusic.cacheKey);
 
 		// La música pertenece a esta pantalla: al salir no debe seguir sonando.
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.configKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, { config: { keys: ['C'], pad: ['y'] } });
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.startGame();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.configKey)) {
+		if (this.controls.justDown('config')) {
 			this.openConfig();
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goToLauncher();
 		}
 	}
@@ -114,37 +110,45 @@ export class PipesTitleScene extends Phaser.Scene {
 		});
 	}
 
-	private drawInstructions() {
-		this.add.text(400, 290, i18n.t('pipes.title.howToPlay'), {
+	/**
+	 * Los textos se apilan con su alto real: el bloque de controles cambia de
+	 * renglones con el idioma o con una tecla nueva, y con posiciones fijas
+	 * terminaba pisando el título y el botón de jugar. Devuelve dónde termina.
+	 */
+	private drawInstructions(): number {
+		const howToPlay = this.add.text(400, 266, i18n.t('pipes.title.howToPlay'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '13px',
 			color: '#7384aa',
 			letterSpacing: 3,
-		}).setOrigin(0.5);
+		}).setOrigin(0.5, 0);
 
-		this.add.text(400, 326, i18n.t('pipes.title.controls'), {
+		const controls = this.add.text(400, howToPlay.y + howToPlay.displayHeight + 10, i18n.t('pipes.title.controls'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '15px',
 			color: '#d9e2ff',
 			align: 'center',
 			lineSpacing: 10,
-		}).setOrigin(0.5);
+		}).setOrigin(0.5, 0);
 
 		// La regla de la meta define el juego, así que se explica antes de jugar.
-		this.add.text(400, 383, i18n.t('pipes.title.goal'), {
+		const goal = this.add.text(400, controls.y + controls.displayHeight + 12, i18n.t('pipes.title.goal'), {
 			fontFamily: 'Arial, sans-serif',
 			fontSize: '12px',
 			color: '#8290b3',
 			align: 'center',
 			lineSpacing: 5,
-		}).setOrigin(0.5);
+		}).setOrigin(0.5, 0);
+
+		return goal.y + goal.displayHeight;
 	}
 
-	private createButtons() {
-		const playButton = this.add.rectangle(400, 422, 270, 52, 0x17402d)
+	private createButtons(top: number) {
+		const playY = top + 26;
+		const playButton = this.add.rectangle(400, playY, 270, 52, 0x17402d)
 			.setStrokeStyle(2, 0x5ee48a)
 			.setInteractive({ useHandCursor: true });
-		this.add.text(400, 422, i18n.t('pipes.title.play'), {
+		this.add.text(400, playY, i18n.t('pipes.title.play'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '18px',
 			color: '#ffffff',
@@ -153,20 +157,22 @@ export class PipesTitleScene extends Phaser.Scene {
 
 		// La configuración vive acá y no dentro de la partida: cambia las reglas
 		// del nivel, así que no debería tocarse con el agua corriendo.
-		const configButton = this.add.rectangle(400, 474, 270, 38, 0x1b2947)
+		const configY = playY + 52;
+		const configButton = this.add.rectangle(400, configY, 270, 38, 0x1b2947)
 			.setStrokeStyle(1, 0x46d9ff)
 			.setInteractive({ useHandCursor: true });
-		this.add.text(400, 474, i18n.t('pipes.title.config'), {
+		this.add.text(400, configY, i18n.t('pipes.title.config'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '13px',
 			color: '#bfe9ff',
 		}).setOrigin(0.5);
 		configButton.on('pointerdown', () => this.openConfig());
 
-		const backButton = this.add.rectangle(400, 524, 270, 38, 0x111a31)
+		const backY = configY + 50;
+		const backButton = this.add.rectangle(400, backY, 270, 38, 0x111a31)
 			.setStrokeStyle(1, 0x40577f)
 			.setInteractive({ useHandCursor: true });
-		this.add.text(400, 524, i18n.t('pipes.title.backToArcade'), {
+		this.add.text(400, backY, i18n.t('pipes.title.backToArcade'), {
 			fontFamily: 'Courier New, monospace',
 			fontSize: '13px',
 			color: '#9eacd0',

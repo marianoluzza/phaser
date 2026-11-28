@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadTrafficAudio, TRAFFIC_AUDIO } from '../audio';
 import { CENTRO, type ArmId, type Turn } from '../constants/layouts';
@@ -25,8 +26,7 @@ const DEMO: Array<{ arm: ArmId; turn: Turn; queue: number; patience: number }> =
 /** Pantalla inicial: la intersección con todo en rojo, cómo se juega y los destinos. */
 export class TrafficTitleScene extends Phaser.Scene {
 	private demoLights: Array<{ graphics: Phaser.GameObjects.Graphics; turn: Turn }> = [];
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls;
 
 	constructor() {
 		super(TRAFFIC_SCENES.TITLE);
@@ -48,9 +48,7 @@ export class TrafficTitleScene extends Phaser.Scene {
 		// La música pertenece a esta pantalla: al salir no debe seguir sonando.
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this);
 	}
 
 	update(time: number) {
@@ -59,11 +57,11 @@ export class TrafficTitleScene extends Phaser.Scene {
 			drawCarLights(graphics, true, turn, blinkOn);
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.startGame();
 			return;
 		}
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.goToLauncher();
 		}
 	}
@@ -189,7 +187,7 @@ export class TrafficTitleScene extends Phaser.Scene {
 
 	/** El botón de jugar ocupa el centro del cruce. */
 	private createPlayButton() {
-		const button = this.add.rectangle(400, 300, 150, 50, 0x0f2b1f, 0.95)
+		const button = this.add.rectangle(400, 300, 190, 50, 0x0f2b1f, 0.95)
 			.setStrokeStyle(2, 0x3ddc84)
 			.setDepth(30)
 			.setInteractive({ useHandCursor: true });

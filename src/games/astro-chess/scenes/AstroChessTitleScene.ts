@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
 import { PIECE_TYPES } from '../constants/pieces';
@@ -20,9 +21,7 @@ const PIECE_SIZE = 56;
  * para mostrarlo sobre el plano en vez de contarlo en una línea.
  */
 export class AstroChessTitleScene extends Phaser.Scene {
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private helpKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'help'>;
 
 	constructor() {
 		super(ASTRO_SCENES.TITLE);
@@ -42,24 +41,21 @@ export class AstroChessTitleScene extends Phaser.Scene {
 		audioManager.playMusic(this, ASTRO_AUDIO.introMusic.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		this.helpKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+		this.controls = new Controls(this, { help: { keys: ['H'], pad: ['y'] } });
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('confirm')) {
 			this.open(ASTRO_SCENES.SHIP);
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.helpKey)) {
+		if (this.controls.justDown('help')) {
 			this.open(ASTRO_SCENES.HELP);
 			return;
 		}
 
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+		if (this.controls.justDown('back')) {
 			this.open(CORE_SCENES.LAUNCHER);
 		}
 	}

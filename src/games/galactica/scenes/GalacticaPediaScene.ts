@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
+import { Controls } from '../../../core/input/controls';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
 import { GALACTICA_AUDIO, loadGalacticaAudio } from '../audio';
 import { SHOTS, type Maneuver, type ShotKind } from '../constants/attacks';
@@ -202,6 +203,7 @@ function bossFight(): DemoScript {
 export class GalacticaPediaScene extends Phaser.Scene {
 	private page: Page = 'basics';
 	private choice = 0;
+	private controls!: Controls;
 	private flipping = false;
 	private entries: Entry[] = [];
 	private demo: PediaDemo | null = null;
@@ -250,15 +252,20 @@ export class GalacticaPediaScene extends Phaser.Scene {
 			}
 		});
 
-		const keyboard = this.input.keyboard!;
-		keyboard.on('keydown-LEFT', () => this.turnPage(-1));
-		keyboard.on('keydown-RIGHT', () => this.turnPage(1));
-		keyboard.on('keydown-UP', () => this.moveChoice(-1));
-		keyboard.on('keydown-DOWN', () => this.moveChoice(1));
-		keyboard.on('keydown-ESC', () => this.back());
+		this.controls = new Controls(this);
 	}
 
 	update(_time: number, delta: number) {
+		const { controls } = this;
+		if (controls.justDown('back')) {
+			this.back();
+			return;
+		}
+		if (controls.justDown('left')) this.turnPage(-1);
+		else if (controls.justDown('right')) this.turnPage(1);
+		else if (controls.justDown('up')) this.moveChoice(-1);
+		else if (controls.justDown('down')) this.moveChoice(1);
+
 		if (!this.demo) {
 			return;
 		}

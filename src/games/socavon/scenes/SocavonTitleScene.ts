@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { GAME_WIDTH, useFullWidth } from '../../../core/renderScale';
 import { CORE_SCENES } from '../../../core/sceneKeys';
 import { loadSocavonAudio, SOCAVON_AUDIO } from '../audio';
@@ -34,11 +35,7 @@ export class SocavonTitleScene extends Phaser.Scene {
 	private miner!: Phaser.GameObjects.Image;
 	private guard!: Phaser.GameObjects.Image;
 
-	private enterKey!: Phaser.Input.Keyboard.Key;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private leftKey!: Phaser.Input.Keyboard.Key;
-	private rightKey!: Phaser.Input.Keyboard.Key;
-	private rerollKey!: Phaser.Input.Keyboard.Key;
+	private controls!: Controls<'reroll'>;
 
 	constructor() {
 		super(SOCAVON_SCENES.TITLE);
@@ -63,13 +60,7 @@ export class SocavonTitleScene extends Phaser.Scene {
 
 		audioManager.continueMusic(this, SOCAVON_AUDIO.titleMusic.cacheKey);
 
-		const keyboard = this.input.keyboard!;
-		const { KeyCodes } = Phaser.Input.Keyboard;
-		this.enterKey = keyboard.addKey(KeyCodes.ENTER);
-		this.escapeKey = keyboard.addKey(KeyCodes.ESC);
-		this.leftKey = keyboard.addKey(KeyCodes.LEFT);
-		this.rightKey = keyboard.addKey(KeyCodes.RIGHT);
-		this.rerollKey = keyboard.addKey(KeyCodes.N);
+		this.controls = new Controls(this, { reroll: { keys: ['N'], pad: ['y'] } });
 	}
 
 	update(_time: number, delta: number) {
@@ -77,11 +68,11 @@ export class SocavonTitleScene extends Phaser.Scene {
 		showClip(this.miner, 'minero/carry', this.elapsed);
 		showClip(this.guard, 'sereno/run', this.elapsed);
 
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) this.startGame();
-		else if (Phaser.Input.Keyboard.JustDown(this.escapeKey)) this.goToLauncher();
-		else if (Phaser.Input.Keyboard.JustDown(this.leftKey) || Phaser.Input.Keyboard.JustDown(this.rightKey)) {
-			this.changeMode();
-		} else if (Phaser.Input.Keyboard.JustDown(this.rerollKey)) this.reroll();
+		const { controls } = this;
+		if (controls.justDown('confirm')) this.startGame();
+		else if (controls.justDown('back')) this.goToLauncher();
+		else if (controls.justDown('left') || controls.justDown('right')) this.changeMode();
+		else if (controls.justDown('reroll')) this.reroll();
 	}
 
 	private drawHeader() {

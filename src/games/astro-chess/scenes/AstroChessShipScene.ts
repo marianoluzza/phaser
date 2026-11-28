@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { audioManager } from '../../../core/audio/AudioManager';
 import { i18n, type TranslationKey } from '../../../core/i18n/i18n';
+import { Controls } from '../../../core/input/controls';
 import { ASTRO_AUDIO, loadAstroAudio } from '../audio';
 import { ROOM_IDS, ROOMS, TOTAL_SLOTS } from '../constants/rooms';
 import { CrewBoard } from '../objects/CrewBoard';
@@ -30,8 +31,8 @@ export class AstroChessShipScene extends Phaser.Scene {
 	private combatButton!: Button;
 	/** Sin armería no se gana: el primer Enter avisa y el segundo confirma. */
 	private confirmedNoWeapons = false;
-	private escapeKey!: Phaser.Input.Keyboard.Key;
-	private enterKey!: Phaser.Input.Keyboard.Key;
+	/** A levanta y deja piezas, así que al combate se va con Start (o Enter). */
+	private controls!: Controls<'fight'>;
 
 	constructor() {
 		super(ASTRO_SCENES.SHIP);
@@ -73,21 +74,22 @@ export class AstroChessShipScene extends Phaser.Scene {
 		audioManager.playMusic(this, ASTRO_AUDIO.introMusic.cacheKey);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => audioManager.stopMusic());
 
-		const keyboard = this.input.keyboard!;
-		this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-		this.enterKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+		this.controls = new Controls(this, { fight: { keys: ['ENTER'], pad: ['start'] } });
 	}
 
 	update() {
-		if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+		if (this.controls.justDown('fight')) {
 			this.startCombat();
 			return;
 		}
 
-		// Esc primero suelta la pieza que haya en la mano; recién después sale.
-		if (Phaser.Input.Keyboard.JustDown(this.escapeKey) && !this.board.cancelSelection()) {
+		// Esc o B primero sueltan la pieza que haya en la mano; recién después salen.
+		if (this.controls.justDown('back') && !this.board.cancelSelection()) {
 			this.goToTitle();
+			return;
 		}
+
+		this.board.handleControls(this.controls);
 	}
 
 	private drawHeader() {
@@ -144,13 +146,13 @@ export class AstroChessShipScene extends Phaser.Scene {
 			fontFamily: FONTS.sans,
 			fontSize: '12px',
 			color: '#ffca4b',
-			wordWrap: { width: 440 },
+			wordWrap: { width: 390 },
 		}).setOrigin(0, 0.5);
 
-		this.combatButton = addButton(this, 580, 578, 160, 32, i18n.t('astro.ship.toCombat'), () =>
+		this.combatButton = addButton(this, 545, 578, 210, 32, i18n.t('astro.ship.toCombat'), () =>
 			this.startCombat()
 		);
-		addButton(this, 720, 578, 110, 32, i18n.t('astro.ship.back'), () => this.goToTitle(), 'secondary');
+		addButton(this, 718, 578, 120, 32, i18n.t('astro.ship.back'), () => this.goToTitle(), 'secondary');
 	}
 
 	private refreshLabels() {
